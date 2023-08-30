@@ -1,22 +1,32 @@
-import { DocumentData } from 'firebase/firestore';
+import { DocumentData, Timestamp } from 'firebase/firestore';
 
-enum BoardType {
-  PUBLIC = 'public',
-  PRIVATE = 'private',
+export enum CreateBoardSteps {
+  ENTER_DETAILS,
+  SELECT_THUMBNAIL,
+  INVITE_USERS,
 }
 
-enum BoardAccess {
+export enum BoardAccess {
   READ_ONLY = 'read_only',
   READ_WRITE = 'read_write',
   ADMIN = 'admin',
 }
 
-interface Board extends DocumentData {
-  _id: string;
+export type CollaborativeUser = {
+  email: string;
+  access: BoardAccess;
+};
+
+export interface Metadata {
   name: string;
-  image?: string;
   description?: string;
-  type: BoardType;
+  image?: string;
+}
+
+export interface Board extends DocumentData {
+  _id: string;
+  metadata: Metadata;
   users: User[];
   owner: User;
+  createdAt: Timestamp;
 }

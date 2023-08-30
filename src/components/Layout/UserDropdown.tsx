@@ -44,8 +44,8 @@ const UserDropdown = () => {
           className="rounded-full"
           height={40}
           width={40}
-          src={userData?.photoURL || '/assets/Dummy Profile.png'}
-          alt={userData?.displayName || 'User'}
+          src={userData?.image || '/assets/Dummy Profile.png'}
+          alt={userData?.name || 'User'}
         />
       </Menu.Button>
 
@@ -62,7 +62,7 @@ const UserDropdown = () => {
           <div className="text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow">
             <div className="px-4 py-3">
               <span className="block text-sm text-gray-900">
-                {userData?.displayName || 'User'}
+                {userData?.name || 'User'}
               </span>
               <span className="block text-sm  text-gray-500 truncate">
                 {userData?.email || "user's email"}
