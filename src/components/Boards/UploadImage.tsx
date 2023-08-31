@@ -2,20 +2,20 @@ import { CreateBoardSteps } from '@/interfaces/Board.d';
 import useBoardsStore from '@/store/boardsStore';
 import useUserStore from '@/store/userStore';
 import Image from 'next/image';
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 
 type Props = {};
 
 const UploadImage = (props: Props) => {
-  const imageRef = useRef<HTMLInputElement>();
-  const [setImage, previewImage, createBoard, setBoardStep] = useBoardsStore(
-    (state) => [
+  const imageRef = useRef<HTMLInputElement | null>(null);
+  const [setImage, previewImage, createBoard, setBoardStep, loading] =
+    useBoardsStore((state) => [
       state.setImage,
       state.previewImage,
       state.createBoard,
       state.setBoardStep,
-    ]
-  );
+      state.loading,
+    ]);
 
   const [userData] = useUserStore((state) => [state.userData]);
 
@@ -31,7 +31,7 @@ const UploadImage = (props: Props) => {
         className="block text-gray-700 text-sm font-bold mb-2"
         htmlFor="image"
       >
-        Image
+        Image (Optional)
       </label>
       <input hidden onChange={handleChange} ref={imageRef} type="file" />
 
@@ -50,15 +50,16 @@ const UploadImage = (props: Props) => {
           onClick={() => {
             setBoardStep(CreateBoardSteps.INVITE_USERS);
           }}
-          className="inline-flex justify-center rounded-md border border-transparent bg-red-100 px-4 py-2 text-sm font-medium text-red-900 hover:bg-red-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+          className="modalBtnPrev"
         >
           Previous
         </button>
 
         <button
           type="button"
-          onClick={() => createBoard(userData)}
-          className="inline-flex justify-center rounded-md border border-transparent bg-red-100 px-4 py-2 text-sm font-medium text-red-900 hover:bg-red-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+          onClick={() => createBoard(userData!)}
+          disabled={loading}
+          className="modalBtnNext"
         >
           Create
         </button>

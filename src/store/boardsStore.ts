@@ -28,6 +28,10 @@ interface BoardsState {
   metadata: Metadata | null;
   image: File | null;
   previewImage: string | null;
+  modalOpen: boolean;
+  loading: boolean;
+  closeModal: () => void;
+  openModal: () => void;
   fetchBoards: (email: string) => void;
   createBoard: (user: User) => void;
   addUser: (user: CollaborativeUser) => void;
@@ -45,15 +49,26 @@ const useBoardsStore = create<BoardsState>()(
     metadata: null,
     image: null,
     previewImage: null,
+    modalOpen: false,
+    loading: false,
+
+    closeModal: () => {
+      set({ modalOpen: false });
+    },
+
+    openModal: () => {
+      set({ modalOpen: true });
+    },
 
     setMetadata: (metadata) => {
       set({ metadata });
     },
 
     fetchBoards: async (email: string) => {
-      toast.loading('Fetching boards...', {
+      toast.loading('Loading your boards...', {
         toastId: 'fetching-boards',
       });
+
       const boards = await fetchBoardsByEmail(email);
       set({ boards });
       toast.dismiss('fetching-boards');
@@ -86,9 +101,11 @@ const useBoardsStore = create<BoardsState>()(
     createBoard: async (user) => {
       let board = {
         metadata: get().metadata,
-        owner: user,
+        owner: user.uid,
         createdAt: Timestamp.now(),
       };
+
+      set({ loading: true });
 
       toast.loading('Creating board...', {
         toastId: 'creating-board',
@@ -134,7 +151,10 @@ const useBoardsStore = create<BoardsState>()(
         });
       }
 
+      get().fetchBoards(user.email);
+      set({ loading: false, modalOpen: false });
       toast.dismiss('creating-board');
+      return true;
     },
   }))
 );

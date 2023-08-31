@@ -1,15 +1,24 @@
 'use client';
-import { ReactNode } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactNode, useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import useUserStore from '@/store/userStore';
 
-const queryClient = new QueryClient();
+const protectedRoutes = ['boards'];
 
 const ClientProvider = ({ children }: { children: ReactNode }) => {
-  return (
-    <div>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    </div>
-  );
+  const router = useRouter();
+  const pathname = usePathname();
+  const [userData] = useUserStore((state) => [state.userData]);
+
+  useEffect(() => {
+    if (protectedRoutes.includes(pathname.split('/')[1])) {
+      if (userData === null) {
+        router.push('/login');
+      }
+    }
+  }, [userData, pathname, router]);
+
+  return <div>{children}</div>;
 };
 
 export default ClientProvider;

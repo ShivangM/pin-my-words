@@ -31,7 +31,7 @@ const NavbarLink = ({ link }: NavbarLinkProps) => {
 
 const Navbar = () => {
   return (
-    <nav className="bg-gray-50 border-gray-200 sticky top-0 left-0">
+    <nav className="bg-gray-50 z-40 border-gray-200 sticky top-0 left-0">
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
         <Link href="/" className="flex items-center">
           <Image

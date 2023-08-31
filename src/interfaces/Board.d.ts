@@ -23,10 +23,10 @@ export interface Metadata {
   image?: string;
 }
 
-export interface Board extends DocumentData {
+export interface Board {
   _id: string;
   metadata: Metadata;
-  users: User[];
   owner: User;
   createdAt: Timestamp;
+  updatedAt: Timestamp;
 }

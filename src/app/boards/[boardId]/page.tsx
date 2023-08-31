@@ -1,8 +1,9 @@
 'use client';
-
-import fetchBoard from '@/lib/fetchBoard';
+import WordsCard from '@/components/Board/WordCard';
+import useBoardStore from '@/store/boardStore';
 import useUserStore from '@/store/userStore';
-import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import moment from 'moment';
 
 type Props = {
   params: {
@@ -12,20 +13,47 @@ type Props = {
 
 const Board = ({ params: { boardId } }: Props) => {
   const [userData] = useUserStore((state) => [state.userData]);
+  const [board, fetchBoard] = useBoardStore((state) => [
+    state.board,
+    state.fetchBoard,
+  ]);
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: [boardId],
-    queryFn: () => fetchBoard(userData?.uid!, boardId),
-    enabled: !!userData && !!boardId,
-  });
-
-  if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div>Error</div>;
+  useEffect(() => {
+    fetchBoard(boardId, userData?.email!);
+  }, [userData, boardId, fetchBoard]);
 
   return (
-    <main className="container mx-auto p-4 sm:p-6 lg:p-8 xl:p-10">
-      <h1 className="text-4xl font-bold text-center w-full">{data?.name}</h1>
-    </main>
+    <div className="">
+      <div className="">
+        <h1 className="text-2xl text-gray-900 font-bold text-left">
+          {board?.metadata?.name}
+        </h1>
+        <p className="text-gray-500 text-sm">{board?.metadata?.description}</p>
+        <time className="text-gray-500 text-sm">
+          Created on {moment(board?.createdAt?.toDate()).format('MMMM Do YYYY')}
+        </time>
+        {/* <time className="text-gray-500 text-sm">
+          Last updated on{' '}
+          {moment(board?.updatedAt.toDate()).format('MMMM Do YYYY')}
+        </time> */}
+      </div>
+
+      <hr className="my-8" />
+
+      <div className="flex flex-col space-y-6">
+        {new Array(10).fill(0).map((_, idx) => (
+          <WordsCard
+            key={idx}
+            idx={idx}
+            word={{
+              word: 'Word',
+              definition: 'Definition',
+              image: '/assets/board-placeholder.svg',
+            }}
+          />
+        ))}
+      </div>
+    </div>
   );
 };
 

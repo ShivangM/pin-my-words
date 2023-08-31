@@ -1,30 +1,22 @@
 'use client';
 import { Dialog, Transition } from '@headlessui/react';
 import Image from 'next/image';
-import { Fragment, useState } from 'react';
+import { Fragment } from 'react';
 import InviteUsers from './InviteUsers';
 import useBoardsStore from '@/store/boardsStore';
 import BasicDetails from './BasicDetails';
 import UploadImage from './UploadImage';
 import { CreateBoardSteps } from '@/interfaces/Board.d';
-import useUserStore from '@/store/userStore';
 
 const CreateNewBoard = () => {
-  let [isOpen, setIsOpen] = useState(false);
-
-  const closeModal = () => {
-    setIsOpen(false);
-  };
-
-  const openModal = () => {
-    setIsOpen(true);
-  };
-
-  const [createBoardStep, createBoard, setBoardStep] = useBoardsStore(
-    (state) => [state.createBoardStep, state.createBoard, state.setBoardStep]
+  const [createBoardStep, modalOpen, closeModal, openModal] = useBoardsStore(
+    (state) => [
+      state.createBoardStep,
+      state.modalOpen,
+      state.closeModal,
+      state.openModal,
+    ]
   );
-
-  const [userData] = useUserStore((state) => [state.userData]);
 
   const Step = () => {
     switch (createBoardStep) {
@@ -58,7 +50,7 @@ const CreateNewBoard = () => {
         <p className="">Add a new board.</p>
       </button>
 
-      <Transition show={isOpen} as={Fragment}>
+      <Transition show={modalOpen} as={Fragment}>
         <Dialog as="div" className="relative z-10" onClose={closeModal}>
           <Transition.Child
             as={Fragment}

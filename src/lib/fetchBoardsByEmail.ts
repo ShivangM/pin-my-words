@@ -1,4 +1,4 @@
-import { Board } from '@/interfaces/Board';
+import { Board } from '@/interfaces/Board.d';
 import db from '@/utils/firebase';
 import {
   collection,
@@ -9,26 +9,35 @@ import {
   where,
 } from 'firebase/firestore';
 
-const fetchBoardsByEmail = async (email: string) => {
+const fetchBoardsByEmail = async (email: string): Promise<Board[]> => {
+  let boards: Board[] = [];
+
   try {
     const userBoardCollection = collection(db, 'users-boards');
     const q = query(userBoardCollection, where('userId', '==', email));
     const querySnapshot = await getDocs(q);
 
-    let boards: Board[] = [];
+    // Create an array to hold all the promises
+    const fetchPromises: Promise<void>[] = [];
 
-    querySnapshot.forEach(async (docSnapshot) => {
-      const boardId = await docSnapshot.data().boardId;
+    querySnapshot.forEach((docSnapshot) => {
+      const boardId = docSnapshot.data().boardId;
       const boardDocRef = doc(db, 'boards', boardId);
-      const boardDoc = await getDoc(boardDocRef);
+      const fetchPromise = getDoc(boardDocRef).then((boardDoc) => {
+        const board = boardDoc.data();
+        boards.push({ ...board, _id: boardDoc.id } as Board);
+      });
 
-      boards.push({ ...boardDoc.data(), _id: boardDoc.id } as Board);
+      fetchPromises.push(fetchPromise);
     });
 
-    return boards;
+    // Wait for all promises to complete before returning
+    await Promise.all(fetchPromises);
   } catch (error) {
     console.error(error);
   }
+
+  return boards;
 };
 
 export default fetchBoardsByEmail;
