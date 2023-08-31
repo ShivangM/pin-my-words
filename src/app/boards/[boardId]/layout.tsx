@@ -11,9 +11,10 @@ export default function BoardLayout({
   return (
     <>
       <SidePanelBackdrop />
-      <main className="container overflow-x-hidden relative flex space-x-10 mx-auto p-4 sm:p-6 lg:p-8 xl:p-10">
+      <OpenSidePanelButton />
+
+      <main className="container relative flex space-x-10 mx-auto p-4 sm:p-6 lg:p-8 xl:p-10">
         <div className="flex flex-1 min-h-screen flex-col">{children}</div>
-        <OpenSidePanelButton />
         <SidePanel />
       </main>
     </>

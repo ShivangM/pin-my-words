@@ -22,7 +22,7 @@ const WordsCard = ({ word, idx }: { word: Word; idx: number }) => {
       <div className="flex flex-col justify-center flex-1 p-6">
         <span className="text-xs uppercase">NOUN</span>
         <h3 className="text-3xl font-bold">{word.word}</h3>
-        <p className="my-6">{word.definition}</p>
+        <p className="my-6">{word.meaning}</p>
         <button type="button" className="self-start">
           View More
         </button>
