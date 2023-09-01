@@ -11,7 +11,6 @@ const CreateBoardModal = () => {
     useBoardsStore((state) => [
       state.createBoardStep,
       state.createBoardModalOpen,
-      state.openCreateBoardModal,
       state.closeCreateBoardModal,
     ]);
 

@@ -17,14 +17,14 @@ const BasicDetails = () => {
 
   const [userData] = useUserStore((state) => [state.userData]);
 
-  const [setMetadata, metadata, previewImage, setImage] = useBoardsStore(
-    (state) => [
+  const [setMetadata, metadata, previewImage, setImage, closeCreateBoardModal] =
+    useBoardsStore((state) => [
       state.setMetadata,
       state.metadata,
       state.previewImage,
       state.setImage,
-    ]
-  );
+      state.closeCreateBoardModal,
+    ]);
 
   // Image Upload and Preview
   const imageRef = useRef<HTMLInputElement | null>(null);
@@ -124,6 +124,10 @@ const BasicDetails = () => {
 
       {/* Submit  */}
       <div className="mt-4 flex items-center space-x-4">
+        <button onClick={closeCreateBoardModal} className="modalBtnPrev">
+          Cancel
+        </button>
+
         <button disabled={isSubmitting} type="submit" className="modalBtnNext">
           Next
         </button>
