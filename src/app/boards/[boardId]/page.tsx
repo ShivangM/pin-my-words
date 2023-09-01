@@ -8,6 +8,7 @@ import { AiFillDelete } from 'react-icons/ai';
 import { BiSolidEdit, BiTimeFive } from 'react-icons/bi';
 import { MdUpdate } from 'react-icons/md';
 import { Parallax } from 'react-parallax';
+import SearchWord from '@/components/Board/SearchWord';
 
 type Props = {
   params: {
@@ -43,7 +44,7 @@ const Board = ({ params: { boardId } }: Props) => {
   }
 
   return (
-    <div className="">
+    <div className="space-y-8">
       <Parallax
         blur={{ min: -15, max: 15 }}
         bgImage={board?.metadata?.image || '/assets/board-placeholder.svg'}
@@ -55,7 +56,7 @@ const Board = ({ params: { boardId } }: Props) => {
         <div style={{ height: '300px' }} />
       </Parallax>
 
-      <div className="mt-8 space-y-4">
+      <div className="space-y-4">
         <div className="">
           <div className="flex items-center justify-between w-full">
             <h1 className="text-2xl text-gray-900 font-bold flex-1 text-left">
@@ -102,7 +103,12 @@ const Board = ({ params: { boardId } }: Props) => {
         </div>
       </div>
 
-      <hr className="my-8" />
+      <hr />
+
+      <div className="flex items-center space-x-4">
+        <SearchWord />
+        <button className="btn">Add Word</button>
+      </div>
 
       <div className="flex flex-col space-y-6">
         {words?.map((word, idx) => (
