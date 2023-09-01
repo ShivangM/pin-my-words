@@ -1,8 +1,21 @@
-import React from 'react';
-
+'use client';
+import { ChangeEvent, useMemo, useState } from 'react';
+import debounce from 'lodash.debounce';
 type Props = {};
 
 const SearchWord = (props: Props) => {
+  const [searchTerm, setSearchTerm] = useState<string>();
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const debouncedResults = useMemo(() => {
+    return debounce(handleChange, 300);
+  }, []);
+
+  console.log(debouncedResults);
+
   return (
     <form className="">
       <label
@@ -11,6 +24,7 @@ const SearchWord = (props: Props) => {
       >
         Search
       </label>
+
       <div className="relative">
         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
           <svg
@@ -32,14 +46,14 @@ const SearchWord = (props: Props) => {
 
         <input
           type="search"
-          id="default-search"
+          id="search"
+          value={searchTerm}
+          onChange={debouncedResults}
           className="block flex-1 w-full px-4 py-3 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 outline-none"
           placeholder="Search For a Word..."
           required
         />
       </div>
-
-      <button className="btn">Add Word</button>
     </form>
   );
 };

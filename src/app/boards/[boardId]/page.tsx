@@ -2,7 +2,7 @@
 import WordsCard from '@/components/Board/WordCard';
 import useBoardStore from '@/store/boardStore';
 import useUserStore from '@/store/userStore';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import moment from 'moment';
 import { AiFillDelete } from 'react-icons/ai';
 import { BiSolidEdit, BiTimeFive } from 'react-icons/bi';
@@ -18,6 +18,7 @@ type Props = {
 
 const Board = ({ params: { boardId } }: Props) => {
   const [userData] = useUserStore((state) => [state.userData]);
+  const [isOwner, setIsOwner] = useState(false);
 
   const [
     board,
@@ -36,8 +37,12 @@ const Board = ({ params: { boardId } }: Props) => {
   ]);
 
   useEffect(() => {
+    setIsOwner(board?.owner === userData?.uid);
+  }, [userData, board]);
+
+  useEffect(() => {
     fetchBoard(boardId, userData?.email!);
-  }, [boardId]);
+  }, [boardId, fetchBoard, userData]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -62,7 +67,7 @@ const Board = ({ params: { boardId } }: Props) => {
             <h1 className="text-2xl text-gray-900 font-bold flex-1 text-left">
               {board?.metadata?.name}
             </h1>
-            {board?.owner === userData?.uid ? (
+            {isOwner ? (
               <div className="w-fit flex items-center space-x-2">
                 <BiSolidEdit
                   onClick={openEditBoardModal}
@@ -110,11 +115,11 @@ const Board = ({ params: { boardId } }: Props) => {
         <button className="btn">Add Word</button>
       </div>
 
-      <div className="flex flex-col space-y-6">
+      {/* <div className="flex flex-col space-y-6">
         {words?.map((word, idx) => (
           <WordsCard key={idx} idx={idx} word={word} />
         ))}
-      </div>
+      </div> */}
     </div>
   );
 };
