@@ -5,8 +5,9 @@ import useUserStore from '@/store/userStore';
 import { useEffect } from 'react';
 import moment from 'moment';
 import { AiFillDelete } from 'react-icons/ai';
-import { BiSolidEdit } from 'react-icons/bi';
-import { Parallax, Background } from 'react-parallax';
+import { BiSolidEdit, BiTimeFive } from 'react-icons/bi';
+import { MdUpdate } from 'react-icons/md';
+import { Parallax } from 'react-parallax';
 
 type Props = {
   params: {
@@ -54,34 +55,51 @@ const Board = ({ params: { boardId } }: Props) => {
         <div style={{ height: '300px' }} />
       </Parallax>
 
-      <div className="mt-8">
-        <div className="flex items-center justify-between w-full">
-          <h1 className="text-2xl text-gray-900 font-bold flex-1 text-left">
-            {board?.metadata?.name}
-          </h1>
-          {board?.owner === userData?.uid ? (
-            <div className="w-fit flex items-center space-x-2">
-              <BiSolidEdit
-                onClick={openEditBoardModal}
-                className="w-6 h-6 cursor-pointer text-gray-700"
-              />
-              <AiFillDelete
-                onClick={openDeleteBoardModal}
-                className="w-6 h-6 cursor-pointer text-red-500"
-              />
-            </div>
-          ) : null}
+      <div className="mt-8 space-y-4">
+        <div className="">
+          <div className="flex items-center justify-between w-full">
+            <h1 className="text-2xl text-gray-900 font-bold flex-1 text-left">
+              {board?.metadata?.name}
+            </h1>
+            {board?.owner === userData?.uid ? (
+              <div className="w-fit flex items-center space-x-2">
+                <BiSolidEdit
+                  onClick={openEditBoardModal}
+                  className="w-6 h-6 cursor-pointer text-gray-700"
+                />
+                <AiFillDelete
+                  onClick={openDeleteBoardModal}
+                  className="w-6 h-6 cursor-pointer text-red-500"
+                />
+              </div>
+            ) : null}
+          </div>
+          <p className="text-gray-500 text-sm">
+            {board?.metadata?.description}
+          </p>
         </div>
-        <p className="text-gray-500 text-sm">{board?.metadata?.description}</p>
-        <time className="text-gray-500 text-sm">
-          Created on {moment(board?.createdAt?.toDate()).format('MMMM Do YYYY')}
-        </time>
-        {board?.updatedAt && (
-          <time className="text-gray-500 text-sm">
-            Last updated on{' '}
-            {moment(board?.updatedAt.toDate()).format('MMMM Do YYYY')}
-          </time>
-        )}
+
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-1">
+            <BiTimeFive className="text-xl" />
+            <time className="text-gray-500 flex flex-col text-sm">
+              <span className="font-semibold text-gray-900">Created At: </span>
+              <span>
+                {moment(board?.createdAt?.toDate()).format('MMMM Do YYYY')}
+              </span>
+            </time>
+          </div>
+
+          <div className="flex items-center space-x-1">
+            <MdUpdate className="text-xl" />
+            <time className="text-gray-500 flex flex-col text-sm">
+              <span className="font-semibold text-gray-900">Updated At: </span>
+              <span>
+                {moment(board?.updatedAt.toDate()).format('MMMM Do YYYY')}
+              </span>
+            </time>
+          </div>
+        </div>
       </div>
 
       <hr className="my-8" />

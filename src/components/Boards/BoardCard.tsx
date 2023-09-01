@@ -13,13 +13,15 @@ const BoardCard = ({ board }: { board: Board }) => {
       href={`/boards/${_id}`}
       className="group p-6 cursor-pointer rounded-md shadow-md"
     >
-      <Image
-        src={metadata?.image || '/assets/board-placeholder.svg'}
-        alt={metadata?.name}
-        width={500}
-        height={288}
-        className="object-cover object-center w-full rounded-md"
-      />
+      <div className="w-full relative rounded-md overflow-hidden aspect-square">
+        <Image
+          src={metadata?.image || '/assets/board-placeholder.svg'}
+          alt={metadata?.name}
+          fill
+          className="group-hover:scale-105 transition-all ease-in-out duration-500 object-cover object-center"
+          objectFit="cover"
+        />
+      </div>
       <div className="mt-6 mb-2">
         <span className="block text-xs font-medium uppercase text-green-400">
           {owner === userData?.uid ? 'Owned' : 'Shared with you'}

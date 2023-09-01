@@ -19,11 +19,38 @@ const WordsCard = ({ word, idx }: { word: Word; idx: number }) => {
         />
       </div>
 
-      <div className="flex flex-col justify-center flex-1 p-6">
-        <span className="text-xs uppercase">NOUN</span>
-        <h3 className="text-3xl font-bold">{word.word}</h3>
-        <p className="my-6">{word.meaning}</p>
-        <button type="button" className="self-start">
+      <div className="flex flex-col justify-center space-y-6 flex-1 p-6">
+        <div className="">
+          <span className="text-xs uppercase">NOUN</span>
+          <h3 className="text-3xl font-bold">{word.word}</h3>
+          <p className="">{word.meaning}</p>
+        </div>
+
+        <div className="space-y-1">
+          <h4 className="text-sm font-bold">Examples: </h4>
+          <ol className="space-y-1 list-decimal">
+            {word.examples.map((example, idx) => (
+              <li key={idx} className="text-sm text-gray-500 space-x-1">
+                {example.split(' ').map((w, idx) => (
+                  <span
+                    key={idx}
+                    className={classNames(
+                      'inline-block',
+                      w === word.word ? 'font-bold text-black' : ''
+                    )}
+                  >
+                    {w}
+                  </span>
+                ))}
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <button
+          type="button"
+          className="modalBtn bg-slate-200 hover:bg-slate-300 w-fit"
+        >
           View More
         </button>
       </div>
