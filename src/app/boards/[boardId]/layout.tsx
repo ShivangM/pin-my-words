@@ -1,3 +1,4 @@
+import AddWordModal from '@/components/Board/AddWordModal';
 import DeleteBoardModal from '@/components/Board/DeleteBoardModal';
 import EditBoardModal from '@/components/Board/EditBoardModal';
 import OpenSidePanelButton from '@/components/Board/OpenSidePanelButton';
@@ -16,6 +17,7 @@ export default function BoardLayout({
       <OpenSidePanelButton />
       <DeleteBoardModal />
       <EditBoardModal />
+      <AddWordModal />
       <main className="container relative flex space-x-10 mx-auto p-4 sm:p-6 lg:p-8 xl:p-10">
         <div className="flex flex-1 min-h-screen flex-col">{children}</div>
         <SidePanel />

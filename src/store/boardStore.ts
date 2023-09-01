@@ -24,6 +24,10 @@ interface BoardState {
   previewImage: string | null;
   setImage: (image: File) => void;
 
+  addWordModalOpen: boolean;
+  openAddWordModal: () => void;
+  closeAddWordModal: () => void;
+
   sidePanelOpen: boolean;
   openSidePanel: () => void;
   closeSidePanel: () => void;
@@ -53,6 +57,15 @@ const useBoardStore = create<BoardState>()(
 
     closeDeleteBoardModal: () => {
       set({ deleteBoardModalOpen: false });
+    },
+
+    addWordModalOpen: false,
+    openAddWordModal: () => {
+      set({ addWordModalOpen: true });
+    },
+
+    closeAddWordModal: () => {
+      set({ addWordModalOpen: false });
     },
 
     editBoardModalOpen: false,

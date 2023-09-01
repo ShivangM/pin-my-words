@@ -14,10 +14,10 @@ const SearchWord = (props: Props) => {
     return debounce(handleChange, 300);
   }, []);
 
-  console.log(debouncedResults);
+  console.log(searchTerm);
 
   return (
-    <form className="">
+    <form className="flex-1">
       <label
         htmlFor="search"
         className="mb-2 text-sm font-medium text-gray-900 sr-only"
@@ -47,7 +47,6 @@ const SearchWord = (props: Props) => {
         <input
           type="search"
           id="search"
-          value={searchTerm}
           onChange={debouncedResults}
           className="block flex-1 w-full px-4 py-3 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 outline-none"
           placeholder="Search For a Word..."

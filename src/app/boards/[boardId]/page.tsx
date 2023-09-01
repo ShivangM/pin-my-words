@@ -26,6 +26,7 @@ const Board = ({ params: { boardId } }: Props) => {
     words,
     openDeleteBoardModal,
     openEditBoardModal,
+    openAddWordModal,
     loading,
   ] = useBoardStore((state) => [
     state.board,
@@ -33,6 +34,7 @@ const Board = ({ params: { boardId } }: Props) => {
     state.words,
     state.openDeleteBoardModal,
     state.openEditBoardModal,
+    state.openAddWordModal,
     state.loading,
   ]);
 
@@ -112,14 +114,16 @@ const Board = ({ params: { boardId } }: Props) => {
 
       <div className="flex items-center space-x-4">
         <SearchWord />
-        <button className="btn">Add Word</button>
+        <button onClick={openAddWordModal} className="btn">
+          Add Word
+        </button>
       </div>
 
-      {/* <div className="flex flex-col space-y-6">
+      <div className="flex flex-col space-y-6">
         {words?.map((word, idx) => (
           <WordsCard key={idx} idx={idx} word={word} />
         ))}
-      </div> */}
+      </div>
     </div>
   );
 };
