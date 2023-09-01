@@ -1,10 +1,12 @@
-import React from 'react';
+'use client';
+import { useRef, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { ErrorMessage } from '@hookform/error-message';
 import classNames from 'classnames';
 import useUserStore from '@/store/userStore';
 import useBoardsStore from '@/store/boardsStore';
-import { CreateBoardSteps, Metadata } from '@/interfaces/Board.d';
+import { Metadata } from '@/interfaces/Board.d';
+import Image from 'next/image';
 
 const BasicDetails = () => {
   const {
@@ -14,19 +16,32 @@ const BasicDetails = () => {
   } = useForm<Metadata>();
 
   const [userData] = useUserStore((state) => [state.userData]);
-  const [setBoardStep, setMetadata, metadata] = useBoardsStore((state) => [
-    state.setBoardStep,
-    state.setMetadata,
-    state.metadata,
-  ]);
+
+  const [setMetadata, metadata, previewImage, setImage] = useBoardsStore(
+    (state) => [
+      state.setMetadata,
+      state.metadata,
+      state.previewImage,
+      state.setImage,
+    ]
+  );
+
+  // Image Upload and Preview
+  const imageRef = useRef<HTMLInputElement | null>(null);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      setImage(file);
+    }
+  };
 
   const onSubmit: SubmitHandler<Metadata> = async (data) => {
     setMetadata(data);
-    setBoardStep(CreateBoardSteps.INVITE_USERS);
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="pt-6 space-y-4">
+      {/* Name  */}
       <div>
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
@@ -54,6 +69,28 @@ const BasicDetails = () => {
         />
       </div>
 
+      {/* Upload Image  */}
+      <div className="">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="image"
+        >
+          Image (Optional)
+        </label>
+
+        <input hidden onChange={handleChange} ref={imageRef} type="file" />
+
+        <Image
+          src={previewImage || '/assets/board-placeholder.svg'}
+          onClick={() => imageRef?.current?.click()}
+          alt="Board Image"
+          width={500}
+          height={288}
+          className="object-cover cursor-pointer object-center w-full rounded-md"
+        />
+      </div>
+
+      {/* Description  */}
       <div>
         <label
           className="block text-gray-700 text-sm font-bold mb-2"
@@ -85,8 +122,9 @@ const BasicDetails = () => {
         />
       </div>
 
+      {/* Submit  */}
       <div className="mt-4 flex items-center space-x-4">
-        <button type="submit" className="modalBtnNext">
+        <button disabled={isSubmitting} type="submit" className="modalBtnNext">
           Next
         </button>
       </div>

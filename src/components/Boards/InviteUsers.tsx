@@ -18,12 +18,15 @@ const InviteUsers = () => {
     formState: { errors },
   } = useForm<CollaborativeUser>();
 
-  const [addUser, removeUser, users, setBoardStep] = useBoardsStore((state) => [
-    state.addUser,
-    state.removeUser,
-    state.users,
-    state.setBoardStep,
-  ]);
+  const [addUser, removeUser, users, setBoardStep, createBoard, loading] =
+    useBoardsStore((state) => [
+      state.addUser,
+      state.removeUser,
+      state.users,
+      state.setBoardStep,
+      state.createBoard,
+      state.loading,
+    ]);
 
   const [userData] = useUserStore((state) => [state.userData]);
 
@@ -138,6 +141,7 @@ const InviteUsers = () => {
       <div className="mt-4 flex items-center space-x-4">
         <button
           type="button"
+          disabled={loading}
           onClick={() => {
             setBoardStep(CreateBoardSteps.ENTER_DETAILS);
           }}
@@ -148,12 +152,11 @@ const InviteUsers = () => {
 
         <button
           type="button"
-          onClick={() => {
-            setBoardStep(CreateBoardSteps.SELECT_THUMBNAIL);
-          }}
+          disabled={loading}
+          onClick={() => createBoard(userData!)}
           className="modalBtnNext"
         >
-          Next
+          Create Board
         </button>
       </div>
     </div>

@@ -5,6 +5,7 @@ const nextConfig = {
       'localhost',
       'lh3.googleusercontent.com',
       'firebasestorage.googleapis.com',
+      'source.unsplash.com',
     ],
   },
 };

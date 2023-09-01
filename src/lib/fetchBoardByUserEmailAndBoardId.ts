@@ -10,7 +10,7 @@ const fetchBoardByUserEmailAndBoardId = async (
   try {
     const boardRef = doc(db, 'boards', boardId);
     const boardDoc = await getDoc(boardRef);
-    const board = boardDoc.data() as Board;
+    const board = { ...boardDoc.data(), _id: boardDoc.id } as Board;
 
     if (!board) {
       throw new Error('Board does not exist');

@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import moment from 'moment';
 import { AiFillDelete } from 'react-icons/ai';
 import { BiSolidEdit } from 'react-icons/bi';
+import { Parallax, Background } from 'react-parallax';
 
 type Props = {
   params: {
@@ -15,27 +16,61 @@ type Props = {
 
 const Board = ({ params: { boardId } }: Props) => {
   const [userData] = useUserStore((state) => [state.userData]);
-  const [board, fetchBoard, words] = useBoardStore((state) => [
+
+  const [
+    board,
+    fetchBoard,
+    words,
+    openDeleteBoardModal,
+    openEditBoardModal,
+    loading,
+  ] = useBoardStore((state) => [
     state.board,
     state.fetchBoard,
     state.words,
+    state.openDeleteBoardModal,
+    state.openEditBoardModal,
+    state.loading,
   ]);
 
   useEffect(() => {
     fetchBoard(boardId, userData?.email!);
-  }, [userData, boardId, fetchBoard]);
+  }, [boardId]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="">
-      <div className="">
+      <Parallax
+        blur={{ min: -15, max: 15 }}
+        bgImage={board?.metadata?.image || '/assets/board-placeholder.svg'}
+        bgImageAlt={board?.metadata?.name}
+        bgStyle={{ objectFit: 'cover' }}
+        bgImageStyle={{ objectFit: 'cover' }}
+        strength={-300}
+      >
+        <div style={{ height: '300px' }} />
+      </Parallax>
+
+      <div className="mt-8">
         <div className="flex items-center justify-between w-full">
           <h1 className="text-2xl text-gray-900 font-bold flex-1 text-left">
             {board?.metadata?.name}
           </h1>
-          <div className="w-fit flex items-center space-x-2">
-            <BiSolidEdit className="w-6 h-6 cursor-pointer text-gray-700" />
-            <AiFillDelete className="w-6 h-6 cursor-pointer text-red-500" />
-          </div>
+          {board?.owner === userData?.uid ? (
+            <div className="w-fit flex items-center space-x-2">
+              <BiSolidEdit
+                onClick={openEditBoardModal}
+                className="w-6 h-6 cursor-pointer text-gray-700"
+              />
+              <AiFillDelete
+                onClick={openDeleteBoardModal}
+                className="w-6 h-6 cursor-pointer text-red-500"
+              />
+            </div>
+          ) : null}
         </div>
         <p className="text-gray-500 text-sm">{board?.metadata?.description}</p>
         <time className="text-gray-500 text-sm">

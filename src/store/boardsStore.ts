@@ -22,48 +22,54 @@ import db, { storage } from '@/utils/firebase';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 
 interface BoardsState {
-  boards: null | Board[];
-  users: CollaborativeUser[] | [];
-  createBoardStep: CreateBoardSteps;
-  metadata: Metadata | null;
-  image: File | null;
-  previewImage: string | null;
-  modalOpen: boolean;
-  loading: boolean;
-  closeModal: () => void;
-  openModal: () => void;
   fetchBoards: (email: string) => void;
-  createBoard: (user: User) => void;
+  boards: null | Board[];
+  loading: boolean;
+
+  metadata: Metadata | null;
+
+  users: CollaborativeUser[] | [];
   addUser: (user: CollaborativeUser) => void;
   removeUser: (userEmail: string) => void;
+
+  image: File | null;
+  previewImage: string | null;
   setImage: (image: File) => void;
+
+  createBoardModalOpen: boolean;
+  createBoardStep: CreateBoardSteps;
   setBoardStep: (step: CreateBoardSteps) => void;
+  openCreateBoardModal: () => void;
+  closeCreateBoardModal: () => void;
+  createBoard: (user: User) => void;
   setMetadata: (metadata: Metadata) => void;
 }
 
 const useBoardsStore = create<BoardsState>()(
   devtools((set, get) => ({
     boards: null,
-    users: [],
-    createBoardStep: CreateBoardSteps.ENTER_DETAILS,
-    metadata: null,
     image: null,
     previewImage: null,
-    modalOpen: false,
+    createBoardStep: CreateBoardSteps.ENTER_DETAILS,
+    users: [],
+    metadata: null,
     loading: false,
 
-    closeModal: () => {
-      set({ modalOpen: false });
-    },
+    //Create Board Modal
+    createBoardModalOpen: false,
+    closeCreateBoardModal: () => set({ createBoardModalOpen: false }),
+    openCreateBoardModal: () => set({ createBoardModalOpen: true }),
+    setBoardStep: (step) => set({ createBoardStep: step }),
 
-    openModal: () => {
-      set({ modalOpen: true });
-    },
+    // Set Board Metadata
+    setMetadata: (metadata) =>
+      set({ metadata, createBoardStep: CreateBoardSteps.INVITE_USERS }),
 
-    setMetadata: (metadata) => {
-      set({ metadata });
-    },
+    // Set Board Image
+    setImage: (image) =>
+      set({ image, previewImage: URL.createObjectURL(image) }),
 
+    // Fetch Boards
     fetchBoards: async (email: string) => {
       toast.loading('Loading your boards...', {
         toastId: 'fetching-boards',
@@ -72,10 +78,6 @@ const useBoardsStore = create<BoardsState>()(
       const boards = await fetchBoardsByEmail(email);
       set({ boards });
       toast.dismiss('fetching-boards');
-    },
-
-    setBoardStep: (step) => {
-      set({ createBoardStep: step });
     },
 
     addUser: (user) => {
@@ -91,18 +93,12 @@ const useBoardsStore = create<BoardsState>()(
       }));
     },
 
-    setImage: (image) => {
-      set({
-        image,
-        previewImage: URL.createObjectURL(image),
-      });
-    },
-
     createBoard: async (user) => {
       let board = {
         metadata: get().metadata,
         owner: user.uid,
         createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
       };
 
       set({ loading: true });
@@ -127,15 +123,16 @@ const useBoardsStore = create<BoardsState>()(
       setDoc(doc(db, 'users-boards', user.email + '_' + boardRef.id), {
         boardId: boardRef.id,
         userId: user.email,
-        access: BoardAccess.ADMIN,
+        access: BoardAccess.OWNER,
       });
 
-      if (get().image) {
-        const imageRef = ref(
-          storage,
-          'boards/' + boardRef.id + get().image!.name.split('.')[1]
-        );
-        const imageBlob = new Blob([get().image!], { type: 'image/jpeg' });
+      //Upload Image to Storage
+      const image = get().image;
+      let imageDownloadURL: string | null = null;
+
+      if (image) {
+        const imageRef = ref(storage, 'boards/' + boardRef.id);
+        const imageBlob = new Blob([image], { type: 'image/jpeg' });
 
         await uploadBytes(imageRef, imageBlob, {
           contentType: 'image/jpeg',
@@ -151,8 +148,22 @@ const useBoardsStore = create<BoardsState>()(
         });
       }
 
-      get().fetchBoards(user.email);
-      set({ loading: false, modalOpen: false });
+      const newBoard: Board = {
+        _id: boardRef.id,
+        metadata: {
+          ...get().metadata!,
+          image: get().previewImage!,
+        },
+        owner: user,
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      };
+
+      set({
+        loading: false,
+        createBoardModalOpen: false,
+        boards: [newBoard, ...get().boards!],
+      });
       toast.dismiss('creating-board');
       return true;
     },

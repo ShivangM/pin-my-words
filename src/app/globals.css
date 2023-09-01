@@ -9,11 +9,11 @@
     }
 
     .btnShaddow {
-        @apply absolute right-0 w-8 h-32 -mt-12 transition-all duration-1000 transform translate-x-12 bg-white opacity-10 rotate-12 group-hover:-translate-x-40 ease-in-out;
+        @apply absolute right-0 w-8 h-20 -mt-12 transition-all duration-1000 transform translate-x-12 bg-white opacity-10 rotate-12 group-hover:-translate-x-40 ease-in-out;
     }
 
     .modalBtn {
-        @apply inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:animate-pulse
+        @apply inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed
     }
 
     .modalBtnPrev {
@@ -21,6 +21,6 @@
     }
 
     .modalBtnNext {
-        @apply bg-blue-100 text-blue-900 hover:bg-blue-200 focus-visible:ring-blue-500 modalBtn
+        @apply bg-blue-100 text-blue-900 hover:bg-blue-200 focus-visible:ring-blue-500 modalBtn disabled:animate-pulse
     }
 }
