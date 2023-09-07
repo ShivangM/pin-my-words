@@ -1,0 +1,34 @@
+[
+    {
+        "value": "Noun",
+        "label": "Noun"
+    },
+    {
+        "value": "Verb",
+        "label": "Verb"
+    },
+    {
+        "value": "Adjective",
+        "label": "Adjective"
+    },
+    {
+        "value": "Adverb",
+        "label": "Adverb"
+    },
+    {
+        "value": "Pronoun",
+        "label": "Pronoun"
+    },
+    {
+        "value": "Preposition",
+        "label": "Preposition"
+    },
+    {
+        "value": "Conjunction",
+        "label": "Conjunction"
+    },
+    {
+        "value": "Interjection",
+        "label": "Interjection"
+    }
+]
