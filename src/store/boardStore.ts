@@ -1,5 +1,6 @@
 import { Board, Metadata } from '@/interfaces/Board.d';
 import { RootWord, Word } from '@/interfaces/Word';
+import addWordToBoardUsingBoardIdAndUserId from '@/lib/addWordToBoardUsingBoardIdAndUserId';
 import deleteBoardByBoardIdAndUserId from '@/lib/deleteBoardByBoardIdAndUserId';
 import fetchBoardByUserEmailAndBoardId from '@/lib/fetchBoardByUserEmailAndBoardId';
 import fetchRootWordsByBoardIdAndUserId from '@/lib/fetchRootWordsByBoardIdAndUserId';
@@ -29,6 +30,7 @@ interface BoardState {
   addWordModalOpen: boolean;
   openAddWordModal: () => void;
   closeAddWordModal: () => void;
+  addWord: (word: Word, boardId: string, image?: File, userId?: string) => Promise<void>;
 
   sidePanelOpen: boolean;
   openSidePanel: () => void;
@@ -69,6 +71,21 @@ const useBoardStore = create<BoardState>()(
 
     closeAddWordModal: () => {
       set({ addWordModalOpen: false });
+    },
+
+    addWord: async (word, boardId, image, userId) => {
+      toast.loading('Adding word...', {
+        toastId: 'add-word',
+      });
+      const wordAdded = await addWordToBoardUsingBoardIdAndUserId(boardId, word, image, userId);
+      if (wordAdded) {
+        set({ addWordModalOpen: false });
+        toast.success('Word added successfully');
+      }
+      else {
+        toast.error('Failed to add word');
+      }
+      toast.dismiss('add-word');
     },
 
     editBoardModalOpen: false,

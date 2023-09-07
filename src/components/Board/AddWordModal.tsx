@@ -4,7 +4,7 @@ import useBoardStore from '@/store/boardStore';
 import { Dialog, Transition } from '@headlessui/react';
 import { ErrorMessage } from '@hookform/error-message';
 import classNames from 'classnames';
-import { Fragment, useRef, useState } from 'react';
+import { Fragment, use, useRef, useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import Select from 'react-select';
 import options from '@/constants/parts-of-speech.json';
@@ -13,11 +13,14 @@ import fetchRootWordsByBoardIdAndUserId from '@/lib/fetchRootWordsByBoardIdAndUs
 import debounce from 'lodash.debounce';
 import { IoIosCloseCircle } from 'react-icons/io';
 import Image from 'next/image';
+import useUserStore from '@/store/userStore';
 
 const AddWordModal = () => {
-  const [closeAddWordModal, addWordModalOpen, loading, boardId] = useBoardStore(
-    (state) => [state.closeAddWordModal, state.addWordModalOpen, state.loading, state.board?._id]
+  const [closeAddWordModal, addWordModalOpen, loading, boardId, addWord] = useBoardStore(
+    (state) => [state.closeAddWordModal, state.addWordModalOpen, state.loading, state.board?._id, state.addWord]
   );
+
+  const [userData] = useUserStore((state) => [state.userData]);
 
   const { register, handleSubmit, control, formState: { errors } } = useForm<Word>();
 
@@ -54,14 +57,14 @@ const AddWordModal = () => {
     }
   };
 
-  const onSubmit: SubmitHandler<Word> = (data) => {
+  const onSubmit: SubmitHandler<Word> = async (data) => {
     const wordData = {
       ...data,
-      image,
-      examples
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      createdBy: userData?.uid!,
     }
-
-    console.log(wordData)
+    await addWord(data, boardId!, image);
   }
 
   return (
