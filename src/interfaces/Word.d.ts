@@ -18,3 +18,11 @@ export interface Word {
   updatedAt: Timestamp;
   createdBy: string;
 }
+
+
+export interface RootWord {
+  description: string;
+  root: string;
+  type: string;
+  meaning: string;
+}

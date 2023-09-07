@@ -1,7 +1,8 @@
 import { Board, Metadata } from '@/interfaces/Board.d';
-import { Word } from '@/interfaces/Word';
+import { RootWord, Word } from '@/interfaces/Word';
 import deleteBoardByBoardIdAndUserId from '@/lib/deleteBoardByBoardIdAndUserId';
 import fetchBoardByUserEmailAndBoardId from '@/lib/fetchBoardByUserEmailAndBoardId';
+import fetchRootWordsByBoardIdAndUserId from '@/lib/fetchRootWordsByBoardIdAndUserId';
 import fetchWordsByBoardId from '@/lib/fetchWordsByBoardId';
 import updateBoardByBoardIdAndUserId from '@/lib/updateBoardByBoardIdAndUserId';
 import { toast } from 'react-toastify';
@@ -12,6 +13,7 @@ interface BoardState {
   board: null | Board;
   loading: boolean;
   words: null | Word[];
+  rootWords: null | RootWord[]
 
   deleteBoardModalOpen: boolean;
   openDeleteBoardModal: () => void;
@@ -43,6 +45,7 @@ const useBoardStore = create<BoardState>()(
     loading: false,
     sidePanelOpen: false,
     words: null,
+    rootWords: null,
     image: null,
     previewImage: null,
 
