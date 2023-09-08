@@ -21,6 +21,7 @@ export interface Word {
 
 
 export interface RootWord {
+  id: string;
   description: string;
   root: string;
   type: string;
