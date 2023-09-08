@@ -2,12 +2,12 @@ import { BoardAccess } from '@/interfaces/Board';
 import db from '@/utils/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
-const fetchUserAccessByBoardIdAndUserEmail = async (
+const fetchUserAccessByBoardIdAndUserId = async (
   boardId: string,
-  userEmail: string
+  userId: string
 ): Promise<BoardAccess | null> => {
   try {
-    const userBoardRef = doc(db, 'users-boards', userEmail + '_' + boardId);
+    const userBoardRef = doc(db, 'users-boards', userId + '_' + boardId);
     const userBoardDoc = await getDoc(userBoardRef);
     if (!userBoardDoc.exists()) {
       throw new Error('User does not have access to this board');
@@ -20,4 +20,4 @@ const fetchUserAccessByBoardIdAndUserEmail = async (
   }
 };
 
-export default fetchUserAccessByBoardIdAndUserEmail;
+export default fetchUserAccessByBoardIdAndUserId;

@@ -4,18 +4,25 @@ import {
   CreateBoardSteps,
 } from '@/interfaces/Board.d';
 import React from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import classNames from 'classnames';
+import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { ErrorMessage } from '@hookform/error-message';
 import useBoardsStore from '@/store/boardsStore';
 import { IoIosCloseCircle } from 'react-icons/io';
 import useUserStore from '@/store/userStore';
+import AsyncSelect from 'react-select/async';
+import Select from 'react-select';
+import { User } from '@/interfaces/User';
+import debounce from 'lodash.debounce';
+import fetchUsersByEmailSearch from '@/lib/fetchUsersByEmailSearch';
+import { OptionProps } from 'react-select';
+import Image from 'next/image';
 
 const InviteUsers = () => {
   const {
     register,
     handleSubmit,
     formState: { errors },
+    control,
   } = useForm<CollaborativeUser>();
 
   const [addUser, removeUser, users, setBoardStep, createBoard, loading] =
@@ -34,6 +41,20 @@ const InviteUsers = () => {
     addUser(data);
   };
 
+  const promiseOptions = (inputValue: string, callback: (res: User[]) => void) => {
+    fetchUsersByEmailSearch(inputValue).then((res) => {
+      callback(res);
+    });
+  };
+
+  const loadOptions = debounce(promiseOptions, 1000);
+
+  const accessOptions = [
+    { value: BoardAccess.READ_ONLY, label: 'Read Only' },
+    { value: BoardAccess.READ_WRITE, label: 'Read & Write' },
+    { value: BoardAccess.ADMIN, label: 'Admin' },
+  ];
+
   return (
     <div className="pt-6 space-y-4" onSubmit={handleSubmit(onSubmit)}>
       <form className="space-y-4">
@@ -51,13 +72,26 @@ const InviteUsers = () => {
           {users?.map((user, index) => (
             <div
               key={index}
-              className="flex bg-gray-50 rounded-full px-4 py-2 items-center gap-2"
+              className="flex bg-gray-50 rounded-full p-1.5 items-center gap-2"
             >
-              <p className="text-sm text-gray-500">{user.email}</p>
+              <div className="flex space-x-2 items-center">
+                <Image
+                  src={user.user.image || '/images/user.png'}
+                  alt={user.user.name}
+                  className="rounded-full"
+                  height={30}
+                  width={30}
+                />
+
+                <div className="text-xs">
+                  <p className="text-gray-900 font-medium">{user.user.name}</p>
+                  <p className="text-gray-500">{user.access}</p>
+                </div>
+              </div>
               <button
                 className=""
                 onClick={() => {
-                  removeUser(user.email);
+                  removeUser(user.user.uid!);
                 }}
               >
                 <IoIosCloseCircle className="h-5 w-5 text-red-500" />
@@ -68,28 +102,60 @@ const InviteUsers = () => {
 
         <div className="">
           <div className="flex items-center space-x-2 mb-3">
-            <input
-              className={classNames(
-                'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline',
-                errors?.email ? 'border-red-500' : null
-              )}
-              type="text"
-              {...register('email', {
+            <Controller
+              control={control}
+              name="user"
+              rules={{
                 required: 'Email is required.',
                 pattern: {
                   value: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/,
                   message: 'Please enter a valid email address.',
                 },
                 validate: (value) => {
-                  if (value === userData?.email) {
+                  if (value?.uid === userData?.uid) {
                     return 'You cannot invite yourself.';
                   }
-                  if (users.find((u) => u.email === value)) {
+                  if (users.find((u) => u.user.uid === value.uid)) {
                     return 'User already added.';
                   }
                 },
-              })}
-              placeholder="Enter other users email for the Board (Optional)"
+              }}
+
+              render={({ field: { onChange, ref } }) => (
+                <AsyncSelect
+                  //@ts-ignore
+                  inputRef={ref}
+                  cacheOptions
+                  placeholder="Enter email address"
+                  loadOptions={loadOptions}
+                  getOptionLabel={(user) => user.email}
+                  components={{
+                    Option: ({ data, innerProps, innerRef }: OptionProps<User>) => {
+                      return (
+                        <div className='cursor-pointer' ref={innerRef} {...innerProps}>
+                          <div className="flex py-2 px-4 items-center space-x-2">
+                            <Image
+                              src={data.image || '/images/user.png'}
+                              alt={data.name}
+                              className="rounded-full"
+                              height={30}
+                              width={30}
+                            />
+                            <div className="text-sm">
+                              <p className='text-gray-900 font-medium'>{data.name}</p>
+                              <p className='text-gray-500'>{data.email}</p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    },
+                  }}
+
+                  noOptionsMessage={(user) => `No user found with this email ${user.inputValue}`}
+                  onChange={(val) => onChange(val)}
+                  className='flex-1'
+                />
+              )}
             />
 
             <button type="submit" className="modalBtnNext">
@@ -99,7 +165,7 @@ const InviteUsers = () => {
 
           <ErrorMessage
             errors={errors}
-            name="email"
+            name="user"
             render={({ message }) => (
               <p className="text-red-500 text-xs italic">{message}</p>
             )}
@@ -107,26 +173,22 @@ const InviteUsers = () => {
         </div>
 
         <div className="">
-          <select
-            className={classNames(
-              'shadow border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline',
-              errors?.access ? 'border-red-500' : null
+          <Controller
+            control={control}
+            name="access"
+            rules={{ required: 'Access is required.' }}
+            render={({ field: { onChange, ref } }) => (
+              <Select
+                //@ts-ignore
+                inputRef={ref}
+                defaultValue={accessOptions[0]}
+                onChange={(val) => onChange(val?.value)}
+                options={accessOptions}
+                isSearchable={false}
+                menuPlacement='top'
+              />
             )}
-            {...register('access', {
-              required: 'Access is required.',
-            })}
-            defaultValue={BoardAccess.READ_ONLY}
-          >
-            <option value={BoardAccess.READ_ONLY}>
-              Read Only (Only Read the Words)
-            </option>
-            <option value={BoardAccess.READ_WRITE}>
-              Read & Write (Read & Write the Words)
-            </option>
-            <option value={BoardAccess.ADMIN}>
-              Admin ( Read, Write, Update and Delete the words. )
-            </option>
-          </select>
+          />
 
           <ErrorMessage
             errors={errors}

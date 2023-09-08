@@ -9,12 +9,12 @@ import {
   where,
 } from 'firebase/firestore';
 
-const fetchBoardsByEmail = async (email: string): Promise<Board[]> => {
+const fetchBoardsByUid = async (uid: string): Promise<Board[]> => {
   let boards: Board[] = [];
 
   try {
     const userBoardCollection = collection(db, 'users-boards');
-    const q = query(userBoardCollection, where('userId', '==', email));
+    const q = query(userBoardCollection, where('userId', '==', uid));
     const querySnapshot = await getDocs(q);
 
     // Create an array to hold all the promises
@@ -40,4 +40,4 @@ const fetchBoardsByEmail = async (email: string): Promise<Board[]> => {
   return boards;
 };
 
-export default fetchBoardsByEmail;
+export default fetchBoardsByUid;

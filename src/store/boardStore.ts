@@ -2,7 +2,7 @@ import { Board, Metadata } from '@/interfaces/Board.d';
 import { RootWord, Word } from '@/interfaces/Word';
 import addWordToBoardUsingBoardIdAndUserId from '@/lib/addWordToBoardUsingBoardIdAndUserId';
 import deleteBoardByBoardIdAndUserId from '@/lib/deleteBoardByBoardIdAndUserId';
-import fetchBoardByUserEmailAndBoardId from '@/lib/fetchBoardByUserEmailAndBoardId';
+import fetchBoardByBoardIdAndUserId from '@/lib/fetchBoardByBoardIdAndUserId';
 import fetchRootWordsByBoardIdAndUserId from '@/lib/fetchRootWordsByBoardIdAndUserId';
 import fetchWordsByBoardId from '@/lib/fetchWordsByBoardId';
 import updateBoardByBoardIdAndUserId from '@/lib/updateBoardByBoardIdAndUserId';
@@ -36,7 +36,7 @@ interface BoardState {
   openSidePanel: () => void;
   closeSidePanel: () => void;
 
-  fetchBoard: (boardId: string, userEmail: string) => void;
+  fetchBoard: (boardId: string, userId: string) => void;
   deleteBoard: (userId: string) => Promise<boolean>;
   editBoard: (userId: string, metadata: Metadata) => void;
 }
@@ -105,9 +105,9 @@ const useBoardStore = create<BoardState>()(
       set({ sidePanelOpen: false });
     },
 
-    fetchBoard: async (boardId, userEmail) => {
+    fetchBoard: async (boardId, userId) => {
       set({ loading: true });
-      const board = await fetchBoardByUserEmailAndBoardId(userEmail, boardId);
+      const board = await fetchBoardByBoardIdAndUserId(boardId, userId);
       const words = await fetchWordsByBoardId(boardId);
       set({ board, loading: false, words });
     },

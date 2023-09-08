@@ -30,7 +30,7 @@ const addWordToBoardUsingBoardIdAndUserId = async (
             const storageRef = ref(storage, `boards/${boardId}/words/${wordDoc.id}`);
             await uploadBytes(storageRef, image);
             const imageUrl = await getDownloadURL(storageRef);
-            await updateDoc(wordDoc, { image: imageUrl, createdBy: userId, updatedAt: Timestamp.now(), createdAt: Timestamp.now() });
+            await updateDoc(wordDoc, { image: imageUrl });
         }
 
         return true;

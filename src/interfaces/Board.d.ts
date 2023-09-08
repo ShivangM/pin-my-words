@@ -1,4 +1,5 @@
 import { DocumentData, Timestamp } from 'firebase/firestore';
+import { User } from './User';
 
 export enum CreateBoardSteps {
   ENTER_DETAILS,
@@ -13,7 +14,7 @@ export enum BoardAccess {
 }
 
 export type CollaborativeUser = {
-  email: string;
+  user: User;
   access: BoardAccess;
 };
 

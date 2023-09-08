@@ -1,11 +1,11 @@
 import { Board } from '@/interfaces/Board';
 import db from '@/utils/firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import fetchUserAccessByBoardIdAndUserEmail from './fetchUserAccessByBoardIdAndUserEmail';
+import fetchUserAccessByBoardIdAndUserEmail from './fetchUserAccessByBoardIdAndUserId';
 
 const fetchBoardByUserEmailAndBoardId = async (
-  userEmail: string,
-  boardId: string
+  boardId: string,
+  userId: string
 ): Promise<Board | null> => {
   try {
     const boardRef = doc(db, 'boards', boardId);
@@ -18,7 +18,7 @@ const fetchBoardByUserEmailAndBoardId = async (
 
     const userAccess = await fetchUserAccessByBoardIdAndUserEmail(
       boardId,
-      userEmail
+      userId
     );
 
     if (!userAccess) {

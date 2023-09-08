@@ -44,25 +44,25 @@ const SignIn = () => {
           const user = authResult.user;
           const userRef = doc(db, 'users', user.uid);
           const userDoc = getDoc(userRef);
+
           userDoc.then(async (docSnapshot) => {
             if (docSnapshot.exists()) {
               setUserData(docSnapshot.data() as User);
-              router.push('/boards');
-              return true;
-            } else {
+            } 
+            else {
               const userData = {
-                uid: user.uid!,
                 email: user.email!,
                 name: user.displayName!,
                 image: user.photoURL || undefined,
                 createdAt: Timestamp.now(),
                 updatedAt: Timestamp.now(),
               };
+
               setDoc(doc(db, 'users', user.uid!), userData);
               setUserData(userData);
-              router.push('/boards');
-              return true;
             }
+
+            router.push('/boards');
           });
         }
         return false;

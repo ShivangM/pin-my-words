@@ -15,8 +15,6 @@ const fetchRootWordsByBoardIdAndUserId = async (boardId: string, userId: string)
 
         const rootWordsCollection = collection(db, boardRef.path + "/roots")        
 
-        // const fetchPromises: Promise<void>[] = [];
-
         const rootWordDocs = await getDocs(rootWordsCollection);
 
         rootWordDocs.forEach((doc) => {

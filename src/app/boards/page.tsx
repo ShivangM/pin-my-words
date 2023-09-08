@@ -13,7 +13,7 @@ const Boards = () => {
 
   useEffect(() => {
     if (userData) {
-      fetchBoards(userData.email);
+      fetchBoards(userData.uid!);
     }
   }, [userData, fetchBoards]);
 

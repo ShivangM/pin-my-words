@@ -5,7 +5,7 @@ import {
   CreateBoardSteps,
   Metadata,
 } from '@/interfaces/Board.d';
-import fetchBoardsByEmail from '@/lib/fetchBoardsByEmail';
+import fetchBoardsByUid from '@/lib/fetchBoardsByUid';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { toast } from 'react-toastify';
@@ -30,7 +30,7 @@ interface BoardsState {
 
   users: CollaborativeUser[] | [];
   addUser: (user: CollaborativeUser) => void;
-  removeUser: (userEmail: string) => void;
+  removeUser: (userUid: string) => void;
 
   image: File | null;
   previewImage: string | null;
@@ -70,12 +70,12 @@ const useBoardsStore = create<BoardsState>()(
       set({ image, previewImage: URL.createObjectURL(image) }),
 
     // Fetch Boards
-    fetchBoards: async (email: string) => {
+    fetchBoards: async (uid: string) => {
       toast.loading('Loading your boards...', {
         toastId: 'fetching-boards',
       });
 
-      const boards = await fetchBoardsByEmail(email);
+      const boards = await fetchBoardsByUid(uid);
       set({ boards });
       toast.dismiss('fetching-boards');
     },
@@ -87,9 +87,9 @@ const useBoardsStore = create<BoardsState>()(
       });
     },
 
-    removeUser: (userEmail) => {
+    removeUser: (userUid) => {
       set((state) => ({
-        users: state.users!.filter((user) => user.email !== userEmail),
+        users: state.users!.filter((user) => user.user.uid !== userUid),
       }));
     },
 
@@ -113,16 +113,16 @@ const useBoardsStore = create<BoardsState>()(
       const users = get().users;
       // const usersBoardsCollection = collection(db, 'users-boards');
       users.forEach((user) => {
-        setDoc(doc(db, 'users-boards', user.email + '_' + boardRef.id), {
+        setDoc(doc(db, 'users-boards', user.user.uid! + '_' + boardRef.id), {
           boardId: boardRef.id,
-          userId: user.email,
+          userId: user.user.uid!,
           access: user.access,
         });
       });
 
-      setDoc(doc(db, 'users-boards', user.email + '_' + boardRef.id), {
+      setDoc(doc(db, 'users-boards', user.uid + '_' + boardRef.id), {
         boardId: boardRef.id,
-        userId: user.email,
+        userId: user.uid,
         access: BoardAccess.OWNER,
       });
 
