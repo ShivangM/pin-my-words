@@ -2,19 +2,27 @@ import { Word } from "@/interfaces/Word";
 import db, { storage } from "@/utils/firebase";
 import { Timestamp, addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import fetchUserAccessByBoardIdAndUserId from "./fetchUserAccessByBoardIdAndUserId";
+import { BoardAccess } from "@/interfaces/Board.d";
 
 const addWordToBoardUsingBoardIdAndUserId = async (
     boardId: string,
     word: Word,
+    userId: string,
     image?: File,
-    userId?: string,
-): Promise<boolean> => {
+): Promise<Word | undefined> => {
     try {
         const boardRef = doc(db, 'boards', boardId);
         const boardDoc = await getDoc(boardRef);
 
         if (!boardDoc.exists()) {
             throw new Error('Board does not exist');
+        }
+
+        const userAccess = await fetchUserAccessByBoardIdAndUserId(boardId, userId);
+
+        if(!userAccess || userAccess === BoardAccess.READ_ONLY) {
+            throw new Error('User does not have write access to this board');
         }
 
         const wordRef = collection(db, boardRef.path + "/words");
@@ -33,10 +41,17 @@ const addWordToBoardUsingBoardIdAndUserId = async (
             await updateDoc(wordDoc, { image: imageUrl });
         }
 
-        return true;
+        const wordAdded = {
+            ...word,
+            _id: wordDoc.id,
+            image: image ? URL.createObjectURL(image) : undefined,
+            createdAt: Timestamp.now(),
+            updatedAt: Timestamp.now(),
+        };
+
+        return wordAdded;
     } catch (error) {
         console.error(error);
-        return false;
     }
 }
 

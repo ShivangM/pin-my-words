@@ -29,7 +29,7 @@ const WordsCard = ({ word, idx }: { word: Word; idx: number }) => {
         <div className="space-y-1">
           <h4 className="text-sm font-bold">Examples: </h4>
           <ol className="space-y-1 list-decimal">
-            {word.examples.map((example, idx) => (
+            {word.examples?.map((example, idx) => (
               <li key={idx} className="text-sm text-gray-500 space-x-1">
                 {example.split(' ').map((w, idx) => (
                   <span

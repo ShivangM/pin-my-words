@@ -1,7 +1,7 @@
 import { Board } from '@/interfaces/Board';
 import db from '@/utils/firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import fetchUserAccessByBoardIdAndUserEmail from './fetchUserAccessByBoardIdAndUserId';
+import fetchUserAccessByBoardIdAndUserId from './fetchUserAccessByBoardIdAndUserId';
 
 const fetchBoardByUserEmailAndBoardId = async (
   boardId: string,
@@ -16,7 +16,7 @@ const fetchBoardByUserEmailAndBoardId = async (
       throw new Error('Board does not exist');
     }
 
-    const userAccess = await fetchUserAccessByBoardIdAndUserEmail(
+    const userAccess = await fetchUserAccessByBoardIdAndUserId(
       boardId,
       userId
     );

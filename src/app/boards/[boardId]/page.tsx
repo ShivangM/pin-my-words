@@ -43,7 +43,7 @@ const Board = ({ params: { boardId } }: Props) => {
   }, [userData, board]);
 
   useEffect(() => {
-    fetchBoard(boardId, userData?.email!);
+    fetchBoard(boardId, userData?.uid!);
   }, [boardId, fetchBoard, userData]);
 
   if (loading) {

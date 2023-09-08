@@ -1,11 +1,12 @@
 import { Word } from '@/interfaces/Word';
 import db from '@/utils/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 
 const fetchWordsByBoardId = async (boardId: string): Promise<Word[] | null> => {
   try {
     const wordsCollection = collection(db, 'boards', boardId, 'words');
-    const wordsDocs = await getDocs(wordsCollection);
+    const q = query(wordsCollection, orderBy('createdAt', 'desc'));
+    const wordsDocs = await getDocs(q);
     const words: Word[] = [];
     wordsDocs.forEach((wordDoc) => {
       const word = wordDoc.data() as Word;

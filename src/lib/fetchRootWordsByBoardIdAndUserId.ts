@@ -1,11 +1,18 @@
 import { RootWord } from "@/interfaces/Word";
 import db from "@/utils/firebase";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
+import fetchUserAccessByBoardIdAndUserId from "./fetchUserAccessByBoardIdAndUserId";
 
 const fetchRootWordsByBoardIdAndUserId = async (boardId: string, userId: string): Promise<RootWord[]> => {
     let rootWords: RootWord[] = []
 
     try {
+        const userAccess = await fetchUserAccessByBoardIdAndUserId(boardId, userId);
+
+        if(!userAccess) {
+            throw new Error('User does not have write access to this board');
+        }
+
         const boardRef = doc(db, 'boards', boardId);
         const boardDoc = await getDoc(boardRef);
 
@@ -19,7 +26,7 @@ const fetchRootWordsByBoardIdAndUserId = async (boardId: string, userId: string)
 
         rootWordDocs.forEach((doc) => {
             const docData = doc.data();
-            rootWords.push(docData as RootWord)
+            rootWords.push({...docData, id: doc.id} as RootWord)
         });
     } catch (error) {
         console.error(error);

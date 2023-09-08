@@ -14,6 +14,7 @@ import debounce from 'lodash.debounce';
 import { IoIosCloseCircle } from 'react-icons/io';
 import Image from 'next/image';
 import useUserStore from '@/store/userStore';
+import { Timestamp } from 'firebase/firestore';
 
 const AddWordModal = () => {
   const [closeAddWordModal, addWordModalOpen, loading, boardId, addWord] = useBoardStore(
@@ -24,9 +25,10 @@ const AddWordModal = () => {
 
   const { register, handleSubmit, control, formState: { errors } } = useForm<Word>();
 
-  const promiseOptions = (inputValue: string) => {
-    const rootWords = fetchRootWordsByBoardIdAndUserId(boardId!, "");
-    return rootWords;
+  const promiseOptions = (inputValue: string, callback: (res: RootWord[])=>void) => {
+    fetchRootWordsByBoardIdAndUserId(boardId!, userData?.uid!).then((res) => {
+      callback(res);
+    });
   };
 
   const loadOptions = debounce(promiseOptions, 300);
@@ -60,11 +62,12 @@ const AddWordModal = () => {
   const onSubmit: SubmitHandler<Word> = async (data) => {
     const wordData = {
       ...data,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      examples,
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
       createdBy: userData?.uid!,
     }
-    await addWord(data, boardId!, image);
+    await addWord(wordData, boardId!, userData?.uid!, image);
   }
 
   return (
@@ -130,8 +133,8 @@ const AddWordModal = () => {
                               cacheOptions
                               loadOptions={loadOptions}
                               getOptionLabel={(option: RootWord) => option.root}
-                              getOptionValue={(option: RootWord) => option.root}
-                              onChange={(val) => onChange(val.map((c) => c.root))}
+                              getOptionValue={(option: RootWord) => option.id}
+                              onChange={(val) => onChange(val.map((c) => c.id))}
                               isMulti={true}
                             />
                           )}
@@ -276,7 +279,7 @@ const AddWordModal = () => {
                             placeholder="Write a exmaple over here..."
                           />
 
-                          <button onClick={addExample} className="modalBtnNext">
+                          <button type='button' onClick={addExample} className="modalBtnNext">
                             +
                           </button>
                         </div>

@@ -30,7 +30,7 @@ interface BoardState {
   addWordModalOpen: boolean;
   openAddWordModal: () => void;
   closeAddWordModal: () => void;
-  addWord: (word: Word, boardId: string, image?: File, userId?: string) => Promise<void>;
+  addWord: (word: Word, boardId: string, userId: string, image?: File) => Promise<void>;
 
   sidePanelOpen: boolean;
   openSidePanel: () => void;
@@ -73,13 +73,14 @@ const useBoardStore = create<BoardState>()(
       set({ addWordModalOpen: false });
     },
 
-    addWord: async (word, boardId, image, userId) => {
+    addWord: async (word, boardId, userId, image) => {
       toast.loading('Adding word...', {
         toastId: 'add-word',
       });
-      const wordAdded = await addWordToBoardUsingBoardIdAndUserId(boardId, word, image, userId);
+      const wordAdded = await addWordToBoardUsingBoardIdAndUserId(boardId, word, userId, image);
+      
       if (wordAdded) {
-        set({ addWordModalOpen: false });
+        set({ addWordModalOpen: false, words: [wordAdded, ...get().words!] });
         toast.success('Word added successfully');
       }
       else {
