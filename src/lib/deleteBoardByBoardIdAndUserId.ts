@@ -44,7 +44,7 @@ const deleteBoardByBoardIdAndUserId = async (
     await Promise.all(fetchPromises);
     await deleteDoc(boardRef);
 
-    //Deleting image from storage if existed
+    //Deleting images from storage if existed
     if (board.metadata.image) {
       const imageRef = ref(storage, 'boards/' + boardId);
       await deleteObject(imageRef);

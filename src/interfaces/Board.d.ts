@@ -27,7 +27,7 @@ export interface Metadata {
 export interface Board {
   _id: string;
   metadata: Metadata;
-  owner: User;
+  owner: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }

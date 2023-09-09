@@ -78,7 +78,7 @@ const useBoardStore = create<BoardState>()(
         toastId: 'add-word',
       });
       const wordAdded = await addWordToBoardUsingBoardIdAndUserId(boardId, word, userId, image);
-      
+
       if (wordAdded) {
         set({ addWordModalOpen: false, words: [wordAdded, ...get().words!] });
         toast.success('Word added successfully');
@@ -114,7 +114,6 @@ const useBoardStore = create<BoardState>()(
     },
 
     deleteBoard: async (userId) => {
-      set({ loading: true });
       toast.loading('Deleting board...', {
         toastId: 'delete-board',
       });
@@ -136,12 +135,10 @@ const useBoardStore = create<BoardState>()(
         toast.success('Board deleted successfully');
       }
 
-      set({ loading: false });
       return success;
     },
 
     editBoard: async (userId, metadata) => {
-      set({ loading: true });
       toast.loading('Updating board...', {
         toastId: 'update-board',
       });
@@ -171,7 +168,7 @@ const useBoardStore = create<BoardState>()(
         toast.success('Board updated successfully');
       }
 
-      set({ loading: false, editBoardModalOpen: false });
+      set({ editBoardModalOpen: false });
     },
   }))
 );

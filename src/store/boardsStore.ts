@@ -131,7 +131,7 @@ const useBoardsStore = create<BoardsState>()(
       let imageDownloadURL: string | null = null;
 
       if (image) {
-        const imageRef = ref(storage, 'boards/' + boardRef.id);
+        const imageRef = ref(storage, 'boards/' + boardRef.id + "/" + "cover");
         const imageBlob = new Blob([image], { type: 'image/jpeg' });
 
         await uploadBytes(imageRef, imageBlob, {
@@ -154,7 +154,7 @@ const useBoardsStore = create<BoardsState>()(
           ...get().metadata!,
           image: get().previewImage!,
         },
-        owner: user,
+        owner: user.uid!,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       };

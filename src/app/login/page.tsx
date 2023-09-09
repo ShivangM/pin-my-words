@@ -47,7 +47,7 @@ const SignIn = () => {
 
           userDoc.then(async (docSnapshot) => {
             if (docSnapshot.exists()) {
-              setUserData(docSnapshot.data() as User);
+              setUserData({...docSnapshot.data(), uid: docSnapshot.id} as User);
             } 
             else {
               const userData = {
@@ -59,7 +59,7 @@ const SignIn = () => {
               };
 
               setDoc(doc(db, 'users', user.uid!), userData);
-              setUserData(userData);
+              setUserData({...userData, uid: user.uid!});
             }
 
             router.push('/boards');
