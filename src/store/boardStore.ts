@@ -2,9 +2,9 @@ import { Board, Metadata } from '@/interfaces/Board.d';
 import { RootWord, Word } from '@/interfaces/Word';
 import addWordToBoardUsingBoardIdAndUserId from '@/lib/addWordToBoardUsingBoardIdAndUserId';
 import deleteBoardByBoardIdAndUserId from '@/lib/deleteBoardByBoardIdAndUserId';
+import deleteWordFromBoard from '@/lib/deleteWordUsingFromBoard';
 import fetchBoardByBoardIdAndUserId from '@/lib/fetchBoardByBoardIdAndUserId';
-import fetchRootWordsByBoardIdAndUserId from '@/lib/fetchRootWordsByBoardIdAndUserId';
-import fetchWordsByBoardId from '@/lib/fetchWordsByBoardId';
+import fetchWordsByBoardIdAndUserId from '@/lib/fetchWordsByBoardIdAndUserId';
 import updateBoardByBoardIdAndUserId from '@/lib/updateBoardByBoardIdAndUserId';
 import { toast } from 'react-toastify';
 import { create } from 'zustand';
@@ -12,9 +12,9 @@ import { devtools } from 'zustand/middleware';
 
 interface BoardState {
   board: null | Board;
-  loading: boolean;
   words: null | Word[];
   rootWords: null | RootWord[]
+  focusedWord: Word | null;
 
   deleteBoardModalOpen: boolean;
   openDeleteBoardModal: () => void;
@@ -32,6 +32,16 @@ interface BoardState {
   closeAddWordModal: () => void;
   addWord: (word: Word, boardId: string, userId: string, image?: File) => Promise<void>;
 
+  deleteWordModalOpen: boolean;
+  openDeleteWordModal: (word: Word) => void;
+  closeDeleteWordModal: () => void;
+  deleteWord: (userId: string) => Promise<void>;
+
+  editWordModalOpen: boolean;
+  openEditWordModal: (word: Word) => void;
+  closeEditWordModal: () => void;
+  editWord: (userId: string) => Promise<void>;
+
   sidePanelOpen: boolean;
   openSidePanel: () => void;
   closeSidePanel: () => void;
@@ -44,12 +54,12 @@ interface BoardState {
 const useBoardStore = create<BoardState>()(
   devtools((set, get) => ({
     board: null,
-    loading: false,
     sidePanelOpen: false,
     words: null,
     rootWords: null,
     image: null,
     previewImage: null,
+    focusedWord: null,
 
     setImage: (image) => {
       set({ image, previewImage: URL.createObjectURL(image) });
@@ -89,6 +99,42 @@ const useBoardStore = create<BoardState>()(
       toast.dismiss('add-word');
     },
 
+    deleteWordModalOpen: false,
+    openDeleteWordModal: (word) => {
+      set({ deleteWordModalOpen: true, focusedWord: word });
+    },
+
+    closeDeleteWordModal: () => {
+      set({ deleteWordModalOpen: false, focusedWord: null });
+    },
+
+    deleteWord: async (userId) => {
+      if (!get().focusedWord) return;
+      try {
+        await deleteWordFromBoard(get().board!._id, get().focusedWord._id, userId);
+      } catch (error) {
+        throw error;
+      }
+    },
+
+    editWordModalOpen: false,
+    openEditWordModal: (word) => {
+      set({ deleteWordModalOpen: true, focusedWord: word });
+    },
+
+    closeEditWordModal: () => {
+      set({ deleteWordModalOpen: false, focusedWord: null });
+    },
+
+    editWord: async (userId) => {
+      if (!get().focusedWord) return;
+      try {
+        await editWordFromBoard(get().board!._id, get().focusedWord._id, userId);
+      } catch (error) {
+        throw error;
+      }
+    },
+
     editBoardModalOpen: false,
     openEditBoardModal: () => {
       set({ editBoardModalOpen: true });
@@ -107,10 +153,21 @@ const useBoardStore = create<BoardState>()(
     },
 
     fetchBoard: async (boardId, userId) => {
-      set({ loading: true });
-      const board = await fetchBoardByBoardIdAndUserId(boardId, userId);
-      const words = await fetchWordsByBoardId(boardId);
-      set({ board, loading: false, words });
+      try {
+        const board = await fetchBoardByBoardIdAndUserId(boardId, userId);
+        set({ board });
+      } catch (error) {
+        throw error;
+      }
+    },
+
+    fetchWords: async (boardId, userId) => {
+      try {
+        const words = await fetchWordsByBoardIdAndUserId(boardId, userId);
+        set({ words });
+      } catch (error) {
+        throw error;
+      }
     },
 
     deleteBoard: async (userId) => {

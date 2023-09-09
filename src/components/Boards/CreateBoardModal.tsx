@@ -20,8 +20,6 @@ const CreateBoardModal = () => {
         return <BasicDetails />;
       case CreateBoardSteps.INVITE_USERS:
         return <InviteUsers />;
-      default:
-        return <BasicDetails />;
     }
   };
 

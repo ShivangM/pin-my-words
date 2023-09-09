@@ -3,7 +3,7 @@ import {
   CollaborativeUser,
   CreateBoardSteps,
 } from '@/interfaces/Board.d';
-import React from 'react';
+import { useState } from 'react';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { ErrorMessage } from '@hookform/error-message';
 import useBoardsStore from '@/store/boardsStore';
@@ -16,26 +16,26 @@ import debounce from 'lodash.debounce';
 import fetchUsersByEmailSearch from '@/lib/fetchUsersByEmailSearch';
 import { OptionProps } from 'react-select';
 import Image from 'next/image';
+import { toast } from 'react-toastify';
 
 const InviteUsers = () => {
   const {
-    register,
     handleSubmit,
     formState: { errors },
     control,
   } = useForm<CollaborativeUser>();
 
-  const [addUser, removeUser, users, setBoardStep, createBoard, loading] =
+  const [addUser, removeUser, users, setBoardStep, createBoard] =
     useBoardsStore((state) => [
       state.addUser,
       state.removeUser,
       state.users,
       state.setBoardStep,
       state.createBoard,
-      state.loading,
     ]);
 
   const [userData] = useUserStore((state) => [state.userData]);
+  const [loading, setLoading] = useState(false)
 
   const onSubmit: SubmitHandler<CollaborativeUser> = (data) => {
     addUser(data);
@@ -55,6 +55,22 @@ const InviteUsers = () => {
     { value: BoardAccess.ADMIN, label: 'Admin' },
   ];
 
+  const handleCreateBoard = async () => {
+    setLoading(true)
+    toast.loading('Creating board...', {
+      toastId: 'creating-board',
+    });
+
+    try {
+      await createBoard(userData!)
+    } catch (error: any) {
+      toast.error(error.message)
+    } finally {
+      setLoading(false)
+      toast.dismiss('creating-board');
+    }
+  }
+
   return (
     <div className="pt-6 space-y-4" onSubmit={handleSubmit(onSubmit)}>
       <form className="space-y-4">
@@ -66,10 +82,9 @@ const InviteUsers = () => {
         </label>
 
         <div
-          hidden={users.length === 0}
           className="flex flex-wrap w-full items-center gap-4"
         >
-          {users?.map((user, index) => (
+          {users ? users.map((user, index) => (
             <div
               key={index}
               className="flex bg-gray-50 rounded-full p-1.5 items-center gap-2"
@@ -97,7 +112,9 @@ const InviteUsers = () => {
                 <IoIosCloseCircle className="h-5 w-5 text-red-500" />
               </button>
             </div>
-          ))}
+          ))
+            : null
+          }
         </div>
 
         <div className="">
@@ -115,7 +132,7 @@ const InviteUsers = () => {
                   if (value?.uid === userData?.uid) {
                     return 'You cannot invite yourself.';
                   }
-                  if (users.find((u) => u.user.uid === value.uid)) {
+                  if (users?.find((u) => u.user.uid === value.uid)) {
                     return 'User already added.';
                   }
                 },
@@ -215,7 +232,7 @@ const InviteUsers = () => {
         <button
           type="button"
           disabled={loading}
-          onClick={() => createBoard(userData!)}
+          onClick={handleCreateBoard}
           className="modalBtnNext"
         >
           Create Board

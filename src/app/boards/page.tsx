@@ -2,8 +2,14 @@
 import BoardCard from '@/components/Boards/BoardCard';
 import useBoardsStore from '@/store/boardsStore';
 import useUserStore from '@/store/userStore';
+import { Metadata } from 'next';
 import Image from 'next/image';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
+
+export const metadata: Metadata = {
+  title: "Boards"
+};
 
 const Boards = () => {
   const [userData] = useUserStore((state) => [state.userData]);
@@ -11,9 +17,24 @@ const Boards = () => {
     (state) => [state.boards, state.fetchBoards, state.openCreateBoardModal]
   );
 
+  const [loading, setLoading] = useState(false)
+
   useEffect(() => {
     if (userData) {
-      fetchBoards(userData.uid!);
+      toast.loading('Loading your boards...', {
+        toastId: 'fetching-boards',
+      });
+
+      setLoading(true)
+
+      try {
+        fetchBoards(userData.uid!);
+      } catch (error: any) {
+        toast.error(error.message);
+      } finally {
+        toast.dismiss('fetching-boards');
+        setLoading(false)
+      }
     }
   }, [userData, fetchBoards]);
 
@@ -39,9 +60,11 @@ const Boards = () => {
       </button>
 
       {/* Boards */}
-      {boards?.map((board) => (
+      {boards ? boards.map((board) => (
         <BoardCard key={board._id} board={board} />
-      ))}
+      ))
+        : loading ? <div>Loading...</div> : <div>No boards found.</div>
+      }
     </div>
   );
 };

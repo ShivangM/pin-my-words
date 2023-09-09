@@ -1,9 +1,16 @@
 import { Word } from '@/interfaces/Word.d';
+import useBoardStore from '@/store/boardStore';
 import classNames from 'classnames';
 import Image from 'next/image';
+import { AiFillDelete } from 'react-icons/ai';
+import { BiSolidEdit } from 'react-icons/bi';
 import { HiMiniSpeakerWave } from 'react-icons/hi2';
 
 const WordsCard = ({ word, idx }: { word: Word; idx: number }) => {
+  const [openDeleteWordModal] = useBoardStore((state) => [
+    state.openDeleteWordModal,
+  ]);
+
   return (
     <div
       className={classNames(
@@ -20,13 +27,23 @@ const WordsCard = ({ word, idx }: { word: Word; idx: number }) => {
         />
       </div>
 
-      <div className="flex flex-col justify-center space-y-6 flex-1 p-6">
+      <div className="flex flex-col relative justify-center space-y-6 flex-1 p-6">
+        <div className="w-fit flex items-center space-x-2 absolute top-4 right-4">
+          <BiSolidEdit
+            className="w-6 h-6 cursor-pointer text-gray-700"
+          />
+          <AiFillDelete
+            onClick={() => openDeleteWordModal(word)}
+            className="w-6 h-6 cursor-pointer text-red-500"
+          />
+        </div>
+
         <div className="">
           <span className="text-xs uppercase">{word.partOfSpeech?.join(", ")}</span>
           <h3 className="text-3xl font-bold space-x-2">
             <span>{word.word}</span>
             <HiMiniSpeakerWave className='inline text-gray-400 cursor-pointer' />
-            </h3>
+          </h3>
           <p className="">{word.meaning}</p>
         </div>
 

@@ -7,7 +7,7 @@ export enum AddWordSteps {
 }
 
 export interface Word {
-  id: string;
+  _id: string;
   word: string;
   meaning: string;
   partOfSpeech: string[];

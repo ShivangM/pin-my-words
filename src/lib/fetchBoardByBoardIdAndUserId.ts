@@ -3,19 +3,11 @@ import db from '@/utils/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import fetchUserAccessByBoardIdAndUserId from './fetchUserAccessByBoardIdAndUserId';
 
-const fetchBoardByUserEmailAndBoardId = async (
+const fetchBoardByBoardIdAndUserId = async (
   boardId: string,
   userId: string
-): Promise<Board | null> => {
+): Promise<Board> => {
   try {
-    const boardRef = doc(db, 'boards', boardId);
-    const boardDoc = await getDoc(boardRef);
-    const board = { ...boardDoc.data(), _id: boardDoc.id } as Board;
-
-    if (!board) {
-      throw new Error('Board does not exist');
-    }
-
     const userAccess = await fetchUserAccessByBoardIdAndUserId(
       boardId,
       userId
@@ -25,11 +17,19 @@ const fetchBoardByUserEmailAndBoardId = async (
       throw new Error('User does not have access to this board');
     }
 
+    const boardRef = doc(db, 'boards', boardId);
+    const boardDoc = await getDoc(boardRef);
+
+    if (!boardDoc.exists()) {
+      throw new Error('Board does not exist');
+    }
+
+    const board = { ...boardDoc.data(), _id: boardDoc.id } as Board;
     return board;
+
   } catch (error) {
-    console.error(error);
-    return null;
+    throw error;
   }
 };
 
-export default fetchBoardByUserEmailAndBoardId;
+export default fetchBoardByBoardIdAndUserId;

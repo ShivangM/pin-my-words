@@ -1,6 +1,5 @@
 import {
   Board,
-  BoardAccess,
   CollaborativeUser,
   CreateBoardSteps,
   Metadata,
@@ -10,39 +9,31 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { toast } from 'react-toastify';
 import { User } from '@/interfaces/User';
-import {
-  addDoc,
-  collection,
-  doc,
-  setDoc,
-  Timestamp,
-  updateDoc,
-} from 'firebase/firestore';
-import db, { storage } from '@/utils/firebase';
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import createBoardUsingUserId from '@/lib/createBoardUsingUserId';
 
 interface BoardsState {
-  fetchBoards: (email: string) => void;
+  fetchBoards: (email: string) => Promise<void>;
   boards: null | Board[];
-  loading: boolean;
 
-  metadata: Metadata | null;
-
-  users: CollaborativeUser[] | [];
+  users: CollaborativeUser[] | null;
   addUser: (user: CollaborativeUser) => void;
   removeUser: (userUid: string) => void;
+
+  metadata: Metadata | null;
+  setMetadata: (metadata: Metadata) => void;
 
   image: File | null;
   previewImage: string | null;
   setImage: (image: File) => void;
 
   createBoardModalOpen: boolean;
-  createBoardStep: CreateBoardSteps;
-  setBoardStep: (step: CreateBoardSteps) => void;
   openCreateBoardModal: () => void;
   closeCreateBoardModal: () => void;
-  createBoard: (user: User) => void;
-  setMetadata: (metadata: Metadata) => void;
+
+  createBoardStep: CreateBoardSteps;
+  setBoardStep: (step: CreateBoardSteps) => void;
+
+  createBoard: (user: User) => Promise<void>;
 }
 
 const useBoardsStore = create<BoardsState>()(
@@ -53,7 +44,6 @@ const useBoardsStore = create<BoardsState>()(
     createBoardStep: CreateBoardSteps.ENTER_DETAILS,
     users: [],
     metadata: null,
-    loading: false,
 
     //Create Board Modal
     createBoardModalOpen: false,
@@ -71,10 +61,6 @@ const useBoardsStore = create<BoardsState>()(
 
     // Fetch Boards
     fetchBoards: async (uid: string) => {
-      toast.loading('Loading your boards...', {
-        toastId: 'fetching-boards',
-      });
-
       const boards = await fetchBoardsByUid(uid);
       set({ boards });
       toast.dismiss('fetching-boards');
@@ -83,7 +69,7 @@ const useBoardsStore = create<BoardsState>()(
     addUser: (user) => {
       const users = get().users;
       set({
-        users: [...users, user],
+        users: users ? [...users, user] : [user],
       });
     },
 
@@ -94,78 +80,16 @@ const useBoardsStore = create<BoardsState>()(
     },
 
     createBoard: async (user) => {
-      let board = {
-        metadata: get().metadata,
-        owner: user.uid,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
-      };
+      try {
+        const newBoard = await createBoardUsingUserId(get().metadata!, user.uid!, get().image, get().users);
 
-      set({ loading: true });
-
-      toast.loading('Creating board...', {
-        toastId: 'creating-board',
-      });
-
-      const boardsCollection = collection(db, 'boards');
-      const boardRef = await addDoc(boardsCollection, board);
-
-      const users = get().users;
-      // const usersBoardsCollection = collection(db, 'users-boards');
-      users.forEach((user) => {
-        setDoc(doc(db, 'users-boards', user.user.uid! + '_' + boardRef.id), {
-          boardId: boardRef.id,
-          userId: user.user.uid!,
-          access: user.access,
+        set({
+          createBoardModalOpen: false,
+          boards: [newBoard, ...get().boards!],
         });
-      });
-
-      setDoc(doc(db, 'users-boards', user.uid + '_' + boardRef.id), {
-        boardId: boardRef.id,
-        userId: user.uid,
-        access: BoardAccess.OWNER,
-      });
-
-      //Upload Image to Storage
-      const image = get().image;
-      let imageDownloadURL: string | null = null;
-
-      if (image) {
-        const imageRef = ref(storage, 'boards/' + boardRef.id + "/" + "cover");
-        const imageBlob = new Blob([image], { type: 'image/jpeg' });
-
-        await uploadBytes(imageRef, imageBlob, {
-          contentType: 'image/jpeg',
-        }).then((snapshot) => {
-          getDownloadURL(snapshot.ref).then((downloadURL) => {
-            updateDoc(boardRef, {
-              metadata: {
-                ...get().metadata,
-                image: downloadURL,
-              },
-            });
-          });
-        });
+      } catch (error) {
+        throw error;
       }
-
-      const newBoard: Board = {
-        _id: boardRef.id,
-        metadata: {
-          ...get().metadata!,
-          image: get().previewImage!,
-        },
-        owner: user.uid!,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
-      };
-
-      set({
-        loading: false,
-        createBoardModalOpen: false,
-        boards: [newBoard, ...get().boards!],
-      });
-      toast.dismiss('creating-board');
-      return true;
     },
   }))
 );
