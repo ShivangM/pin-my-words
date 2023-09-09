@@ -27,7 +27,7 @@ const updateBoardByBoardIdAndUserId = async (
 
     // Updating image from storage if existed
     if (image) {
-      const imageRef = ref(storage, 'boards/' + boardId);
+      const imageRef = ref(storage, 'boards/' + boardId + '/' + "cover");
       const imageBlob = new Blob([image], { type: 'image/jpeg' });
 
       await uploadBytes(imageRef, imageBlob, {

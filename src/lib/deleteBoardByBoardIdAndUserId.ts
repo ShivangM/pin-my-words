@@ -46,7 +46,7 @@ const deleteBoardByBoardIdAndUserId = async (
 
     //Deleting images from storage if existed
     if (board.metadata.image) {
-      const imageRef = ref(storage, 'boards/' + boardId);
+      const imageRef = ref(storage, 'boards/' + boardId + "/cover");
       await deleteObject(imageRef);
     }
 
