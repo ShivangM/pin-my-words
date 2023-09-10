@@ -138,18 +138,23 @@ const useBoardStore = create<BoardState>()(
 
     editWord: async (word, userId, image) => {
       const boardId = get().board?._id;
-      const focusedWord = get().focusedWord;
 
       if (!boardId) {
         throw new Error('Board does not exist');
       }
 
-      if (!focusedWord) {
-        throw new Error('Word does not exist');
-      }
-
       try {
-        await editWordFromBoard(word, boardId, userId, image);
+        const editedWord = await editWordFromBoard(word, boardId, userId, image);
+        set({
+          editWordModalOpen: false,
+          focusedWord: null,
+          words: get().words?.map((word) => {
+            if (word._id === editedWord._id) {
+              return editedWord;
+            }
+            return word;
+          }),
+        });
       } catch (error) {
         throw error;
       }

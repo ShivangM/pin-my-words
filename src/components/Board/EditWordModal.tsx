@@ -59,7 +59,7 @@ const EditWordModal = () => {
   }
 
   const removeExample = (idx: number) => {
-    setExamples(examples.splice(idx, 1));
+    setExamples(examples.filter((_, index) => index !== idx));
   }
 
   // Image Upload and Preview

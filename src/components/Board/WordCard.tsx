@@ -3,6 +3,7 @@ import { Word } from '@/interfaces/Word.d';
 import useBoardStore from '@/store/boardStore';
 import classNames from 'classnames';
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
 import { AiFillDelete } from 'react-icons/ai';
 import { BiSolidEdit } from 'react-icons/bi';
 import { HiMiniSpeakerWave } from 'react-icons/hi2';
@@ -13,6 +14,21 @@ const WordsCard = ({ word, idx }: { word: Word; idx: number }) => {
     state.openEditWordModal,
     state.userAccess
   ]);
+
+  const [utterance, setUtterance] = useState<SpeechSynthesisUtterance | null>(null);
+  const [synth, setSynth] = useState<SpeechSynthesis | null>(null);
+
+  useEffect(() => {
+    const synth = window.speechSynthesis;
+    const u = new SpeechSynthesisUtterance(word.word);
+
+    setUtterance(u);
+    setSynth(synth);
+
+    return () => {
+      synth.cancel();
+    };
+  }, [word]);
 
   return (
     <div
@@ -50,7 +66,7 @@ const WordsCard = ({ word, idx }: { word: Word; idx: number }) => {
           <span className="text-xs uppercase">{word.partOfSpeech?.join(", ")}</span>
           <h3 className="text-3xl font-bold space-x-2">
             <span>{word.word}</span>
-            <HiMiniSpeakerWave className='inline text-gray-400 cursor-pointer' />
+            <HiMiniSpeakerWave onClick={() => synth?.speak(utterance!)} className='inline text-gray-400 cursor-pointer' />
           </h3>
           <p className="">{word.meaning}</p>
         </div>

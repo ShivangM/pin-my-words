@@ -1,4 +1,4 @@
-import { Timestamp } from 'firebase/firestore';
+import { DocumentReference, Timestamp } from 'firebase/firestore';
 
 export enum AddWordSteps {
   ENTER_DETAILS,
@@ -11,7 +11,7 @@ export interface Word {
   word: string;
   meaning: string;
   partOfSpeech: string[];
-  roots?: string[];
+  roots?: string[] | RootWord[];
   examples: string[];
   image?: string;
   createdAt: Timestamp;
@@ -19,9 +19,8 @@ export interface Word {
   createdBy: string;
 }
 
-
 export interface RootWord {
-  id: string;
+  _id: string;
   description: string;
   root: string;
   type: string;
