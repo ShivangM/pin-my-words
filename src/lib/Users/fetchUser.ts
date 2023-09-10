@@ -1,5 +1,5 @@
+import { User } from "@/interfaces/User";
 import db from "@/utils/firebase";
-import { User } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 
 const fetchUser = async (userId: string): Promise<User> => {

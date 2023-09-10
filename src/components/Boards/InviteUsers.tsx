@@ -23,7 +23,10 @@ const InviteUsers = () => {
     handleSubmit,
     formState: { errors },
     control,
-  } = useForm<BoardUser>();
+  } = useForm<{
+    user: User;
+    access: BoardAccess;
+  }>();
 
   const [addUser, removeUser, users, setBoardStep, createBoard] =
     useBoardsStore((state) => [
@@ -37,8 +40,11 @@ const InviteUsers = () => {
   const [userData] = useUserStore((state) => [state.userData]);
   const [loading, setLoading] = useState(false)
 
-  const onSubmit: SubmitHandler<BoardUser> = (data) => {
-    addUser(data);
+  const onSubmit: SubmitHandler<{
+    user: User;
+    access: BoardAccess;
+  }> = (data) => {
+    addUser({ ...data.user, access: data.access });
   };
 
   const promiseOptions = (inputValue: string, callback: (res: User[]) => void) => {
@@ -91,22 +97,22 @@ const InviteUsers = () => {
             >
               <div className="flex space-x-2 items-center">
                 <Image
-                  src={user.user.image || '/images/user.png'}
-                  alt={user.user.name}
+                  src={user.image || '/images/user.png'}
+                  alt={user.name}
                   className="rounded-full"
                   height={30}
                   width={30}
                 />
 
                 <div className="text-xs">
-                  <p className="text-gray-900 font-medium">{user.user.name}</p>
+                  <p className="text-gray-900 font-medium">{user.name}</p>
                   <p className="text-gray-500">{user.access}</p>
                 </div>
               </div>
               <button
                 className=""
                 onClick={() => {
-                  removeUser(user.user.uid!);
+                  removeUser(user.uid!);
                 }}
               >
                 <IoIosCloseCircle className="h-5 w-5 text-red-500" />
@@ -132,7 +138,7 @@ const InviteUsers = () => {
                   if (value?.uid === userData?.uid) {
                     return 'You cannot invite yourself.';
                   }
-                  if (users?.find((u) => u.user.uid === value.uid)) {
+                  if (users?.find((u) => u.uid === value.uid)) {
                     return 'User already added.';
                   }
                 },

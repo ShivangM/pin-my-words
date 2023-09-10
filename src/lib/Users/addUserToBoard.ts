@@ -7,7 +7,7 @@ const addUserToBoard = async (
     boardId: string,
     user: BoardUser,
     userId: string,
-): Promise<void> => {
+): Promise<BoardUser> => {
 
     try {
         const boardRef = doc(db, 'boards', boardId);
@@ -23,12 +23,13 @@ const addUserToBoard = async (
             throw new Error('User does not have write access to this board');
         }
 
-
         await setDoc(doc(db, 'users-boards', user.uid! + '_' + boardRef.id), {
             boardId: boardRef.id,
             userId: user.uid!,
             access: user.access,
         });
+
+        return user;
     } catch (error) {
         throw error;
     }
