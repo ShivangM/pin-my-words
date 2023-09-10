@@ -6,9 +6,10 @@ import { Dialog, Transition } from '@headlessui/react';
 import { ErrorMessage } from '@hookform/error-message';
 import classNames from 'classnames';
 import Image from 'next/image';
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useRef } from 'react';
+import { toast } from 'react-toastify';
 type Props = {};
 
 const EditBoardModal = (props: Props) => {
@@ -16,7 +17,6 @@ const EditBoardModal = (props: Props) => {
     editBoard,
     closeEditBoardModal,
     editBoardModalOpen,
-    loading,
     board,
     setImage,
     previewImage,
@@ -24,13 +24,13 @@ const EditBoardModal = (props: Props) => {
     state.editBoard,
     state.closeEditBoardModal,
     state.editBoardModalOpen,
-    state.loading,
     state.board,
     state.setImage,
     state.previewImage,
   ]);
 
   const userData = useUserStore((state) => state.userData);
+  const [editBoardLoading, setEditBoardLoading] = useState(false)
 
   const {
     register,
@@ -48,7 +48,20 @@ const EditBoardModal = (props: Props) => {
   };
 
   const onSubmit: SubmitHandler<Metadata> = async (data) => {
-    editBoard(userData?.uid!, data);
+    setEditBoardLoading(true)
+    toast.loading('Updating board...', {
+      toastId: 'update-board',
+    });
+
+    try {
+      await editBoard(userData?.uid!, data);
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setEditBoardLoading(false)
+      closeEditBoardModal();
+      toast.dismiss('update-board');
+    }
   };
 
   return (
@@ -209,7 +222,7 @@ const EditBoardModal = (props: Props) => {
                       <button
                         type="submit"
                         className="modalBtnNext"
-                        disabled={loading}
+                        disabled={editBoardLoading}
                       >
                         Edit Board
                       </button>

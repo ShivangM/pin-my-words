@@ -14,8 +14,6 @@ const SearchWord = (props: Props) => {
     return debounce(handleChange, 300);
   }, []);
 
-  console.log(searchTerm);
-
   return (
     <form className="flex-1">
       <label
@@ -36,9 +34,9 @@ const SearchWord = (props: Props) => {
           >
             <path
               stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
               d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
             />
           </svg>

@@ -38,7 +38,7 @@ const deleteWordFromBoard = async (boardId: string, wordId: string, userId: stri
 
         //Deleting images from storage if existed
         if (word.image) {
-            const imageRef = ref(storage, 'boards/' + boardId + "/words" + wordId);
+            const imageRef = ref(storage, 'boards/' + boardId + "/words/" + wordId);
             await deleteObject(imageRef);
         }
     } catch (error) {

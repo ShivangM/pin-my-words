@@ -7,16 +7,15 @@ import { toast } from 'react-toastify';
 type Props = {};
 
 const DeleteWordModal = (props: Props) => {
-  const [deleteWord, closeDeleteWordModal, deleteWordModalOpen, wordsToDelete] =
+  const [deleteWord, closeDeleteWordModal, deleteWordModalOpen, focusedWord] =
     useBoardStore((state) => [
       state.deleteWord,
       state.closeDeleteWordModal,
       state.deleteWordModalOpen,
-      state.wordsToDelete
+      state.focusedWord
     ]);
 
   const userData = useUserStore((state) => state.userData);
-
   const [loading, setLoading] = useState(false)
 
   const handleDeleteWord = async () => {
@@ -75,7 +74,7 @@ const DeleteWordModal = (props: Props) => {
                   </Dialog.Title>
                   <div className="mt-2">
                     <p className="text-sm text-gray-500">
-                      Are you sure you want to delete {wordsToDelete?.word}?
+                      Are you sure you want to delete <span className='font-bold'>{focusedWord?.word}</span>?
                     </p>
                   </div>
 
@@ -83,6 +82,7 @@ const DeleteWordModal = (props: Props) => {
                     <button
                       onClick={closeDeleteWordModal}
                       className="modalBtnPrev"
+                      disabled={loading}
                     >
                       Cancel
                     </button>

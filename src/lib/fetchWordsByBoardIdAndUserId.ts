@@ -1,6 +1,6 @@
-import { Word } from '@/interfaces/Word';
+import { RootWord, Word } from '@/interfaces/Word';
 import db from '@/utils/firebase';
-import { collection, getDocs, orderBy, query } from 'firebase/firestore';
+import { DocumentData, DocumentSnapshot, collection, doc, getDoc, getDocs, orderBy, query } from 'firebase/firestore';
 import fetchUserAccessByBoardIdAndUserId from './fetchUserAccessByBoardIdAndUserId';
 
 const fetchWordsByBoardIdAndUserId = async (boardId: string, userId: string): Promise<Word[]> => {
@@ -20,7 +20,27 @@ const fetchWordsByBoardIdAndUserId = async (boardId: string, userId: string): Pr
 
     const words: Word[] = [];
     wordsDocs.forEach((wordDoc) => {
-      const word = { ...wordDoc.data(), _id: wordDoc.id } as Word;
+      const wordData = wordDoc.data() as Word;
+      const roots = wordData.roots as string[];
+
+      let rootDocPromises: Promise<DocumentSnapshot<DocumentData, DocumentData>>[] = [];
+
+      roots?.forEach((root) => {
+        const rootDocPromise = getDoc(doc(db, 'boards', boardId, 'roots', root));
+        rootDocPromises.push(rootDocPromise);
+      });
+
+      const rootWords: RootWord[] = [];
+
+      Promise.all(rootDocPromises).then((rootDocs) => {
+        rootDocs.forEach((rootDoc) => {
+          const rootData = rootDoc.data() as RootWord;
+          const rootWord = { ...rootData, _id: rootDoc.id };
+          rootWords.push(rootWord);
+        });
+      });
+
+      const word = { ...wordData, roots: rootWords, _id: wordDoc.id };
       words.push(word);
     });
 

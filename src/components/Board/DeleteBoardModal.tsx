@@ -3,28 +3,38 @@ import useBoardStore from '@/store/boardStore';
 import useUserStore from '@/store/userStore';
 import { Dialog, Transition } from '@headlessui/react';
 import { useRouter } from 'next/navigation';
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
+import { toast } from 'react-toastify';
 type Props = {};
 
 const DeleteBoardModal = (props: Props) => {
-  const [deleteBoard, closeDeleteBoardModal, deleteBoardModalOpen, loading] =
+  const [deleteBoard, closeDeleteBoardModal, deleteBoardModalOpen] =
     useBoardStore((state) => [
       state.deleteBoard,
       state.closeDeleteBoardModal,
       state.deleteBoardModalOpen,
-      state.loading,
     ]);
 
   const userData = useUserStore((state) => state.userData);
-
+  const [deleteBoardLoading, setDeleteBoardLoading] = useState<boolean>(false)
   const router = useRouter();
 
   const handleDeleteBoard = async () => {
-    const deleteBoardSuccess = await deleteBoard(userData?.uid!);
-    if (deleteBoardSuccess) {
+    setDeleteBoardLoading(true);
+    toast.loading('Deleting board...', {
+      toastId: 'delete-board',
+    });
+
+    try {
+      await deleteBoard(userData?.uid!);
       router.push('/boards');
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setDeleteBoardLoading(false);
+      closeDeleteBoardModal();
+      toast.dismiss('delete-board');
     }
-    closeDeleteBoardModal();
   };
   return (
     <>
@@ -80,7 +90,7 @@ const DeleteBoardModal = (props: Props) => {
                     <button
                       onClick={handleDeleteBoard}
                       className="modalBtnNext"
-                      disabled={loading}
+                      disabled={deleteBoardLoading}
                     >
                       Delete Board
                     </button>

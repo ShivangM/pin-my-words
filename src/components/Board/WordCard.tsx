@@ -1,3 +1,4 @@
+import { BoardAccess } from '@/interfaces/Board.d';
 import { Word } from '@/interfaces/Word.d';
 import useBoardStore from '@/store/boardStore';
 import classNames from 'classnames';
@@ -7,8 +8,10 @@ import { BiSolidEdit } from 'react-icons/bi';
 import { HiMiniSpeakerWave } from 'react-icons/hi2';
 
 const WordsCard = ({ word, idx }: { word: Word; idx: number }) => {
-  const [openDeleteWordModal] = useBoardStore((state) => [
+  const [openDeleteWordModal, openEditWordModal, userAccess] = useBoardStore((state) => [
     state.openDeleteWordModal,
+    state.openEditWordModal,
+    state.userAccess
   ]);
 
   return (
@@ -28,15 +31,20 @@ const WordsCard = ({ word, idx }: { word: Word; idx: number }) => {
       </div>
 
       <div className="flex flex-col relative justify-center space-y-6 flex-1 p-6">
-        <div className="w-fit flex items-center space-x-2 absolute top-4 right-4">
-          <BiSolidEdit
-            className="w-6 h-6 cursor-pointer text-gray-700"
-          />
-          <AiFillDelete
-            onClick={() => openDeleteWordModal(word)}
-            className="w-6 h-6 cursor-pointer text-red-500"
-          />
-        </div>
+        {
+          userAccess === BoardAccess.READ_ONLY ? null
+            :
+            <div className="w-fit flex items-center space-x-2 absolute top-4 right-4">
+              <BiSolidEdit
+                onClick={() => openEditWordModal(word)}
+                className="w-6 h-6 cursor-pointer text-gray-700"
+              />
+              <AiFillDelete
+                onClick={() => openDeleteWordModal(word)}
+                className="w-6 h-6 cursor-pointer text-red-500"
+              />
+            </div>
+        }
 
         <div className="">
           <span className="text-xs uppercase">{word.partOfSpeech?.join(", ")}</span>

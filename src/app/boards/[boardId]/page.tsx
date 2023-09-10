@@ -9,6 +9,7 @@ import { BiSolidEdit, BiTimeFive } from 'react-icons/bi';
 import { MdUpdate } from 'react-icons/md';
 import { Parallax } from 'react-parallax';
 import SearchWord from '@/components/Board/SearchWord';
+import { BoardAccess } from '@/interfaces/Board.d';
 
 type Props = {
   params: {
@@ -18,37 +19,93 @@ type Props = {
 
 const Board = ({ params: { boardId } }: Props) => {
   const [userData] = useUserStore((state) => [state.userData]);
-  const [isOwner, setIsOwner] = useState(false);
+
+  const [userAccessLoading, setUserAccessLoading] = useState(false);
+  const [userAccessFetchError, setUserAccessFetchError] = useState<Error | null>(null)
+
+  const [boardLoading, setBoardLoading] = useState(false);
+  const [boardFetchError, setBoardFetchError] = useState<Error | null>(null)
+
+  const [wordsLoading, setWordsLoading] = useState(false);
+  const [wordsFetchError, setWordsFetchError] = useState<Error | null>(null)
 
   const [
+    userAccess,
+    fetchUserAccess,
     board,
     fetchBoard,
     words,
+    fetchWords,
     openDeleteBoardModal,
     openEditBoardModal,
     openAddWordModal,
-    loading,
+    reset,
   ] = useBoardStore((state) => [
+    state.userAccess,
+    state.fetchUserAccess,
     state.board,
     state.fetchBoard,
     state.words,
+    state.fetchWords,
     state.openDeleteBoardModal,
     state.openEditBoardModal,
     state.openAddWordModal,
-    state.loading,
+    state.reset
   ]);
 
   useEffect(() => {
-    setIsOwner(board?.owner === userData?.uid);
-  }, [userData, board]);
+    const fetchUserAccessFunction = async () => {
+      setUserAccessLoading(true)
+      try {
+        await fetchUserAccess(boardId, userData?.uid!);
+      } catch (error: any) {
+        setUserAccessFetchError(error)
+      } finally {
+        setUserAccessLoading(false)
+      }
+    }
+
+    const fetchWordsFunction = async () => {
+      setWordsLoading(true)
+      try {
+        await fetchWords(boardId, userData?.uid!);
+      } catch (error: any) {
+        setWordsFetchError(error)
+      } finally {
+        setWordsLoading(false)
+      }
+    }
+
+    const fetchBoardFunction = async () => {
+      setBoardLoading(true)
+      try {
+        fetchBoard(boardId, userData?.uid!);
+      } catch (error: any) {
+        setBoardFetchError(error)
+      } finally {
+        setBoardLoading(false)
+      }
+    }
+
+    if (userData) {
+      if (userAccess) {
+        if (!board) fetchBoardFunction()
+        if (board && !words) fetchWordsFunction()
+      } else {
+        fetchUserAccessFunction()
+      }
+    }
+  }, [userData, boardId, fetchUserAccess, fetchBoard, fetchWords, userAccess, board, words])
 
   useEffect(() => {
-    fetchBoard(boardId, userData?.uid!);
-  }, [boardId, fetchBoard, userData]);
+    return () => {
+      reset()
+    }
+  }, [reset])
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  if (userAccessLoading || boardLoading || wordsLoading) return <div>Loading...</div>
+  if (userAccessFetchError) return <div> You dont have access to this board. </div>
+  if (boardFetchError) return <div> Error fetching board. </div>
 
   return (
     <div className="space-y-8">
@@ -69,7 +126,7 @@ const Board = ({ params: { boardId } }: Props) => {
             <h1 className="text-2xl text-gray-900 font-bold flex-1 text-left">
               {board?.metadata?.name}
             </h1>
-            {isOwner ? (
+            {userAccess === BoardAccess.OWNER ? (
               <div className="w-fit flex items-center space-x-2">
                 <BiSolidEdit
                   onClick={openEditBoardModal}
@@ -114,9 +171,13 @@ const Board = ({ params: { boardId } }: Props) => {
 
       <div className="flex items-center space-x-4">
         <SearchWord />
-        <button onClick={openAddWordModal} className="btn">
-          Add Word
-        </button>
+        {
+          userAccess === BoardAccess.READ_ONLY ? null
+            :
+            <button onClick={openAddWordModal} className="btn">
+              Add Word
+            </button>
+        }
       </div>
 
       <div className="flex flex-col space-y-6">

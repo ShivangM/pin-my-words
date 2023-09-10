@@ -1,9 +1,11 @@
-import { Board, Metadata } from '@/interfaces/Board.d';
-import { RootWord, Word } from '@/interfaces/Word';
+import { Board, BoardAccess, Metadata } from '@/interfaces/Board.d';
+import { RootWord, Word } from '@/interfaces/Word.d';
 import addWordToBoardUsingBoardIdAndUserId from '@/lib/addWordToBoardUsingBoardIdAndUserId';
 import deleteBoardByBoardIdAndUserId from '@/lib/deleteBoardByBoardIdAndUserId';
-import deleteWordFromBoard from '@/lib/deleteWordUsingFromBoard';
+import deleteWordFromBoard from '@/lib/deleteWordFromBoard';
+import editWordFromBoard from '@/lib/editWordFromBoard';
 import fetchBoardByBoardIdAndUserId from '@/lib/fetchBoardByBoardIdAndUserId';
+import fetchUserAccessByBoardIdAndUserId from '@/lib/fetchUserAccessByBoardIdAndUserId';
 import fetchWordsByBoardIdAndUserId from '@/lib/fetchWordsByBoardIdAndUserId';
 import updateBoardByBoardIdAndUserId from '@/lib/updateBoardByBoardIdAndUserId';
 import { toast } from 'react-toastify';
@@ -13,6 +15,7 @@ import { devtools } from 'zustand/middleware';
 interface BoardState {
   board: null | Board;
   words: null | Word[];
+  userAccess: null | BoardAccess;
   rootWords: null | RootWord[]
   focusedWord: Word | null;
 
@@ -27,10 +30,13 @@ interface BoardState {
   previewImage: string | null;
   setImage: (image: File) => void;
 
+  fetchUserAccess: (boardId: string, userId: string) => Promise<void>;
+  fetchWords: (boardId: string, userId: string) => Promise<void>;
+
   addWordModalOpen: boolean;
   openAddWordModal: () => void;
   closeAddWordModal: () => void;
-  addWord: (word: Word, boardId: string, userId: string, image?: File) => Promise<void>;
+  addWord: (word: Word, userId: string, image?: File) => Promise<void>;
 
   deleteWordModalOpen: boolean;
   openDeleteWordModal: (word: Word) => void;
@@ -40,20 +46,23 @@ interface BoardState {
   editWordModalOpen: boolean;
   openEditWordModal: (word: Word) => void;
   closeEditWordModal: () => void;
-  editWord: (userId: string) => Promise<void>;
+  editWord: (word: Word, userId: string, image?: File) => Promise<void>;
 
   sidePanelOpen: boolean;
   openSidePanel: () => void;
   closeSidePanel: () => void;
 
   fetchBoard: (boardId: string, userId: string) => void;
-  deleteBoard: (userId: string) => Promise<boolean>;
-  editBoard: (userId: string, metadata: Metadata) => void;
+  deleteBoard: (userId: string) => Promise<void>;
+  editBoard: (userId: string, metadata: Metadata) => Promise<void>;
+
+  reset: () => void;
 }
 
 const useBoardStore = create<BoardState>()(
   devtools((set, get) => ({
     board: null,
+    userAccess: null,
     sidePanelOpen: false,
     words: null,
     rootWords: null,
@@ -83,20 +92,16 @@ const useBoardStore = create<BoardState>()(
       set({ addWordModalOpen: false });
     },
 
-    addWord: async (word, boardId, userId, image) => {
-      toast.loading('Adding word...', {
-        toastId: 'add-word',
-      });
-      const wordAdded = await addWordToBoardUsingBoardIdAndUserId(boardId, word, userId, image);
+    addWord: async (word, userId, image) => {
+      const boardId = get().board?._id;
+      if (!boardId) return;
 
-      if (wordAdded) {
+      try {
+        const wordAdded = await addWordToBoardUsingBoardIdAndUserId(boardId, word, userId, image);
         set({ addWordModalOpen: false, words: [wordAdded, ...get().words!] });
-        toast.success('Word added successfully');
+      } catch (error) {
+        throw error;
       }
-      else {
-        toast.error('Failed to add word');
-      }
-      toast.dismiss('add-word');
     },
 
     deleteWordModalOpen: false,
@@ -111,7 +116,12 @@ const useBoardStore = create<BoardState>()(
     deleteWord: async (userId) => {
       if (!get().focusedWord) return;
       try {
-        await deleteWordFromBoard(get().board!._id, get().focusedWord._id, userId);
+        await deleteWordFromBoard(get().board!._id, get().focusedWord!._id, userId);
+        set({
+          deleteWordModalOpen: false,
+          focusedWord: null,
+          words: get().words?.filter((word) => word._id !== get().focusedWord!._id),
+        });
       } catch (error) {
         throw error;
       }
@@ -119,17 +129,27 @@ const useBoardStore = create<BoardState>()(
 
     editWordModalOpen: false,
     openEditWordModal: (word) => {
-      set({ deleteWordModalOpen: true, focusedWord: word });
+      set({ editWordModalOpen: true, focusedWord: word });
     },
 
     closeEditWordModal: () => {
-      set({ deleteWordModalOpen: false, focusedWord: null });
+      set({ editWordModalOpen: false, focusedWord: null });
     },
 
-    editWord: async (userId) => {
-      if (!get().focusedWord) return;
+    editWord: async (word, userId, image) => {
+      const boardId = get().board?._id;
+      const focusedWord = get().focusedWord;
+
+      if (!boardId) {
+        throw new Error('Board does not exist');
+      }
+
+      if (!focusedWord) {
+        throw new Error('Word does not exist');
+      }
+
       try {
-        await editWordFromBoard(get().board!._id, get().focusedWord._id, userId);
+        await editWordFromBoard(word, boardId, userId, image);
       } catch (error) {
         throw error;
       }
@@ -152,6 +172,15 @@ const useBoardStore = create<BoardState>()(
       set({ sidePanelOpen: false });
     },
 
+    fetchUserAccess: async (boardId, userId) => {
+      try {
+        const userAccess = await fetchUserAccessByBoardIdAndUserId(boardId, userId);
+        set({ userAccess });
+      } catch (error) {
+        throw error;
+      }
+    },
+
     fetchBoard: async (boardId, userId) => {
       try {
         const board = await fetchBoardByBoardIdAndUserId(boardId, userId);
@@ -171,62 +200,51 @@ const useBoardStore = create<BoardState>()(
     },
 
     deleteBoard: async (userId) => {
-      toast.loading('Deleting board...', {
-        toastId: 'delete-board',
-      });
-
       const boardId = get().board?._id;
       if (!boardId) {
-        toast.dismiss('delete-board');
-        toast.error('Failed to delete board');
-        set({ loading: false });
-        return false;
+        throw new Error('Board does not exist');
       }
 
-      const success = await deleteBoardByBoardIdAndUserId(userId, boardId);
-      toast.dismiss('delete-board');
-
-      if (!success) {
-        toast.error('Failed to delete board');
-      } else {
-        toast.success('Board deleted successfully');
+      try {
+        await deleteBoardByBoardIdAndUserId(userId, boardId);
+      } catch (error) {
+        throw error;
       }
-
-      return success;
     },
 
     editBoard: async (userId, metadata) => {
-      toast.loading('Updating board...', {
-        toastId: 'update-board',
-      });
-
       const boardId = get().board?._id;
       const image = get().image;
 
       if (!boardId) {
-        toast.dismiss('delete-board');
-        toast.error('Failed to delete board');
-        set({ loading: false });
-        return false;
+        throw new Error('Board does not exist');
       }
 
-      const updatedBoard = await updateBoardByBoardIdAndUserId(
-        userId,
-        boardId,
-        metadata,
-        image
-      );
+      try {
+        const updatedBoard = await updateBoardByBoardIdAndUserId(
+          userId,
+          boardId,
+          metadata,
+          image
+        );
 
-      toast.dismiss('update-board');
-
-      if (!updatedBoard) {
-        toast.error('Failed to update board');
-      } else {
-        toast.success('Board updated successfully');
+        set({ board: updatedBoard });
+      } catch (error) {
+        throw error;
       }
-
-      set({ editBoardModalOpen: false });
     },
+
+    reset: () => {
+      set({
+        board: null,
+        userAccess: null,
+        sidePanelOpen: false,
+        words: null,
+        image: null,
+        previewImage: null,
+        focusedWord: null,
+      });
+    }
   }))
 );
 

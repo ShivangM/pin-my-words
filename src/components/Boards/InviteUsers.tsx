@@ -194,6 +194,7 @@ const InviteUsers = () => {
             control={control}
             name="access"
             rules={{ required: 'Access is required.' }}
+            defaultValue={BoardAccess.READ_ONLY}
             render={({ field: { onChange, ref } }) => (
               <Select
                 //@ts-ignore

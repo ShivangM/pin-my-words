@@ -9,7 +9,7 @@ const fetchRootWordsByBoardIdAndUserId = async (boardId: string, userId: string)
     try {
         const userAccess = await fetchUserAccessByBoardIdAndUserId(boardId, userId);
 
-        if(!userAccess) {
+        if (!userAccess) {
             throw new Error('User does not have write access to this board');
         }
 
@@ -20,13 +20,13 @@ const fetchRootWordsByBoardIdAndUserId = async (boardId: string, userId: string)
             throw new Error('Board does not exist');
         }
 
-        const rootWordsCollection = collection(db, boardRef.path + "/roots")        
+        const rootWordsCollection = collection(db, boardRef.path + "/roots")
 
         const rootWordDocs = await getDocs(rootWordsCollection);
 
         rootWordDocs.forEach((doc) => {
             const docData = doc.data();
-            rootWords.push({...docData, id: doc.id} as RootWord)
+            rootWords.push({ ...docData, _id: doc.id } as RootWord)
         });
     } catch (error) {
         console.error(error);

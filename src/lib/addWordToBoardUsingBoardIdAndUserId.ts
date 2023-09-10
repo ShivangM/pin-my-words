@@ -10,10 +10,13 @@ const addWordToBoardUsingBoardIdAndUserId = async (
     word: Word,
     userId: string,
     image?: File,
-): Promise<Word | undefined> => {
+): Promise<Word> => {
+
     try {
         const boardRef = doc(db, 'boards', boardId);
         const boardDoc = await getDoc(boardRef);
+
+        console.log(boardRef.path)
 
         if (!boardDoc.exists()) {
             throw new Error('Board does not exist');
@@ -21,7 +24,7 @@ const addWordToBoardUsingBoardIdAndUserId = async (
 
         const userAccess = await fetchUserAccessByBoardIdAndUserId(boardId, userId);
 
-        if(!userAccess || userAccess === BoardAccess.READ_ONLY) {
+        if (!userAccess || userAccess === BoardAccess.READ_ONLY) {
             throw new Error('User does not have write access to this board');
         }
 
@@ -51,7 +54,7 @@ const addWordToBoardUsingBoardIdAndUserId = async (
 
         return wordAdded;
     } catch (error) {
-        console.error(error);
+        throw error;
     }
 }
 

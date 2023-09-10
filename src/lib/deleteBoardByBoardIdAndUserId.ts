@@ -14,7 +14,7 @@ import { deleteObject, ref } from 'firebase/storage';
 const deleteBoardByBoardIdAndUserId = async (
   userId: string,
   boardId: string
-): Promise<boolean> => {
+): Promise<void> => {
   try {
     const boardRef = doc(db, 'boards', boardId);
     const boardDoc = await getDoc(boardRef);
@@ -49,11 +49,8 @@ const deleteBoardByBoardIdAndUserId = async (
       const imageRef = ref(storage, 'boards/' + boardId + "/cover");
       await deleteObject(imageRef);
     }
-
-    return true;
   } catch (error) {
-    console.error(error);
-    return false;
+    throw error;
   }
 };
 

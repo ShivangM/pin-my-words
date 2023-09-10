@@ -15,17 +15,19 @@ import { IoIosCloseCircle } from 'react-icons/io';
 import Image from 'next/image';
 import useUserStore from '@/store/userStore';
 import { Timestamp } from 'firebase/firestore';
+import { toast } from 'react-toastify';
 
 const AddWordModal = () => {
-  const [closeAddWordModal, addWordModalOpen, loading, boardId, addWord] = useBoardStore(
-    (state) => [state.closeAddWordModal, state.addWordModalOpen, state.loading, state.board?._id, state.addWord]
+  const [closeAddWordModal, addWordModalOpen, boardId, addWord] = useBoardStore(
+    (state) => [state.closeAddWordModal, state.addWordModalOpen, state.board?._id, state.addWord]
   );
 
   const [userData] = useUserStore((state) => [state.userData]);
+  const [addWordLoading, setAddWordLoading] = useState<boolean>(false)
 
   const { register, handleSubmit, control, formState: { errors } } = useForm<Word>();
 
-  const promiseOptions = (inputValue: string, callback: (res: RootWord[])=>void) => {
+  const promiseOptions = (inputValue: string, callback: (res: RootWord[]) => void) => {
     fetchRootWordsByBoardIdAndUserId(boardId!, userData?.uid!).then((res) => {
       callback(res);
     });
@@ -67,7 +69,22 @@ const AddWordModal = () => {
       updatedAt: Timestamp.now(),
       createdBy: userData?.uid!,
     }
-    await addWord(wordData, boardId!, userData?.uid!, image);
+
+    toast.loading('Adding word...', {
+      toastId: 'add-word',
+    });
+
+    setAddWordLoading(true)
+
+    try {
+      await addWord(wordData, userData?.uid!, image);
+    } catch (error: any) {
+      toast.error(error.message)
+    } finally {
+      toast.dismiss('add-word');
+      setAddWordLoading(false)
+      closeAddWordModal();
+    }
   }
 
   return (
@@ -133,8 +150,8 @@ const AddWordModal = () => {
                               cacheOptions
                               loadOptions={loadOptions}
                               getOptionLabel={(option: RootWord) => option.root}
-                              getOptionValue={(option: RootWord) => option.id}
-                              onChange={(val) => onChange(val.map((c) => c.id))}
+                              getOptionValue={(option: RootWord) => option._id}
+                              onChange={(val) => onChange(val.map((c) => c._id))}
                               isMulti={true}
                             />
                           )}
@@ -321,6 +338,7 @@ const AddWordModal = () => {
                         type="button"
                         onClick={closeAddWordModal}
                         className="modalBtnPrev"
+                        disabled={addWordLoading}
                       >
                         Cancel
                       </button>
@@ -328,7 +346,7 @@ const AddWordModal = () => {
                       <button
                         type="submit"
                         className="modalBtnNext"
-                        disabled={loading}
+                        disabled={addWordLoading}
                       >
                         Add Word
                       </button>
