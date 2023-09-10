@@ -13,8 +13,7 @@ export enum BoardAccess {
   OWNER = 'owner',
 }
 
-export type CollaborativeUser = {
-  user: User;
+export interface BoardUser extends User {
   access: BoardAccess;
 };
 

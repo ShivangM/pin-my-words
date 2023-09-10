@@ -1,11 +1,11 @@
 import { RootWord, Word } from '@/interfaces/Word';
 import db from '@/utils/firebase';
 import { DocumentData, DocumentSnapshot, collection, doc, getDoc, getDocs, orderBy, query } from 'firebase/firestore';
-import fetchUserAccessByBoardIdAndUserId from './fetchUserAccessByBoardIdAndUserId';
+import fetchUserAccess from '../Users/fetchUserAccess';
 
-const fetchWordsByBoardIdAndUserId = async (boardId: string, userId: string): Promise<Word[]> => {
+const fetchWords = async (boardId: string, userId: string): Promise<Word[]> => {
   try {
-    const userAccess = await fetchUserAccessByBoardIdAndUserId(
+    const userAccess = await fetchUserAccess(
       boardId,
       userId
     );
@@ -50,4 +50,4 @@ const fetchWordsByBoardIdAndUserId = async (boardId: string, userId: string): Pr
   }
 };
 
-export default fetchWordsByBoardIdAndUserId;
+export default fetchWords;

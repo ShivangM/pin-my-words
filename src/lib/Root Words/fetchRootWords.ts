@@ -1,9 +1,9 @@
 import { RootWord } from "@/interfaces/Word";
 import db from "@/utils/firebase";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
-import fetchUserAccessByBoardIdAndUserId from "./fetchUserAccessByBoardIdAndUserId";
+import fetchUserAccessByBoardIdAndUserId from "../Users/fetchUserAccess";
 
-const fetchRootWordsByBoardIdAndUserId = async (boardId: string, userId: string): Promise<RootWord[]> => {
+const fetchRootWords = async (boardId: string, userId: string): Promise<RootWord[]> => {
     let rootWords: RootWord[] = []
 
     try {
@@ -28,12 +28,12 @@ const fetchRootWordsByBoardIdAndUserId = async (boardId: string, userId: string)
             const docData = doc.data();
             rootWords.push({ ...docData, _id: doc.id } as RootWord)
         });
+
+        return rootWords
     } catch (error) {
-        console.error(error);
+        throw error;
     }
 
-    console.log(rootWords)
-    return rootWords
 }
 
-export default fetchRootWordsByBoardIdAndUserId;
+export default fetchRootWords;

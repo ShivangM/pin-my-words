@@ -9,7 +9,7 @@ import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import Select from 'react-select';
 import options from '@/constants/parts-of-speech.json';
 import AsyncSelect from 'react-select/async';
-import fetchRootWordsByBoardIdAndUserId from '@/lib/fetchRootWordsByBoardIdAndUserId';
+import fetchRootWordsByBoardIdAndUserId from '@/lib/Root Words/fetchRootWords';
 import debounce from 'lodash.debounce';
 import { IoIosCloseCircle } from 'react-icons/io';
 import Image from 'next/image';

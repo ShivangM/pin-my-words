@@ -1,6 +1,6 @@
 import {
   BoardAccess,
-  CollaborativeUser,
+  BoardUser,
   CreateBoardSteps,
 } from '@/interfaces/Board.d';
 import { useState } from 'react';
@@ -13,7 +13,7 @@ import AsyncSelect from 'react-select/async';
 import Select from 'react-select';
 import { User } from '@/interfaces/User';
 import debounce from 'lodash.debounce';
-import fetchUsersByEmailSearch from '@/lib/fetchUsersByEmailSearch';
+import fetchUsersByEmailSearch from '@/lib/Users/fetchUsersByEmailSearch';
 import { OptionProps } from 'react-select';
 import Image from 'next/image';
 import { toast } from 'react-toastify';
@@ -23,7 +23,7 @@ const InviteUsers = () => {
     handleSubmit,
     formState: { errors },
     control,
-  } = useForm<CollaborativeUser>();
+  } = useForm<BoardUser>();
 
   const [addUser, removeUser, users, setBoardStep, createBoard] =
     useBoardsStore((state) => [
@@ -37,7 +37,7 @@ const InviteUsers = () => {
   const [userData] = useUserStore((state) => [state.userData]);
   const [loading, setLoading] = useState(false)
 
-  const onSubmit: SubmitHandler<CollaborativeUser> = (data) => {
+  const onSubmit: SubmitHandler<BoardUser> = (data) => {
     addUser(data);
   };
 

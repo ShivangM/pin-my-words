@@ -1,8 +1,8 @@
 import { Word } from "@/interfaces/Word.d";
 import db, { storage } from "@/utils/firebase";
-import { Timestamp, addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
+import { Timestamp, doc, getDoc, updateDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import fetchUserAccessByBoardIdAndUserId from "./fetchUserAccessByBoardIdAndUserId";
+import fetchUserAccess from "../Users/fetchUserAccess";
 import { BoardAccess } from "@/interfaces/Board.d";
 
 const editWordFromBoard = async (
@@ -12,7 +12,7 @@ const editWordFromBoard = async (
     image?: File,
 ): Promise<Word> => {
     try {
-        const userAccess = await fetchUserAccessByBoardIdAndUserId(boardId, userId);
+        const userAccess = await fetchUserAccess(boardId, userId);
 
         if (!userAccess || userAccess === BoardAccess.READ_ONLY) {
             throw new Error('User does not have write access to this board');
@@ -42,7 +42,6 @@ const editWordFromBoard = async (
 
         return wordUpdated;
     } catch (error) {
-        console.log(error)
         throw error;
     }
 }

@@ -3,7 +3,7 @@ import db, { storage } from '@/utils/firebase';
 import { doc, getDoc, Timestamp, updateDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 
-const updateBoardByBoardIdAndUserId = async (
+const updateBoard = async (
   userId: string,
   boardId: string,
   metadata: Metadata,
@@ -60,4 +60,4 @@ const updateBoardByBoardIdAndUserId = async (
   }
 };
 
-export default updateBoardByBoardIdAndUserId;
+export default updateBoard;

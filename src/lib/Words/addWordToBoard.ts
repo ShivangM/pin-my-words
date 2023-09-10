@@ -2,10 +2,10 @@ import { Word } from "@/interfaces/Word";
 import db, { storage } from "@/utils/firebase";
 import { Timestamp, addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import fetchUserAccessByBoardIdAndUserId from "./fetchUserAccessByBoardIdAndUserId";
+import fetchUserAccess from "../Users/fetchUserAccess";
 import { BoardAccess } from "@/interfaces/Board.d";
 
-const addWordToBoardUsingBoardIdAndUserId = async (
+const addWordToBoard = async (
     boardId: string,
     word: Word,
     userId: string,
@@ -16,13 +16,11 @@ const addWordToBoardUsingBoardIdAndUserId = async (
         const boardRef = doc(db, 'boards', boardId);
         const boardDoc = await getDoc(boardRef);
 
-        console.log(boardRef.path)
-
         if (!boardDoc.exists()) {
             throw new Error('Board does not exist');
         }
 
-        const userAccess = await fetchUserAccessByBoardIdAndUserId(boardId, userId);
+        const userAccess = await fetchUserAccess(boardId, userId);
 
         if (!userAccess || userAccess === BoardAccess.READ_ONLY) {
             throw new Error('User does not have write access to this board');
@@ -58,4 +56,4 @@ const addWordToBoardUsingBoardIdAndUserId = async (
     }
 }
 
-export default addWordToBoardUsingBoardIdAndUserId;
+export default addWordToBoard;

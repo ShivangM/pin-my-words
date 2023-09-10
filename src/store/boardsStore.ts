@@ -1,22 +1,22 @@
 import {
   Board,
-  CollaborativeUser,
+  BoardUser,
   CreateBoardSteps,
   Metadata,
 } from '@/interfaces/Board.d';
-import fetchBoardsByUid from '@/lib/fetchBoardsByUid';
+import fetchBoardsByUid from '@/lib/Boards/fetchBoards';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { toast } from 'react-toastify';
 import { User } from '@/interfaces/User';
-import createBoardUsingUserId from '@/lib/createBoardUsingUserId';
+import createBoardUsingUserId from '@/lib/Boards/createBoard';
 
 interface BoardsState {
   fetchBoards: (email: string) => Promise<void>;
   boards: null | Board[];
 
-  users: CollaborativeUser[] | null;
-  addUser: (user: CollaborativeUser) => void;
+  users: BoardUser[] | null;
+  addUser: (user: BoardUser) => void;
   removeUser: (userUid: string) => void;
 
   metadata: Metadata | null;
@@ -75,7 +75,7 @@ const useBoardsStore = create<BoardsState>()(
 
     removeUser: (userUid) => {
       set((state) => ({
-        users: state.users!.filter((user) => user.user.uid !== userUid),
+        users: state.users!.filter((user) => user.uid !== userUid),
       }));
     },
 

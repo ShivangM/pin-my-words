@@ -1,9 +1,9 @@
-import { Board, BoardAccess, CollaborativeUser, Metadata } from "@/interfaces/Board.d";
+import { Board, BoardAccess, BoardUser, Metadata } from "@/interfaces/Board.d";
 import db, { storage } from "@/utils/firebase";
 import { Timestamp, addDoc, collection, doc, setDoc, updateDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
-const createBoardUsingUserId = async (metadata: Metadata, owner: string, image: File | null, users: CollaborativeUser[] | null): Promise<Board> => {
+const createBoard = async (metadata: Metadata, owner: string, image: File | null, users: BoardUser[] | null): Promise<Board> => {
     let board: Board = {
         _id: '',
         metadata,
@@ -22,9 +22,9 @@ const createBoardUsingUserId = async (metadata: Metadata, owner: string, image: 
             let addUserPromises: Promise<void>[] = [];
 
             users.forEach((user) => {
-                const addUserPromise = setDoc(doc(db, 'users-boards', user.user.uid! + '_' + boardRef.id), {
+                const addUserPromise = setDoc(doc(db, 'users-boards', user.uid! + '_' + boardRef.id), {
                     boardId: boardRef.id,
-                    userId: user.user.uid!,
+                    userId: user.uid!,
                     access: user.access,
                 });
 
@@ -73,4 +73,4 @@ const createBoardUsingUserId = async (metadata: Metadata, owner: string, image: 
     }
 }
 
-export default createBoardUsingUserId;
+export default createBoard;

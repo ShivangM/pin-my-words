@@ -6,13 +6,9 @@ import {
 } from '@hassanmojab/react-modern-calendar-datepicker';
 import useBoardStore from '@/store/boardStore';
 
-type Props = {};
-
-const DateFilter = (props: Props) => {
+const DateFilter = () => {
   const [selectedDay, setSelectedDay] = useState<DayValue>(null);
   const [createdAt] = useBoardStore((state) => [state.board?.createdAt]);
-
-  console.log(selectedDay);
 
   const today = new Date();
 

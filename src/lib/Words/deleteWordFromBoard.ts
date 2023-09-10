@@ -1,12 +1,12 @@
 import { BoardAccess } from "@/interfaces/Board.d";
-import fetchUserAccessByBoardIdAndUserId from "./fetchUserAccessByBoardIdAndUserId";
+import fetchUserAccess from "../Users/fetchUserAccess";
 import db, { storage } from "@/utils/firebase";
 import { collection, deleteDoc, doc, getDoc, getDocs, query, where } from "firebase/firestore";
 import { deleteObject, ref } from "firebase/storage";
 
 const deleteWordFromBoard = async (boardId: string, wordId: string, userId: string): Promise<void> => {
     try {
-        const userAccess = await fetchUserAccessByBoardIdAndUserId(boardId, userId);
+        const userAccess = await fetchUserAccess(boardId, userId);
 
         if (userAccess === BoardAccess.READ_ONLY) {
             throw new Error('You do not have permission to edit this board');

@@ -29,6 +29,9 @@ const Board = ({ params: { boardId } }: Props) => {
   const [wordsLoading, setWordsLoading] = useState(false);
   const [wordsFetchError, setWordsFetchError] = useState<Error | null>(null)
 
+  const [rootWordsLoading, setRootWordsLoading] = useState(false);
+  const [rootWordsFetchError, setRootWordsFetchError] = useState<Error | null>(null)
+
   const [
     userAccess,
     fetchUserAccess,
@@ -36,9 +39,12 @@ const Board = ({ params: { boardId } }: Props) => {
     fetchBoard,
     words,
     fetchWords,
+    rootWords,
+    fetchRootWords,
     openDeleteBoardModal,
     openEditBoardModal,
     openAddWordModal,
+    openAddRootWordModal,
     reset,
   ] = useBoardStore((state) => [
     state.userAccess,
@@ -47,9 +53,12 @@ const Board = ({ params: { boardId } }: Props) => {
     state.fetchBoard,
     state.words,
     state.fetchWords,
+    state.rootWords,
+    state.fetchRootWords,
     state.openDeleteBoardModal,
     state.openEditBoardModal,
     state.openAddWordModal,
+    state.openAddRootWordModal,
     state.reset
   ]);
 
@@ -76,6 +85,17 @@ const Board = ({ params: { boardId } }: Props) => {
       }
     }
 
+    const fetchRootWordsFunction = async () => {
+      setRootWordsLoading(true)
+      try {
+        await fetchRootWords(boardId, userData?.uid!);
+      } catch (error: any) {
+        setRootWordsFetchError(error)
+      } finally {
+        setRootWordsLoading(false)
+      }
+    }
+
     const fetchBoardFunction = async () => {
       setBoardLoading(true)
       try {
@@ -91,11 +111,12 @@ const Board = ({ params: { boardId } }: Props) => {
       if (userAccess) {
         if (!board) fetchBoardFunction()
         if (board && !words) fetchWordsFunction()
+        if (board && !rootWords) fetchRootWordsFunction()
       } else {
         fetchUserAccessFunction()
       }
     }
-  }, [userData, boardId, fetchUserAccess, fetchBoard, fetchWords, userAccess, board, words])
+  }, [userData, boardId, fetchUserAccess, fetchBoard, fetchWords, fetchRootWords, userAccess, board, words, rootWords])
 
   useEffect(() => {
     return () => {
@@ -169,21 +190,30 @@ const Board = ({ params: { boardId } }: Props) => {
 
       <hr />
 
-      <div className="flex items-center space-x-4">
+
+      <div className="flex flex-col w-full sm:flex-row items-center gap-4">
         <SearchWord />
         {
           userAccess === BoardAccess.READ_ONLY ? null
             :
-            <button onClick={openAddWordModal} className="btn">
-              Add Word
-            </button>
+            <div className="flex items-center space-x-2">
+              <button onClick={openAddRootWordModal} className="btn">
+                Add Root Word
+              </button>
+
+              <button onClick={openAddWordModal} className="btn">
+                Add Word
+              </button>
+            </div>
         }
       </div>
 
       <div className="flex flex-col space-y-6">
-        {words?.map((word, idx) => (
+        {words && words.length > 0 ? words.map((word, idx) => (
           <WordsCard key={idx} idx={idx} word={word} />
-        ))}
+        ))
+          : <div className="">No word found.</div>
+        }
       </div>
     </div>
   );

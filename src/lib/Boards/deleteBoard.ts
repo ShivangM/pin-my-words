@@ -11,7 +11,7 @@ import {
 } from 'firebase/firestore';
 import { deleteObject, ref } from 'firebase/storage';
 
-const deleteBoardByBoardIdAndUserId = async (
+const deleteBoard = async (
   userId: string,
   boardId: string
 ): Promise<void> => {
@@ -54,4 +54,4 @@ const deleteBoardByBoardIdAndUserId = async (
   }
 };
 
-export default deleteBoardByBoardIdAndUserId;
+export default deleteBoard;

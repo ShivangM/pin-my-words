@@ -2,14 +2,9 @@
 import BoardCard from '@/components/Boards/BoardCard';
 import useBoardsStore from '@/store/boardsStore';
 import useUserStore from '@/store/userStore';
-import { Metadata } from 'next';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-
-export const metadata: Metadata = {
-  title: "Boards"
-};
 
 const Boards = () => {
   const [userData] = useUserStore((state) => [state.userData]);

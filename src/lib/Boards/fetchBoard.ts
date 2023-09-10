@@ -1,14 +1,14 @@
 import { Board } from '@/interfaces/Board';
 import db from '@/utils/firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import fetchUserAccessByBoardIdAndUserId from './fetchUserAccessByBoardIdAndUserId';
+import fetchUserAccess from '../Users/fetchUserAccess';
 
-const fetchBoardByBoardIdAndUserId = async (
+const fetchBoard = async (
   boardId: string,
   userId: string
 ): Promise<Board> => {
   try {
-    const userAccess = await fetchUserAccessByBoardIdAndUserId(
+    const userAccess = await fetchUserAccess(
       boardId,
       userId
     );
@@ -32,4 +32,4 @@ const fetchBoardByBoardIdAndUserId = async (
   }
 };
 
-export default fetchBoardByBoardIdAndUserId;
+export default fetchBoard;

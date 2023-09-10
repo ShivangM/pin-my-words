@@ -15,14 +15,14 @@ const fetchUsersByEmailSearch = async (email: string): Promise<User[]> => {
         }
 
         userDocs.forEach((doc) => {
-            const docData =  doc.data();
-            users.push({...docData, uid: doc.id} as User)
+            const docData = doc.data();
+            users.push({ ...docData, uid: doc.id } as User)
         });
-    } catch (error) {
-        console.error(error);
-    }
 
-    return users;
+        return users;
+    } catch (error) {
+        throw error;
+    }
 }
 
 export default fetchUsersByEmailSearch;
