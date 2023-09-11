@@ -54,7 +54,7 @@ const Boards = () => {
       </button>
 
       {/* Boards */}
-      {boards ? boards.map((board) => (
+      {boards && boards.length > 0 ? boards.map((board) => (
         <BoardCard key={board._id} board={board} />
       ))
         : loading ? <div>Loading...</div> : <div>No boards found.</div>

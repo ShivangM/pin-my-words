@@ -1,6 +1,6 @@
 import { Word } from "@/interfaces/Word";
 import db, { storage } from "@/utils/firebase";
-import { Timestamp, addDoc, collection, doc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
+import { Timestamp, addDoc, collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import fetchUserAccess from "../Users/fetchUserAccess";
 import { BoardAccess } from "@/interfaces/Board.d";
@@ -26,7 +26,7 @@ const addWordToBoard = async (
             throw new Error('User does not have write access to this board');
         }
 
-        const wordsCollection = collection(db, boardRef.path + "/words");
+        const wordsCollection = collection(db, boardRef.path, "words");
         const wordExistQuery = query(wordsCollection, where('word', '==', word.word.toLowerCase()));
         const wordExistDoc = await getDocs(wordExistQuery);
 
@@ -34,13 +34,22 @@ const addWordToBoard = async (
             throw new Error('Word already exists');
         }
 
+        const roots = word.roots;
+        console.log(roots)
+        delete word.roots;
         const wordDoc = await addDoc(wordsCollection, word);
 
-        const rootWordsRef = collection(db, boardRef.path + "/roots-words");
-        const rootWordDoc = await addDoc(rootWordsRef, {
-            wordId: wordDoc.id,
-            rootId: word.roots,
-        });
+        if (roots) {
+            const rootWordsCollection = collection(db, boardRef.path, "roots-words");
+
+            for await (const root of roots) {
+                await setDoc(doc(rootWordsCollection, root.value + "_" + wordDoc.id), {
+                    rootId: root.value,
+                    wordId: wordDoc.id,
+                    label: root.label
+                });
+            }
+        }
 
         let imageUrl = word.image;
 
@@ -54,6 +63,7 @@ const addWordToBoard = async (
         const wordAdded = {
             ...word,
             _id: wordDoc.id,
+            roots,
             image: imageUrl,
             createdAt: Timestamp.now(),
             updatedAt: Timestamp.now(),

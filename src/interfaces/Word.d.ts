@@ -10,9 +10,9 @@ export interface Word {
   _id: string;
   word: string;
   meaning: string;
-  partOfSpeech: string[];
-  roots?: { label: string, value: string }[];
-  examples: string[];
+  partOfSpeech?: string[];
+  roots?: { label: string; value: string }[];
+  examples?: string[];
   image?: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;

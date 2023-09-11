@@ -96,7 +96,7 @@ const BasicDetails = () => {
           className="block text-gray-700 text-sm font-bold mb-2"
           htmlFor="description"
         >
-          Description
+          Description (Optional)
         </label>
         <textarea
           className={classNames(
@@ -110,7 +110,7 @@ const BasicDetails = () => {
             },
           })}
           defaultValue={metadata?.description}
-          placeholder="Enter a description for the Board (Optional)"
+          placeholder="Enter a description for the Board."
         />
 
         <ErrorMessage

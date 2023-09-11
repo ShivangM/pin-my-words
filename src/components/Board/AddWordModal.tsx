@@ -133,7 +133,7 @@ const AddWordModal = () => {
                         <Controller
                           control={control}
                           name="roots"
-                          rules={{ required: 'Root Word(s) is required.' }}
+                          // rules={{ required: 'Root Word(s) is required.' }}
                           render={({ field: { onChange, ref } }) => (
                             <Select
                               //@ts-ignore
@@ -217,13 +217,12 @@ const AddWordModal = () => {
                           className="block text-gray-700 text-sm font-bold mb-2"
                           htmlFor="name"
                         >
-                          Part(s) Of Speech
+                          Part(s) Of Speech (Optional)
                         </label>
 
                         <Controller
                           control={control}
                           name="partOfSpeech"
-                          rules={{ required: 'Parts of speech is required.' }}
                           render={({ field: { onChange, ref } }) => (
                             <Select
                               //@ts-ignore

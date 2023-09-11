@@ -7,8 +7,8 @@ import { ErrorMessage } from '@hookform/error-message';
 import classNames from 'classnames';
 import Image from 'next/image';
 import { Fragment, useState } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
-import { useRef } from 'react';
+import { SubmitHandler, set, useForm } from 'react-hook-form';
+import { useRef, useEffect } from 'react';
 import { toast } from 'react-toastify';
 type Props = {};
 
@@ -27,13 +27,6 @@ const EditBoardModal = (props: Props) => {
 
   const userData = useUserStore((state) => state.userData);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-    reset
-  } = useForm<Metadata>();
-
   // Image Upload and Preview
   const imageRef = useRef<HTMLInputElement | null>(null);
   const [image, setImage] = useState<File>()
@@ -45,6 +38,20 @@ const EditBoardModal = (props: Props) => {
       setPreviewImage(URL.createObjectURL(file));
     }
   };
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset
+  } = useForm<Metadata>();
+
+  useEffect(() => {
+    if (board) {
+      reset(board.metadata)
+      setPreviewImage(board.metadata.image)
+    }
+  }, [board])
 
   const onSubmit: SubmitHandler<Metadata> = async (data) => {
     toast.loading('Updating board...', {
@@ -127,9 +134,6 @@ const EditBoardModal = (props: Props) => {
                           errors?.name ? 'border-red-500' : null
                         )}
                         type="text"
-                        defaultValue={
-                          board?.metadata?.name || `${userData?.name}'s Board`
-                        }
                         {...register('name', {
                           required: 'Board name is required.',
                         })}
@@ -164,7 +168,6 @@ const EditBoardModal = (props: Props) => {
                       <Image
                         src={
                           previewImage ||
-                          board?.metadata.image ||
                           '/assets/board-placeholder.svg'
                         }
                         onClick={() => imageRef?.current?.click()}
@@ -195,7 +198,6 @@ const EditBoardModal = (props: Props) => {
                               'Description cannot be more than 200 characters.',
                           },
                         })}
-                        defaultValue={board?.metadata?.description}
                         placeholder="Enter a description for the Board (Optional)"
                       />
 

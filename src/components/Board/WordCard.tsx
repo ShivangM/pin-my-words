@@ -86,7 +86,7 @@ const WordsCard = ({ word, idx }: { word: Word; idx: number }) => {
         <div className="space-y-1">
           <h4 className="text-sm font-bold">Examples: </h4>
           <ol className="space-y-1 text-sm text-gray-500 list-inside list-decimal">
-            {word.examples.length > 0 ? word.examples.map((example, idx) => (
+            {word.examples && word.examples.length > 0 ? word.examples.map((example, idx) => (
               <li key={idx} className="space-x-1">
                 {example.split(' ').map((w, idx) => (
                   <span

@@ -23,10 +23,11 @@ const EditWordModal = () => {
 
 
   useEffect(() => {
-    if (focusedWord?.examples) setExamples(focusedWord.examples)
-    if (focusedWord?.image) setPreviewImage(focusedWord.image)
-    if (focusedWord?.roots) reset({ roots: focusedWord.roots })
-    if (focusedWord?.partOfSpeech) reset({ partOfSpeech: focusedWord.partOfSpeech })
+    if (focusedWord) {
+      reset(focusedWord)
+      setExamples(focusedWord.examples || [])
+      setPreviewImage(focusedWord.image)
+    }
   }, [focusedWord])
 
   //Example
@@ -48,7 +49,7 @@ const EditWordModal = () => {
   // Image Upload and Preview
   const imageRef = useRef<HTMLInputElement | null>(null);
   const [image, setImage] = useState<File>()
-  const [previewImage, setPreviewImage] = useState<string | null>(null)
+  const [previewImage, setPreviewImage] = useState<string>()
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
@@ -138,7 +139,7 @@ const EditWordModal = () => {
                         <Controller
                           control={control}
                           name="roots"
-                          rules={{ required: 'Root Word(s) is required.' }}
+                          // rules={{ required: 'Root Word(s) is required.' }}
                           render={({ field: { onChange, ref } }) => (
                             <Select
                               //@ts-ignore
@@ -174,7 +175,6 @@ const EditWordModal = () => {
                             errors?.word ? 'border-red-500' : null
                           )}
                           type="text"
-                          defaultValue={focusedWord?.word}
                           placeholder="Word"
                           {...register('word', {
                             required: 'Word is required.',
@@ -204,7 +204,6 @@ const EditWordModal = () => {
                             errors?.word ? 'border-red-500' : null
                           )}
                           type="text"
-                          defaultValue={focusedWord?.meaning}
                           placeholder="Word"
                           {...register('meaning', {
                             required: 'Meaning is required.',
@@ -237,7 +236,7 @@ const EditWordModal = () => {
                               //@ts-ignore
                               inputRef={ref}
                               defaultValue={focusedWord?.partOfSpeech?.map((pos) => ({ label: pos, value: pos }))}
-                              onChange={(pos) => onChange(pos.map((c) => c))}
+                              onChange={(pos) => onChange(pos.map((c) => c.value))}
                               getOptionLabel={(option) => option.label}
                               getOptionValue={(option) => option.value}
                               isMulti={true}
