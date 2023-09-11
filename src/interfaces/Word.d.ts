@@ -11,7 +11,7 @@ export interface Word {
   word: string;
   meaning: string;
   partOfSpeech: string[];
-  roots?: string[] | RootWord[];
+  roots?: { label: string, value: string }[];
   examples: string[];
   image?: string;
   createdAt: Timestamp;

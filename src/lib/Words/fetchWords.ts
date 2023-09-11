@@ -21,26 +21,7 @@ const fetchWords = async (boardId: string, userId: string): Promise<Word[]> => {
     const words: Word[] = [];
     wordsDocs.forEach((wordDoc) => {
       const wordData = wordDoc.data() as Word;
-      const roots = wordData.roots as string[];
-
-      let rootDocPromises: Promise<DocumentSnapshot<DocumentData, DocumentData>>[] = [];
-
-      roots?.forEach((root) => {
-        const rootDocPromise = getDoc(doc(db, 'boards', boardId, 'roots', root));
-        rootDocPromises.push(rootDocPromise);
-      });
-
-      const rootWords: RootWord[] = [];
-
-      Promise.all(rootDocPromises).then((rootDocs) => {
-        rootDocs.forEach((rootDoc) => {
-          const rootData = rootDoc.data() as RootWord;
-          const rootWord = { ...rootData, _id: rootDoc.id };
-          rootWords.push(rootWord);
-        });
-      });
-
-      const word = { ...wordData, roots: rootWords, _id: wordDoc.id };
+      const word = { ...wordData, _id: wordDoc.id };
       words.push(word);
     });
 

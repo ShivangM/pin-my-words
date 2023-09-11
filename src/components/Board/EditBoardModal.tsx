@@ -18,49 +18,49 @@ const EditBoardModal = (props: Props) => {
     closeEditBoardModal,
     editBoardModalOpen,
     board,
-    setImage,
-    previewImage,
   ] = useBoardStore((state) => [
     state.editBoard,
     state.closeEditBoardModal,
     state.editBoardModalOpen,
     state.board,
-    state.setImage,
-    state.previewImage,
   ]);
 
   const userData = useUserStore((state) => state.userData);
-  const [editBoardLoading, setEditBoardLoading] = useState(false)
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
+    reset
   } = useForm<Metadata>();
 
   // Image Upload and Preview
   const imageRef = useRef<HTMLInputElement | null>(null);
+  const [image, setImage] = useState<File>()
+  const [previewImage, setPreviewImage] = useState<string>()
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
       setImage(file);
+      setPreviewImage(URL.createObjectURL(file));
     }
   };
 
   const onSubmit: SubmitHandler<Metadata> = async (data) => {
-    setEditBoardLoading(true)
     toast.loading('Updating board...', {
       toastId: 'update-board',
     });
 
     try {
-      await editBoard(userData?.uid!, data);
+      await editBoard(userData?.uid!, data, image);
     } catch (error: any) {
       toast.error(error.message);
     } finally {
-      setEditBoardLoading(false)
       closeEditBoardModal();
       toast.dismiss('update-board');
+      setImage(undefined)
+      reset()
+      setPreviewImage(undefined)
     }
   };
 
@@ -215,6 +215,7 @@ const EditBoardModal = (props: Props) => {
                         type="button"
                         onClick={closeEditBoardModal}
                         className="modalBtnPrev"
+                        disabled={isSubmitting}
                       >
                         Cancel
                       </button>
@@ -222,7 +223,7 @@ const EditBoardModal = (props: Props) => {
                       <button
                         type="submit"
                         className="modalBtnNext"
-                        disabled={editBoardLoading}
+                        disabled={isSubmitting}
                       >
                         Edit Board
                       </button>

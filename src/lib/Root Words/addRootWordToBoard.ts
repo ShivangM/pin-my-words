@@ -1,6 +1,6 @@
 import { RootWord } from "@/interfaces/Word.d";
 import db from "@/utils/firebase";
-import { Timestamp, addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
+import { Timestamp, addDoc, collection, doc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
 import fetchUserAccess from "../Users/fetchUserAccess";
 import { BoardAccess } from "@/interfaces/Board.d";
 
@@ -24,8 +24,15 @@ const addRootWordToBoard = async (
             throw new Error('User does not have write access to this board');
         }
 
-        const rootWordRef = collection(db, boardRef.path + "/roots");
-        const rootWordDoc = await addDoc(rootWordRef, rootWord);
+        const rootWordCollection = collection(db, boardRef.path + "/roots");
+        const rootWordExistQuery = query(rootWordCollection, where('root', '==', rootWord.root.toLowerCase()));
+        const rootWordExistDoc = await getDocs(rootWordExistQuery);
+
+        if (!rootWordExistDoc.empty) {
+            throw new Error('Root word already exists');
+        }
+
+        const rootWordDoc = await addDoc(rootWordCollection, { ...rootWord, root: rootWord.root.toLowerCase() });
 
         const rootWordAdded = {
             ...rootWord,

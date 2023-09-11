@@ -16,10 +16,10 @@ const DeleteWordModal = (props: Props) => {
     ]);
 
   const userData = useUserStore((state) => state.userData);
-  const [loading, setLoading] = useState(false)
+  const [deleteWordLoading, setDeleteWordLoading] = useState<boolean>(false)
 
   const handleDeleteWord = async () => {
-    setLoading(true)
+    setDeleteWordLoading(true)
     toast.loading('Deleting word...', {
       toastId: 'deleting-word'
     })
@@ -28,7 +28,7 @@ const DeleteWordModal = (props: Props) => {
     } catch (error: any) {
       toast.error(error.message)
     } finally {
-      setLoading(false)
+      setDeleteWordLoading(false)
       closeDeleteWordModal()
       toast.dismiss('deleting-word')
     }
@@ -82,14 +82,14 @@ const DeleteWordModal = (props: Props) => {
                     <button
                       onClick={closeDeleteWordModal}
                       className="modalBtnPrev"
-                      disabled={loading}
+                      disabled={deleteWordLoading}
                     >
                       Cancel
                     </button>
                     <button
                       className="modalBtnNext"
                       onClick={handleDeleteWord}
-                      disabled={loading}
+                      disabled={deleteWordLoading}
                     >
                       Delete Word
                     </button>

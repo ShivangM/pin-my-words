@@ -1,5 +1,5 @@
 'use client';
-import { RootWord, Word } from '@/interfaces/Word';
+import { Word } from '@/interfaces/Word';
 import useBoardStore from '@/store/boardStore';
 import { Dialog, Transition } from '@headlessui/react';
 import { ErrorMessage } from '@hookform/error-message';
@@ -8,9 +8,6 @@ import { Fragment, useEffect, useRef, useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import Select from 'react-select';
 import options from '@/constants/parts-of-speech.json';
-import AsyncSelect from 'react-select/async';
-import fetchRootWordsByBoardIdAndUserId from '@/lib/Root Words/fetchRootWords';
-import debounce from 'lodash.debounce';
 import { IoIosCloseCircle } from 'react-icons/io';
 import Image from 'next/image';
 import useUserStore from '@/store/userStore';
@@ -18,37 +15,23 @@ import { Timestamp } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 
 const EditWordModal = () => {
-  const [closeEditWordModal, editWordModalOpen, boardId, editWord, focusedWord] = useBoardStore(
-    (state) => [state.closeEditWordModal, state.editWordModalOpen, state.board?._id, state.editWord, state.focusedWord]
+  const [closeEditWordModal, editWordModalOpen, editWord, focusedWord, rootWords] = useBoardStore(state => [state.closeEditWordModal, state.editWordModalOpen, state.editWord, state.focusedWord, state.rootWords]
   );
 
   const [userData] = useUserStore((state) => [state.userData]);
-  const [editWordLoading, setEditWordLoading] = useState<boolean>(false)
+  const { register, handleSubmit, control, formState: { errors, isSubmitting }, reset } = useForm<Word>();
 
-  const { register, handleSubmit, setValue, control, formState: { errors } } = useForm<Word>();
-
-  const promiseOptions = (inputValue: string, callback: (res: RootWord[]) => void) => {
-    fetchRootWordsByBoardIdAndUserId(boardId!, userData?.uid!).then((res) => {
-      callback(res);
-    });
-  };
-
-  const loadOptions = debounce(promiseOptions, 300);
-
-  const exampleRef = useRef<HTMLInputElement | null>(null);
-
-  const [examples, setExamples] = useState<string[]>([])
 
   useEffect(() => {
     if (focusedWord?.examples) setExamples(focusedWord.examples)
-    if (focusedWord?.roots) {
-      setValue('roots', (focusedWord.roots as RootWord[]).map((root) => root._id))
-    }
-    if (focusedWord?.partOfSpeech) {
-      setValue('partOfSpeech', focusedWord.partOfSpeech)
-    }
+    if (focusedWord?.image) setPreviewImage(focusedWord.image)
+    if (focusedWord?.roots) reset({ roots: focusedWord.roots })
+    if (focusedWord?.partOfSpeech) reset({ partOfSpeech: focusedWord.partOfSpeech })
   }, [focusedWord])
 
+  //Example
+  const exampleRef = useRef<HTMLInputElement | null>(null);
+  const [examples, setExamples] = useState<string[]>([])
 
   const addExample = () => {
     const value = exampleRef?.current?.value;
@@ -75,8 +58,9 @@ const EditWordModal = () => {
   };
 
   const onSubmit: SubmitHandler<Word> = async (data) => {
-    const wordData = {
+    const wordData: Word = {
       ...data,
+      word: data.word.toLowerCase(),
       _id: focusedWord?._id!,
       examples,
       createdAt: Timestamp.now(),
@@ -88,16 +72,14 @@ const EditWordModal = () => {
       toastId: 'edit-word',
     });
 
-    setEditWordLoading(true)
-
     try {
       await editWord(wordData, userData?.uid!, image);
     } catch (error: any) {
       toast.error(error.message)
     } finally {
       toast.dismiss('edit-word');
-      setEditWordLoading(false)
       closeEditWordModal();
+      reset();
     }
   }
 
@@ -158,15 +140,12 @@ const EditWordModal = () => {
                           name="roots"
                           rules={{ required: 'Root Word(s) is required.' }}
                           render={({ field: { onChange, ref } }) => (
-                            <AsyncSelect
+                            <Select
                               //@ts-ignore
                               inputRef={ref}
-                              cacheOptions
-                              loadOptions={loadOptions}
-                              defaultValue={focusedWord?.roots as RootWord[]}
-                              getOptionLabel={(option: RootWord) => option.root}
-                              getOptionValue={(option: RootWord) => option._id}
-                              onChange={(val) => onChange(val.map((c) => c._id))}
+                              defaultValue={focusedWord?.roots || undefined}
+                              options={rootWords?.map((rootWord) => { return { label: rootWord.root, value: rootWord._id } }) || undefined}
+                              onChange={(val) => onChange(val.map((c) => c))}
                               isMulti={true}
                             />
                           )}
@@ -195,7 +174,7 @@ const EditWordModal = () => {
                             errors?.word ? 'border-red-500' : null
                           )}
                           type="text"
-                          value={focusedWord?.word}
+                          defaultValue={focusedWord?.word}
                           placeholder="Word"
                           {...register('word', {
                             required: 'Word is required.',
@@ -225,7 +204,7 @@ const EditWordModal = () => {
                             errors?.word ? 'border-red-500' : null
                           )}
                           type="text"
-                          value={focusedWord?.meaning}
+                          defaultValue={focusedWord?.meaning}
                           placeholder="Word"
                           {...register('meaning', {
                             required: 'Meaning is required.',
@@ -257,11 +236,10 @@ const EditWordModal = () => {
                             <Select
                               //@ts-ignore
                               inputRef={ref}
-                              defaultValue={focusedWord?.partOfSpeech?.map((pos) => ({
-                                value: pos,
-                                label: pos,
-                              }))}
-                              onChange={(val) => onChange(val.map((c) => c.value))}
+                              defaultValue={focusedWord?.partOfSpeech?.map((pos) => ({ label: pos, value: pos }))}
+                              onChange={(pos) => onChange(pos.map((c) => c))}
+                              getOptionLabel={(option) => option.label}
+                              getOptionValue={(option) => option.value}
                               isMulti={true}
                               options={options}
                             />
@@ -343,7 +321,7 @@ const EditWordModal = () => {
                         <input hidden onChange={handleChange} ref={imageRef} type="file" />
 
                         <Image
-                          src={previewImage || focusedWord?.image || '/assets/board-placeholder.svg'}
+                          src={previewImage || '/assets/board-placeholder.svg'}
                           onClick={() => imageRef?.current?.click()}
                           alt="Board Image"
                           width={500}
@@ -359,7 +337,7 @@ const EditWordModal = () => {
                         type="button"
                         onClick={closeEditWordModal}
                         className="modalBtnPrev"
-                        disabled={editWordLoading}
+                        disabled={isSubmitting}
                       >
                         Cancel
                       </button>
@@ -367,7 +345,7 @@ const EditWordModal = () => {
                       <button
                         type="submit"
                         className="modalBtnNext"
-                        disabled={editWordLoading}
+                        disabled={isSubmitting}
                       >
                         Edit Word
                       </button>

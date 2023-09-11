@@ -1,0 +1,205 @@
+'use client';
+import { RootWord } from '@/interfaces/Word';
+import useBoardStore from '@/store/boardStore';
+import { Dialog, Transition } from '@headlessui/react';
+import { ErrorMessage } from '@hookform/error-message';
+import classNames from 'classnames';
+import { Fragment, useState } from 'react';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import useUserStore from '@/store/userStore';
+import { Timestamp } from 'firebase/firestore';
+import { toast } from 'react-toastify';
+
+const AddRootWordModal = () => {
+    const [closeAddRootWordModal, addRootWordModalOpen, addRootWord] = useBoardStore(
+        (state) => [state.closeAddRootWordModal, state.addRootWordModalOpen, state.addRootWord]
+    );
+
+    const [userData] = useUserStore((state) => [state.userData]);
+    const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<RootWord>();
+
+    const onSubmit: SubmitHandler<RootWord> = async (data) => {
+        const rootWordData = {
+            ...data,
+            root: data.root.toLowerCase(),
+            createdAt: Timestamp.now(),
+            updatedAt: Timestamp.now(),
+            createdBy: userData?.uid!,
+        }
+
+        toast.loading('Adding root word...', {
+            toastId: 'add-rootword',
+        });
+
+        try {
+            await addRootWord(rootWordData, userData?.uid!);
+            toast.success('Root word added successfully.')
+        } catch (error: any) {
+            toast.error(error.message)
+        } finally {
+            toast.dismiss('add-rootword');
+            closeAddRootWordModal();
+            reset();
+        }
+    }
+
+    return (
+        <>
+            <Transition show={addRootWordModalOpen} as={Fragment}>
+                <Dialog as="div" className="relative z-50" onClose={closeAddRootWordModal}>
+                    <Transition.Child
+                        as={Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                    >
+                        <div className="fixed inset-0 bg-black bg-opacity-25" />
+                    </Transition.Child>
+
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center p-4 text-center">
+                            <Transition.Child
+                                as={Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="opacity-0 scale-95"
+                                enterTo="opacity-100 scale-100"
+                                leave="ease-in duration-200"
+                                leaveFrom="opacity-100 scale-100"
+                                leaveTo="opacity-0 scale-95"
+                            >
+                                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl space-y-6 transition-all">
+                                    <div className="">
+                                        <Dialog.Title
+                                            as="h3"
+                                            className="text-lg font-medium leading-6 text-gray-900"
+                                        >
+                                            Add Word To Board
+                                        </Dialog.Title>
+                                        <div className="mt-2">
+                                            <p className="text-sm text-gray-500">
+                                                Add a word to this board.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                                        <div className='space-y-3'>
+                                            <div>
+                                                <label
+                                                    className="block text-gray-700 text-sm font-bold mb-2"
+                                                    htmlFor="root"
+                                                >
+                                                    Root Word
+                                                </label>
+
+                                                <input
+                                                    className={classNames(
+                                                        'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline',
+                                                        errors?.root ? 'border-red-500' : null
+                                                    )}
+                                                    type="text"
+                                                    placeholder="Root Word"
+                                                    {...register('root', {
+                                                        required: 'Root Word is required.',
+                                                    })}
+                                                />
+
+                                                <ErrorMessage
+                                                    errors={errors}
+                                                    name="root"
+                                                    render={({ message }) => (
+                                                        <p className="text-red-500 text-xs italic">{message}</p>
+                                                    )}
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label
+                                                    className="block text-gray-700 text-sm font-bold mb-2"
+                                                    htmlFor="name"
+                                                >
+                                                    Meaning
+                                                </label>
+
+                                                <input
+                                                    className={classNames(
+                                                        'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline',
+                                                        errors?.meaning ? 'border-red-500' : null
+                                                    )}
+                                                    type="text"
+                                                    placeholder="Meaning"
+                                                    {...register('meaning', {
+                                                        required: 'Meaning is required.',
+                                                    })}
+                                                />
+
+                                                <ErrorMessage
+                                                    errors={errors}
+                                                    name="meaning"
+                                                    render={({ message }) => (
+                                                        <p className="text-red-500 text-xs italic">{message}</p>
+                                                    )}
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label
+                                                    className="block text-gray-700 text-sm font-bold mb-2"
+                                                    htmlFor="name"
+                                                >
+                                                    Description (Optional)
+                                                </label>
+
+                                                <textarea
+                                                    className={classNames(
+                                                        'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline',
+                                                        errors?.description ? 'border-red-500' : null
+                                                    )}
+                                                    placeholder="Description"
+                                                    {...register('description')}
+                                                />
+
+                                                <ErrorMessage
+                                                    errors={errors}
+                                                    name="description"
+                                                    render={({ message }) => (
+                                                        <p className="text-red-500 text-xs italic">{message}</p>
+                                                    )}
+                                                />
+                                            </div>
+                                        </div>
+
+
+                                        <div className="mt-4 flex items-center space-x-4">
+                                            <button
+                                                type="button"
+                                                onClick={closeAddRootWordModal}
+                                                className="modalBtnPrev"
+                                                disabled={isSubmitting}
+                                            >
+                                                Cancel
+                                            </button>
+
+                                            <button
+                                                type="submit"
+                                                className="modalBtnNext"
+                                                disabled={isSubmitting}
+                                            >
+                                                Add Root Word
+                                            </button>
+                                        </div>
+                                    </form>
+                                </Dialog.Panel>
+                            </Transition.Child>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition>
+        </>
+    );
+};
+
+export default AddRootWordModal;

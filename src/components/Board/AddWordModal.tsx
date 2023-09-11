@@ -4,13 +4,10 @@ import useBoardStore from '@/store/boardStore';
 import { Dialog, Transition } from '@headlessui/react';
 import { ErrorMessage } from '@hookform/error-message';
 import classNames from 'classnames';
-import { Fragment, use, useRef, useState } from 'react';
+import { Fragment, useRef, useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import Select from 'react-select';
 import options from '@/constants/parts-of-speech.json';
-import AsyncSelect from 'react-select/async';
-import fetchRootWordsByBoardIdAndUserId from '@/lib/Root Words/fetchRootWords';
-import debounce from 'lodash.debounce';
 import { IoIosCloseCircle } from 'react-icons/io';
 import Image from 'next/image';
 import useUserStore from '@/store/userStore';
@@ -18,25 +15,17 @@ import { Timestamp } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 
 const AddWordModal = () => {
-  const [closeAddWordModal, addWordModalOpen, boardId, addWord] = useBoardStore(
-    (state) => [state.closeAddWordModal, state.addWordModalOpen, state.board?._id, state.addWord]
+  const [closeAddWordModal, addWordModalOpen, rootWords, addWord] = useBoardStore(
+    (state) => [state.closeAddWordModal, state.addWordModalOpen, state.rootWords, state.addWord]
   );
 
   const [userData] = useUserStore((state) => [state.userData]);
-  const [addWordLoading, setAddWordLoading] = useState<boolean>(false)
+  const { register, handleSubmit, control, formState: { errors, isSubmitting }, reset } = useForm<Word>();
 
-  const { register, handleSubmit, control, formState: { errors } } = useForm<Word>();
-
-  const promiseOptions = (inputValue: string, callback: (res: RootWord[]) => void) => {
-    fetchRootWordsByBoardIdAndUserId(boardId!, userData?.uid!).then((res) => {
-      callback(res);
-    });
-  };
-
-  const loadOptions = debounce(promiseOptions, 300);
-
+  //Examples
   const exampleRef = useRef<HTMLInputElement | null>(null);
   const [examples, setExamples] = useState<string[]>([])
+
   const addExample = () => {
     const value = exampleRef?.current?.value;
     if (!value) return;
@@ -52,7 +41,7 @@ const AddWordModal = () => {
   // Image Upload and Preview
   const imageRef = useRef<HTMLInputElement | null>(null);
   const [image, setImage] = useState<File>()
-  const [previewImage, setPreviewImage] = useState<string | null>(null)
+  const [previewImage, setPreviewImage] = useState<string>()
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
@@ -62,8 +51,9 @@ const AddWordModal = () => {
   };
 
   const onSubmit: SubmitHandler<Word> = async (data) => {
-    const wordData = {
+    const wordData: Word = {
       ...data,
+      word: data.word.toLowerCase(),
       examples,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
@@ -74,16 +64,17 @@ const AddWordModal = () => {
       toastId: 'add-word',
     });
 
-    setAddWordLoading(true)
-
     try {
       await addWord(wordData, userData?.uid!, image);
     } catch (error: any) {
       toast.error(error.message)
     } finally {
       toast.dismiss('add-word');
-      setAddWordLoading(false)
       closeAddWordModal();
+      reset();
+      setExamples([]);
+      setImage(undefined);
+      setPreviewImage(undefined);
     }
   }
 
@@ -144,14 +135,11 @@ const AddWordModal = () => {
                           name="roots"
                           rules={{ required: 'Root Word(s) is required.' }}
                           render={({ field: { onChange, ref } }) => (
-                            <AsyncSelect
+                            <Select
                               //@ts-ignore
                               inputRef={ref}
-                              cacheOptions
-                              loadOptions={loadOptions}
-                              getOptionLabel={(option: RootWord) => option.root}
-                              getOptionValue={(option: RootWord) => option._id}
-                              onChange={(val) => onChange(val.map((c) => c._id))}
+                              options={rootWords?.map((rootWord) => { return { label: rootWord.root, value: rootWord._id } }) || undefined}
+                              onChange={(val) => onChange(val.map((c) => c))}
                               isMulti={true}
                             />
                           )}
@@ -338,7 +326,7 @@ const AddWordModal = () => {
                         type="button"
                         onClick={closeAddWordModal}
                         className="modalBtnPrev"
-                        disabled={addWordLoading}
+                        disabled={isSubmitting}
                       >
                         Cancel
                       </button>
@@ -346,7 +334,7 @@ const AddWordModal = () => {
                       <button
                         type="submit"
                         className="modalBtnNext"
-                        disabled={addWordLoading}
+                        disabled={isSubmitting}
                       >
                         Add Word
                       </button>

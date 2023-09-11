@@ -1,34 +1,34 @@
 [
     {
-        "value": "Noun",
-        "label": "Noun"
+        "label": "Noun",
+        "value": "Noun"
     },
     {
-        "value": "Verb",
-        "label": "Verb"
+        "label": "Verb",
+        "value": "Verb"
     },
     {
-        "value": "Adjective",
-        "label": "Adjective"
+        "label": "Adjective",
+        "value": "Adjective"
     },
     {
-        "value": "Adverb",
-        "label": "Adverb"
+        "label": "Adverb",
+        "value": "Adverb"
     },
     {
-        "value": "Pronoun",
-        "label": "Pronoun"
+        "label": "Pronoun",
+        "value": "Pronoun"
     },
     {
-        "value": "Preposition",
-        "label": "Preposition"
+        "label": "Preposition",
+        "value": "Preposition"
     },
     {
-        "value": "Conjunction",
-        "label": "Conjunction"
+        "label": "Conjunction",
+        "value": "Conjunction"
     },
     {
-        "value": "Interjection",
-        "label": "Interjection"
+        "label": "Interjection",
+        "value": "Interjection"
     }
 ]

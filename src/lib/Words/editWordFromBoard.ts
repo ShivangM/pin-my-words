@@ -27,16 +27,18 @@ const editWordFromBoard = async (
 
         await updateDoc(wordRef, { ...word, updatedAt: Timestamp.now() });
 
+        let imageUrl = word.image;
+
         if (image) {
             const storageRef = ref(storage, `boards/${boardId}/words/${word._id}`);
             await uploadBytes(storageRef, image);
-            const imageUrl = await getDownloadURL(storageRef);
+            imageUrl = await getDownloadURL(storageRef);
             await updateDoc(wordRef, { image: imageUrl, updatedAt: Timestamp.now() });
         }
 
         const wordUpdated = {
             ...word,
-            image: image ? URL.createObjectURL(image) : undefined,
+            image: imageUrl,
             updatedAt: Timestamp.now(),
         };
 

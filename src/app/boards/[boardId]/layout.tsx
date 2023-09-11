@@ -1,3 +1,4 @@
+import AddRootWordModal from '@/components/Board/AddRootWordModal';
 import AddWordModal from '@/components/Board/AddWordModal';
 import DeleteBoardModal from '@/components/Board/DeleteBoardModal';
 import DeleteWordModal from '@/components/Board/DeleteWordModal';
@@ -17,6 +18,9 @@ export default function BoardLayout({
     <>
       <SidePanelBackdrop />
       <OpenSidePanelButton />
+
+      {/* Root Word Options  */}
+      <AddRootWordModal />
 
       {/* Word Options  */}
       <AddWordModal />

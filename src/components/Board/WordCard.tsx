@@ -72,10 +72,22 @@ const WordsCard = ({ word, idx }: { word: Word; idx: number }) => {
         </div>
 
         <div className="space-y-1">
+          <h4 className="text-sm font-bold">Root Word(s): </h4>
+          <ul className="space-x-2 text-sm text-gray-900 font-medium cursor-pointer list-inside list-none flex items-center">
+            {word.roots?.map((root) => (
+              <li key={root.value} className="px-2 py-0.5 transition-all ease-in-out duration-300 bg-gray-200 hover:bg-gray-300 rounded-lg">
+                {root.label}
+              </li>
+            ))
+            }
+          </ul>
+        </div>
+
+        <div className="space-y-1">
           <h4 className="text-sm font-bold">Examples: </h4>
-          <ol className="space-y-1 list-inside list-decimal">
-            {word.examples?.map((example, idx) => (
-              <li key={idx} className="text-sm text-gray-500 space-x-1">
+          <ol className="space-y-1 text-sm text-gray-500 list-inside list-decimal">
+            {word.examples.length > 0 ? word.examples.map((example, idx) => (
+              <li key={idx} className="space-x-1">
                 {example.split(' ').map((w, idx) => (
                   <span
                     key={idx}
@@ -88,7 +100,9 @@ const WordsCard = ({ word, idx }: { word: Word; idx: number }) => {
                   </span>
                 ))}
               </li>
-            ))}
+            ))
+              : <div className="">No Examples Provided.</div>
+            }
           </ol>
         </div>
 

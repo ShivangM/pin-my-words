@@ -42,7 +42,7 @@ const useBoardsStore = create<BoardsState>()(
     image: null,
     previewImage: null,
     createBoardStep: CreateBoardSteps.ENTER_DETAILS,
-    users: [],
+    users: null,
     metadata: null,
 
     //Create Board Modal

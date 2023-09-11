@@ -17,10 +17,6 @@ const Boards = () => {
   useEffect(() => {
     const fetchFunction = async () => {
       if (userData) {
-        toast.loading('Loading your boards...', {
-          toastId: 'fetching-boards',
-        });
-
         setLoading(true)
 
         try {
@@ -28,7 +24,6 @@ const Boards = () => {
         } catch (error: any) {
           toast.error(error.message);
         } finally {
-          toast.dismiss('fetching-boards');
           setLoading(false)
         }
       }

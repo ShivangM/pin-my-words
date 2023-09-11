@@ -26,13 +26,12 @@ interface BoardState {
   deleteBoardModalOpen: boolean;
   openDeleteBoardModal: () => void;
   closeDeleteBoardModal: () => void;
+  deleteBoard: (userId: string) => Promise<void>;
 
   editBoardModalOpen: boolean;
   openEditBoardModal: () => void;
   closeEditBoardModal: () => void;
-  image: File | null;
-  previewImage: string | null;
-  setImage: (image: File) => void;
+  editBoard: (userId: string, metadata: Metadata, image?: File) => Promise<void>;
 
   fetchUserAccess: (boardId: string, userId: string) => Promise<void>;
   fetchWords: (boardId: string, userId: string) => Promise<void>;
@@ -69,9 +68,6 @@ interface BoardState {
   closeSidePanel: () => void;
 
   fetchBoard: (boardId: string, userId: string) => void;
-  deleteBoard: (userId: string) => Promise<void>;
-  editBoard: (userId: string, metadata: Metadata) => Promise<void>;
-
   reset: () => void;
 }
 
@@ -81,14 +77,8 @@ const useBoardStore = create<BoardState>()(
     userAccess: null,
     words: null,
     rootWords: null,
-    image: null,
-    previewImage: null,
     focusedWord: null,
     users: null,
-
-    setImage: (image) => {
-      set({ image, previewImage: URL.createObjectURL(image) });
-    },
 
     //Side Panel
     sidePanelOpen: false,
@@ -217,9 +207,8 @@ const useBoardStore = create<BoardState>()(
     openEditBoardModal: () => set({ editBoardModalOpen: true }),
     closeEditBoardModal: () => set({ editBoardModalOpen: false }),
 
-    editBoard: async (userId, metadata) => {
+    editBoard: async (userId, metadata, image) => {
       const boardId = get().board?._id;
-      const image = get().image;
 
       if (!boardId) {
         throw new Error('Board does not exist');
@@ -294,10 +283,9 @@ const useBoardStore = create<BoardState>()(
         userAccess: null,
         sidePanelOpen: false,
         words: null,
-        image: null,
-        previewImage: null,
-        focusedWord: null,
+        users: null,
         rootWords: null,
+        focusedWord: null,
       });
     }
   }))

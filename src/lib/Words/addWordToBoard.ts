@@ -1,6 +1,6 @@
 import { Word } from "@/interfaces/Word";
 import db, { storage } from "@/utils/firebase";
-import { Timestamp, addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
+import { Timestamp, addDoc, collection, doc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import fetchUserAccess from "../Users/fetchUserAccess";
 import { BoardAccess } from "@/interfaces/Board.d";
@@ -26,8 +26,15 @@ const addWordToBoard = async (
             throw new Error('User does not have write access to this board');
         }
 
-        const wordRef = collection(db, boardRef.path + "/words");
-        const wordDoc = await addDoc(wordRef, word);
+        const wordsCollection = collection(db, boardRef.path + "/words");
+        const wordExistQuery = query(wordsCollection, where('word', '==', word.word.toLowerCase()));
+        const wordExistDoc = await getDocs(wordExistQuery);
+
+        if (!wordExistDoc.empty) {
+            throw new Error('Word already exists');
+        }
+
+        const wordDoc = await addDoc(wordsCollection, word);
 
         const rootWordsRef = collection(db, boardRef.path + "/roots-words");
         const rootWordDoc = await addDoc(rootWordsRef, {
@@ -35,17 +42,19 @@ const addWordToBoard = async (
             rootId: word.roots,
         });
 
+        let imageUrl = word.image;
+
         if (image) {
             const storageRef = ref(storage, `boards/${boardId}/words/${wordDoc.id}`);
             await uploadBytes(storageRef, image);
-            const imageUrl = await getDownloadURL(storageRef);
+            imageUrl = await getDownloadURL(storageRef);
             await updateDoc(wordDoc, { image: imageUrl });
         }
 
         const wordAdded = {
             ...word,
             _id: wordDoc.id,
-            image: image ? URL.createObjectURL(image) : undefined,
+            image: imageUrl,
             createdAt: Timestamp.now(),
             updatedAt: Timestamp.now(),
         };

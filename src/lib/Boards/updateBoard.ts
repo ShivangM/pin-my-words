@@ -7,7 +7,7 @@ const updateBoard = async (
   userId: string,
   boardId: string,
   metadata: Metadata,
-  image: File | null
+  image?: File
 ): Promise<Board> => {
   try {
     const boardRef = doc(db, 'boards', boardId);
@@ -25,23 +25,20 @@ const updateBoard = async (
 
     await updateDoc(boardRef, { metadata, updatedAt: Timestamp.now() });
 
+    let imageUrl = board.metadata.image;
+
     // Updating image from storage if existed
     if (image) {
       const imageRef = ref(storage, 'boards/' + boardId + '/' + "cover");
-      const imageBlob = new Blob([image], { type: 'image/jpeg' });
+      await uploadBytes(imageRef, image);
+      imageUrl = await getDownloadURL(imageRef);
 
-      await uploadBytes(imageRef, imageBlob, {
-        contentType: 'image/jpeg',
-      }).then((snapshot) => {
-        getDownloadURL(snapshot.ref).then((downloadURL) => {
-          updateDoc(boardRef, {
-            metadata: {
-              ...metadata,
-              image: downloadURL,
-              updatedAt: Timestamp.now(),
-            },
-          });
-        });
+      updateDoc(boardRef, {
+        metadata: {
+          ...metadata,
+          image: imageUrl,
+          updatedAt: Timestamp.now(),
+        },
       });
     }
 
@@ -50,7 +47,7 @@ const updateBoard = async (
       metadata: {
         ...metadata,
         updatedAt: Timestamp.now(),
-        image: image ? URL.createObjectURL(image) : board.metadata.image,
+        image: imageUrl,
       },
     }
 
