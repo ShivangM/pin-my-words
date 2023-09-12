@@ -35,8 +35,8 @@ const addWordToBoard = async (
         }
 
         const roots = word.roots;
-        console.log(roots)
         delete word.roots;
+
         const wordDoc = await addDoc(wordsCollection, word);
 
         if (roots) {

@@ -2,6 +2,7 @@ import { BoardAccess } from '@/interfaces/Board.d';
 import { Word } from '@/interfaces/Word.d';
 import useBoardStore from '@/store/boardStore';
 import classNames from 'classnames';
+import moment from 'moment';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { AiFillDelete } from 'react-icons/ai';
@@ -9,10 +10,11 @@ import { BiSolidEdit } from 'react-icons/bi';
 import { HiMiniSpeakerWave } from 'react-icons/hi2';
 
 const WordsCard = ({ word, idx }: { word: Word; idx: number }) => {
-  const [openDeleteWordModal, openEditWordModal, userAccess] = useBoardStore((state) => [
+  const [openDeleteWordModal, openEditWordModal, openViewWordModal, userAccess] = useBoardStore((state) => [
     state.openDeleteWordModal,
     state.openEditWordModal,
-    state.userAccess
+    state.openViewWordModal,
+    state.userAccess,
   ]);
 
   const [utterance, setUtterance] = useState<SpeechSynthesisUtterance | null>(null);
@@ -47,20 +49,23 @@ const WordsCard = ({ word, idx }: { word: Word; idx: number }) => {
       </div>
 
       <div className="flex flex-col relative justify-center space-y-6 flex-1 p-6">
-        {
-          userAccess === BoardAccess.READ_ONLY ? null
-            :
-            <div className="w-fit flex items-center space-x-2 absolute top-4 right-4">
-              <BiSolidEdit
-                onClick={() => openEditWordModal(word)}
-                className="w-6 h-6 cursor-pointer text-gray-700"
-              />
-              <AiFillDelete
-                onClick={() => openDeleteWordModal(word)}
-                className="w-6 h-6 cursor-pointer text-red-500"
-              />
-            </div>
-        }
+        <div className="flex items-center justify-between">
+          <p className='text-xs text-gray-400' >Last Updated {moment(word.updatedAt.toDate()).fromNow()}</p>
+          {
+            userAccess === BoardAccess.READ_ONLY ? null
+              :
+              <div className="w-fit flex items-center space-x-2">
+                <BiSolidEdit
+                  onClick={() => openEditWordModal(word)}
+                  className="w-6 h-6 cursor-pointer text-gray-700"
+                />
+                <AiFillDelete
+                  onClick={() => openDeleteWordModal(word)}
+                  className="w-6 h-6 cursor-pointer text-red-500"
+                />
+              </div>
+          }
+        </div>
 
         <div className="">
           <span className="text-xs uppercase">{word.partOfSpeech?.join(", ")}</span>
@@ -71,44 +76,23 @@ const WordsCard = ({ word, idx }: { word: Word; idx: number }) => {
           <p className="">{word.meaning}</p>
         </div>
 
-        <div className="space-y-1">
+        <div className="space-y-1 w-full">
           <h4 className="text-sm font-bold">Root Word(s): </h4>
-          <ul className="space-x-2 text-sm text-gray-900 font-medium cursor-pointer list-inside list-none flex items-center">
-            {word.roots?.map((root) => (
+          <ul className="space-x-2 overflow-x-auto text-sm text-gray-900 font-medium cursor-pointer list-inside list-none flex items-center">
+            {word.roots && word.roots.length > 0 ? word.roots.map((root) => (
               <li key={root.value} className="px-2 py-0.5 transition-all ease-in-out duration-300 bg-gray-200 hover:bg-gray-300 rounded-lg">
                 {root.label}
               </li>
             ))
+              : <div className="text-gray-500">No Root Word(s) Provided.</div>
             }
           </ul>
-        </div>
-
-        <div className="space-y-1">
-          <h4 className="text-sm font-bold">Examples: </h4>
-          <ol className="space-y-1 text-sm text-gray-500 list-inside list-decimal">
-            {word.examples && word.examples.length > 0 ? word.examples.map((example, idx) => (
-              <li key={idx} className="space-x-1">
-                {example.split(' ').map((w, idx) => (
-                  <span
-                    key={idx}
-                    className={classNames(
-                      'inline-block',
-                      w.toLowerCase().match(word.word.toLowerCase()) ? 'font-bold text-black' : ''
-                    )}
-                  >
-                    {w}
-                  </span>
-                ))}
-              </li>
-            ))
-              : <div className="">No Examples Provided.</div>
-            }
-          </ol>
         </div>
 
         <button
           type="button"
           className="modalBtn bg-slate-200 hover:bg-slate-300 w-fit"
+          onClick={() => openViewWordModal(word)}
         >
           View More
         </button>

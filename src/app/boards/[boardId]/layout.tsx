@@ -7,6 +7,7 @@ import EditWordModal from '@/components/Board/EditWordModal';
 import OpenSidePanelButton from '@/components/Board/OpenSidePanelButton';
 import SidePanel from '@/components/Board/SidePanel';
 import SidePanelBackdrop from '@/components/Board/SidePanelBackdrop';
+import ViewWordModal from '@/components/Board/ViewWordModal';
 import React from 'react';
 
 export default function BoardLayout({
@@ -26,6 +27,7 @@ export default function BoardLayout({
       <AddWordModal />
       <DeleteWordModal />
       <EditWordModal />
+      <ViewWordModal />
 
       {/* Board Options  */}
       <DeleteBoardModal />

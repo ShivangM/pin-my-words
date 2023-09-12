@@ -63,6 +63,10 @@ interface BoardState {
   closeEditWordModal: () => void;
   editWord: (word: Word, userId: string, image?: File) => Promise<void>;
 
+  viewWordModalOpen: boolean;
+  openViewWordModal: (word: Word) => void;
+  closeViewWordModal: () => void;
+
   sidePanelOpen: boolean;
   openSidePanel: () => void;
   closeSidePanel: () => void;
@@ -201,6 +205,11 @@ const useBoardStore = create<BoardState>()(
         throw error;
       }
     },
+
+    //View Word Modal
+    viewWordModalOpen: false,
+    openViewWordModal: (word) => set({ viewWordModalOpen: true, focusedWord: word }),
+    closeViewWordModal: () => set({ viewWordModalOpen: false, focusedWord: null }),
 
     //Edit Board Modal
     editBoardModalOpen: false,
