@@ -1,5 +1,6 @@
 'use client';
 import BoardCard from '@/components/Boards/BoardCard';
+import BoardCardPlaceholder from '@/components/Boards/BoardCardPlaceholder';
 import useBoardsStore from '@/store/boardsStore';
 import useUserStore from '@/store/userStore';
 import Image from 'next/image';
@@ -57,7 +58,7 @@ const Boards = () => {
       {boards && boards.length > 0 ? boards.map((board) => (
         <BoardCard key={board._id} board={board} />
       ))
-        : loading ? <div>Loading...</div> : <div>No boards found.</div>
+        : loading ? Array.apply(null, Array(7)).map((_, idx) => <BoardCardPlaceholder key={idx} />) : <div>No boards found.</div>
       }
     </div>
   );

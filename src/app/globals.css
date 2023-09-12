@@ -23,4 +23,42 @@
     .modalBtnNext {
         @apply bg-blue-100 text-blue-900 hover:bg-blue-200 focus-visible:ring-blue-500 modalBtn disabled:animate-pulse
     }
+
+    .loading-placeholder .bar {
+        width: 20%;
+        animation: loadingAnimation 2s infinite;
+        margin: 2px;
+    }
+
+    .loading-placeholder .image-loading-animation {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loadingImageAnimation 1.5s infinite;
+    }
+
+    @keyframes loadingImageAnimation {
+        0% {
+            background-position: 200% 0;
+        }
+
+        100% {
+            background-position: -200% 0;
+        }
+    }
+
+    @keyframes loadingAnimation {
+        0% {
+            width: 20%;
+        }
+
+        50% {
+            width: 50%;
+        }
+
+        100% {
+            width: 20%;
+        }
+    }
 }

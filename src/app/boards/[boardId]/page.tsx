@@ -10,6 +10,7 @@ import { MdUpdate } from 'react-icons/md';
 import { Parallax } from 'react-parallax';
 import SearchWord from '@/components/Board/SearchWord';
 import { BoardAccess } from '@/interfaces/Board.d';
+import WordCardPlaceholder from '@/components/Board/WordCardPlaceholder';
 
 type Props = {
   params: {
@@ -124,7 +125,7 @@ const Board = ({ params: { boardId } }: Props) => {
     }
   }, [reset])
 
-  if (userAccessLoading || boardLoading || wordsLoading) return <div>Loading...</div>
+  // if (userAccessLoading || boardLoading) return <div>Loading...</div>
   if (userAccessFetchError) return <div> You dont have access to this board. </div>
   if (boardFetchError) return <div> Error fetching board. </div>
 
@@ -212,7 +213,7 @@ const Board = ({ params: { boardId } }: Props) => {
         {words && words.length > 0 ? words.map((word, idx) => (
           <WordsCard key={idx} idx={idx} word={word} />
         ))
-          : <div className="">No word found.</div>
+          : wordsLoading || boardLoading ? Array.apply(null, Array(5)).map((_, idx) => <WordCardPlaceholder idx={idx} />) : <div className="">No word found.</div>
         }
       </div>
     </div>
