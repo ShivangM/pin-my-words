@@ -25,4 +25,7 @@ export interface RootWord {
   root: string;
   type: string;
   meaning: string;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  createdBy: string;
 }

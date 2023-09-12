@@ -14,13 +14,13 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import addUserToBoard from '@/lib/Users/addUserToBoard';
 import fetchBoardUsers from '@/lib/Users/fetchBoardUsers';
+import fetchRootWordHelper from '@/lib/Root Words/fetchRootWord';
 
 interface BoardState {
   board: null | Board;
   words: null | Word[];
   userAccess: null | BoardAccess;
   rootWords: null | RootWord[]
-  focusedWord: Word | null;
   users: null | BoardUser[];
 
   deleteBoardModalOpen: boolean;
@@ -63,9 +63,16 @@ interface BoardState {
   closeEditWordModal: () => void;
   editWord: (word: Word, userId: string, image?: File) => Promise<void>;
 
+  focusedWord: Word | null;
   viewWordModalOpen: boolean;
   openViewWordModal: (word: Word) => void;
   closeViewWordModal: () => void;
+
+  focusedRootWord: RootWord | null;
+  viewRootWordModalOpen: boolean;
+  openViewRootWordModal: (rootWordId: string) => void;
+  closeViewRootWordModal: () => void;
+  // fetchRootWord: (userId: string) => Promise<RootWord>;
 
   sidePanelOpen: boolean;
   openSidePanel: () => void;
@@ -81,7 +88,6 @@ const useBoardStore = create<BoardState>()(
     userAccess: null,
     words: null,
     rootWords: null,
-    focusedWord: null,
     users: null,
 
     //Side Panel
@@ -207,9 +213,35 @@ const useBoardStore = create<BoardState>()(
     },
 
     //View Word Modal
+    focusedWord: null,
     viewWordModalOpen: false,
     openViewWordModal: (word) => set({ viewWordModalOpen: true, focusedWord: word }),
     closeViewWordModal: () => set({ viewWordModalOpen: false, focusedWord: null }),
+
+    //View Root Word Modal
+    focusedRootWord: null,
+    viewRootWordModalOpen: false,
+    openViewRootWordModal: (rootWordId) => set({ viewRootWordModalOpen: true, focusedRootWord: get().rootWords?.find(rootWord => rootWord._id === rootWordId) }),
+    closeViewRootWordModal: () => set({ viewRootWordModalOpen: false, focusedRootWord: null }),
+
+
+    // fetchRootWord: async (userId) => {
+    //   const boardId = get().board?._id;
+    //   const rootId = get().focusedRootWord;
+
+    //   if (!boardId) {
+    //     throw new Error('Board does not exist');
+    //   } else if (!rootId) {
+    //     throw new Error('Root word does not exist');
+    //   }
+
+    //   try {
+    //     const rootWord = await fetchRootWordHelper(boardId, rootId, userId);
+    //     return rootWord;
+    //   } catch (error) {
+    //     throw error;
+    //   }
+    // },
 
     //Edit Board Modal
     editBoardModalOpen: false,

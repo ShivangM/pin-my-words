@@ -4,11 +4,13 @@ import useBoardStore from '@/store/boardStore';
 import { Dialog, Transition } from '@headlessui/react';
 import { ErrorMessage } from '@hookform/error-message';
 import classNames from 'classnames';
-import { Fragment, useState } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { Fragment } from 'react';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import useUserStore from '@/store/userStore';
 import { Timestamp } from 'firebase/firestore';
 import { toast } from 'react-toastify';
+import Select from 'react-select';
+import options from '@/constants/root-word-types.json';
 
 const AddRootWordModal = () => {
     const [closeAddRootWordModal, addRootWordModalOpen, addRootWord] = useBoardStore(
@@ -16,7 +18,7 @@ const AddRootWordModal = () => {
     );
 
     const [userData] = useUserStore((state) => [state.userData]);
-    const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<RootWord>();
+    const { register, handleSubmit, formState: { errors, isSubmitting }, reset, control } = useForm<RootWord>();
 
     const onSubmit: SubmitHandler<RootWord> = async (data) => {
         const rootWordData = {
@@ -90,6 +92,38 @@ const AddRootWordModal = () => {
                                             <div>
                                                 <label
                                                     className="block text-gray-700 text-sm font-bold mb-2"
+                                                    htmlFor="type"
+                                                >
+                                                    Type
+                                                </label>
+
+                                                <Controller
+                                                    control={control}
+                                                    name="type"
+                                                    rules={{ required: 'Type is required.' }}
+                                                    render={({ field: { onChange, ref } }) => (
+                                                        <Select
+                                                            //@ts-ignore
+                                                            inputRef={ref}
+                                                            onChange={(val) => onChange(val?.value)}
+                                                            options={options}
+                                                            isSearchable={false}
+                                                        />
+                                                    )}
+                                                />
+
+                                                <ErrorMessage
+                                                    errors={errors}
+                                                    name="type"
+                                                    render={({ message }) => (
+                                                        <p className="text-red-500 text-xs italic">{message}</p>
+                                                    )}
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label
+                                                    className="block text-gray-700 text-sm font-bold mb-2"
                                                     htmlFor="root"
                                                 >
                                                     Root Word
@@ -119,7 +153,7 @@ const AddRootWordModal = () => {
                                             <div>
                                                 <label
                                                     className="block text-gray-700 text-sm font-bold mb-2"
-                                                    htmlFor="name"
+                                                    htmlFor="meaning"
                                                 >
                                                     Meaning
                                                 </label>
@@ -148,7 +182,7 @@ const AddRootWordModal = () => {
                                             <div>
                                                 <label
                                                     className="block text-gray-700 text-sm font-bold mb-2"
-                                                    htmlFor="name"
+                                                    htmlFor="description"
                                                 >
                                                     Description (Optional)
                                                 </label>

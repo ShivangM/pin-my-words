@@ -1,14 +1,9 @@
 // LoadingWordsCardPlaceholder.tsx
 import React from 'react';
 import classNames from 'classnames';
-import { BiSolidEdit } from 'react-icons/bi';
-import { AiFillDelete } from 'react-icons/ai';
-import { BoardAccess } from '@/interfaces/Board.d';
-import useBoardStore from '@/store/boardStore';
 import { HiMiniSpeakerWave } from 'react-icons/hi2';
 
 const LoadingWordsCardPlaceholder = ({ idx }: { idx: number }) => {
-    const [userAccess] = useBoardStore((state) => [state.userAccess]);
     return (
         <div
             className={classNames(
@@ -22,20 +17,6 @@ const LoadingWordsCardPlaceholder = ({ idx }: { idx: number }) => {
             </div>
 
             <div className="flex flex-col relative justify-center space-y-6 flex-1 p-6">
-                {/* Edit and Delete Icons */}
-                {
-                    userAccess === BoardAccess.READ_ONLY ? null
-                        :
-                        <div className="w-fit flex items-center space-x-2 absolute top-4 right-4">
-                            <BiSolidEdit
-                                className="w-6 h-6 cursor-pointer text-gray-700"
-                            />
-                            <AiFillDelete
-                                className="w-6 h-6 cursor-pointer text-red-500"
-                            />
-                        </div>
-                }
-
                 <div className="">
                     <div className="bg-gray-200 w-40">
                         <div className="bar bg-gray-300 h-3"></div>
@@ -65,30 +46,6 @@ const LoadingWordsCardPlaceholder = ({ idx }: { idx: number }) => {
                             <div className="bar bg-gray-300 h-3"></div>
                         </li>
                     </ul>
-                </div>
-
-                <div className="space-y-1">
-                    <h4 className="text-sm font-bold">Examples:</h4>
-                    <ol className="space-y-1 text-sm text-gray-500 list-inside list-decimal">
-                        <li className="space-x-1">
-                            {/* Loading bar bg-gray-300 s for Examples */}
-                            <div className="bg-gray-200 inline-block w-80">
-                                <div className="bar bg-gray-300 h-2"></div>
-                            </div>
-                        </li>
-                        <li className="space-x-1">
-                            {/* Loading bar bg-gray-300 s for Examples */}
-                            <div className="bg-gray-200 inline-block w-64">
-                                <div className="bar bg-gray-300 h-2"></div>
-                            </div>
-                        </li>
-                        <li className="space-x-1">
-                            {/* Loading bar bg-gray-300 s for Examples */}
-                            <div className="bg-gray-200 inline-block w-72">
-                                <div className="bar bg-gray-300 h-2"></div>
-                            </div>
-                        </li>
-                    </ol>
                 </div>
 
                 <button

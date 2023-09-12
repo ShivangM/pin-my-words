@@ -1,0 +1,14 @@
+[
+    {
+        "label": "Prefix",
+        "value": "prefix"
+    },
+    {
+        "label": "Base",
+        "value": "base"
+    },
+    {
+        "label": "Suffix",
+        "value": "suffix"
+    }
+]

@@ -5,7 +5,8 @@ import useUserStore from '@/store/userStore';
 import { useEffect, useState } from 'react';
 import moment from 'moment';
 import { AiFillDelete } from 'react-icons/ai';
-import { BiSolidEdit, BiTimeFive } from 'react-icons/bi';
+import { BiTimeFive } from 'react-icons/bi';
+import { IoMdSettings } from 'react-icons/io';
 import { MdUpdate } from 'react-icons/md';
 import { Parallax } from 'react-parallax';
 import SearchWord from '@/components/Board/SearchWord';
@@ -150,7 +151,7 @@ const Board = ({ params: { boardId } }: Props) => {
             </h1>
             {userAccess === BoardAccess.OWNER ? (
               <div className="w-fit flex items-center space-x-2">
-                <BiSolidEdit
+                <IoMdSettings
                   onClick={openEditBoardModal}
                   className="w-6 h-6 cursor-pointer text-gray-700"
                 />
@@ -213,7 +214,7 @@ const Board = ({ params: { boardId } }: Props) => {
         {words && words.length > 0 ? words.map((word, idx) => (
           <WordsCard key={idx} idx={idx} word={word} />
         ))
-          : wordsLoading || boardLoading ? Array.apply(null, Array(5)).map((_, idx) => <WordCardPlaceholder idx={idx} />) : <div className="">No word found.</div>
+          : wordsLoading || boardLoading ? Array.apply(null, Array(5)).map((_, idx) => <WordCardPlaceholder key={idx} idx={idx} />) : <div className="">No word found.</div>
         }
       </div>
     </div>

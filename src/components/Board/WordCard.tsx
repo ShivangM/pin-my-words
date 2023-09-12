@@ -10,10 +10,11 @@ import { BiSolidEdit } from 'react-icons/bi';
 import { HiMiniSpeakerWave } from 'react-icons/hi2';
 
 const WordsCard = ({ word, idx }: { word: Word; idx: number }) => {
-  const [openDeleteWordModal, openEditWordModal, openViewWordModal, userAccess] = useBoardStore((state) => [
+  const [openDeleteWordModal, openEditWordModal, openViewWordModal, openViewRootWordModal, userAccess] = useBoardStore((state) => [
     state.openDeleteWordModal,
     state.openEditWordModal,
     state.openViewWordModal,
+    state.openViewRootWordModal,
     state.userAccess,
   ]);
 
@@ -80,7 +81,7 @@ const WordsCard = ({ word, idx }: { word: Word; idx: number }) => {
           <h4 className="text-sm font-bold">Root Word(s): </h4>
           <ul className="space-x-2 overflow-x-auto text-sm text-gray-900 font-medium cursor-pointer list-inside list-none flex items-center">
             {word.roots && word.roots.length > 0 ? word.roots.map((root) => (
-              <li key={root.value} className="px-2 py-0.5 transition-all ease-in-out duration-300 bg-gray-200 hover:bg-gray-300 rounded-lg">
+              <li key={root.value} onClick={() => openViewRootWordModal(root.value)} className="px-2 py-0.5 transition-all ease-in-out duration-300 bg-gray-200 hover:bg-gray-300 rounded-lg">
                 {root.label}
               </li>
             ))
