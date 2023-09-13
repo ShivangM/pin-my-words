@@ -17,6 +17,11 @@ import fetchBoardUsers from '@/lib/Users/fetchBoardUsers';
 import leaveBoardHelper from '@/lib/Users/leaveBoard';
 import createBoard from '@/lib/Boards/createBoard';
 import fetchBoardsHelper from '@/lib/Boards/fetchBoards';
+import removeUserFromBoard from '@/lib/Users/removeUserFromBoard';
+import updateUserAccess from '@/lib/Users/updateUserAccess';
+import { DayValue } from '@hassanmojab/react-modern-calendar-datepicker';
+import fetchWords from '@/lib/Words/fetchWords';
+import fetchWordsByRoot from '@/lib/Words/fetchWordsByRoot';
 
 interface BoardState {
   //Board operations
@@ -35,6 +40,8 @@ interface BoardState {
   fetchUsers: (userId: string) => Promise<void>;
   fetchUserAccess: (boardId: string, userId: string) => Promise<void>;
   addUser: (user: BoardUser, userId: string) => Promise<void>;
+  removeUser: (user: BoardUser, userId: string) => Promise<void>;
+  updateAccess: (user: BoardUser, userId: string, access: BoardAccess) => Promise<void>;
 
   //Words operations
   words: null | Word[];
@@ -47,6 +54,12 @@ interface BoardState {
   rootWords: null | RootWord[]
   fetchRootWords: (boardId: string, userId: string) => Promise<void>;
   addRootWord: (word: RootWord, userId: string) => Promise<void>;
+
+  //Filter operations
+  filteredWords: null | Word[];
+  filterByDate: (date: DayValue, userId: string) => Promise<void>;
+  filterByRootWord: (rootWordId: string, userId: string) => Promise<void>;
+  resetFilter: () => void;
 
   //Reset
   reset: () => void;
@@ -66,6 +79,9 @@ const initialState = {
 
   //Root Words operations
   rootWords: null,
+
+  //Filter operations
+  filteredWords: null,
 }
 
 const useBoardStore = create<BoardState>()(
@@ -185,6 +201,39 @@ const useBoardStore = create<BoardState>()(
       }
     },
 
+    removeUser: async (user, userId) => {
+      const boardId = get().board?._id;
+      if (!boardId) return;
+
+      try {
+        await removeUserFromBoard(user, userId, boardId);
+        set({
+          users: get().users?.filter((u) => u.uid !== user.uid),
+        });
+      } catch (error) {
+        throw error;
+      }
+    },
+
+    updateAccess: async (user, userId, access) => {
+      const boardId = get().board?._id;
+      if (!boardId) return;
+
+      try {
+        await updateUserAccess(user, userId, boardId, access);
+        set({
+          users: get().users?.map((u) => {
+            if (u.uid === user.uid) {
+              return { ...u, access };
+            }
+            return u;
+          }),
+        });
+      } catch (error) {
+        throw error;
+      }
+    },
+
     //Words operations
     fetchWords: async (boardId, userId) => {
       try {
@@ -280,6 +329,35 @@ const useBoardStore = create<BoardState>()(
     //     throw error;
     //   }
     // },
+
+    //Filter operations
+    filterByDate: async (date, userId) => {
+      const boardId = get().board?._id;
+      if (!boardId) return;
+
+      try {
+        const filteredWords = await fetchWords(boardId, userId, date);
+        set({ filteredWords });
+      } catch (error) {
+        throw error;
+      }
+    },
+
+    filterByRootWord: async (rootWordId, userId) => {
+      const boardId = get().board?._id;
+      if (!boardId) return;
+
+      try {
+        const filteredWords = await fetchWordsByRoot(boardId, userId, rootWordId);
+        set({ filteredWords });
+      } catch (error) {
+        throw error;
+      }
+    },
+
+    resetFilter: () => {
+      set({ filteredWords: null });
+    },
 
     reset: () => {
       set(initialState);

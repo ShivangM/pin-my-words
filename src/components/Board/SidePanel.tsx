@@ -1,13 +1,12 @@
 'use client';
-import useBoardStore from '@/store/boardStore';
 import { Tab } from '@headlessui/react';
 import classNames from 'classnames';
 import { AiFillCloseCircle } from 'react-icons/ai';
 import { useState } from 'react';
-import DateFilter from '../SidePanel/DateFilter';
 import Users from '../SidePanel/Users';
 import Activity from '../SidePanel/Activity';
 import useUIStore from '@/store/uiStore';
+import Filters from '../SidePanel/Filters';
 
 const SidePanel = () => {
   const [sidePanelOpen, toggleSidePanel] = useUIStore((state) => [
@@ -16,7 +15,7 @@ const SidePanel = () => {
   ]);
 
   let [options] = useState({
-    Filters: DateFilter,
+    Filters: Filters,
     Users: Users,
     Activity: Activity,
   });
@@ -35,7 +34,7 @@ const SidePanel = () => {
         </button>
       </div>
 
-      <div className="w-80 xl:w-96">
+      <div className="w-80">
         <Tab.Group>
           <Tab.List className="w-full flex space-x-1 rounded-xl bg-blue-900/20 p-1">
             {Object.keys(options).map((category) => (

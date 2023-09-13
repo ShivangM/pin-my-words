@@ -3,43 +3,46 @@ import useBoardStore from '@/store/boardStore';
 import useUIStore from '@/store/uiStore';
 import useUserStore from '@/store/userStore';
 import { Dialog, Transition } from '@headlessui/react';
-import { useRouter } from 'next/navigation';
 import { Fragment, useState } from 'react';
 import { toast } from 'react-toastify';
 type Props = {};
 
-const LeaveBoardModal = (props: Props) => {
-    const [leaveBoard] = useBoardStore((state) => [state.leaveBoard]);
-    const [leaveBoardModalOpen, toggleLeaveBoardModal] = useUIStore(state => [state.leaveBoardModalOpen, state.toggleLeaveBoardModal])
+const RemoveUserModal = (props: Props) => {
+    const [removeUser] =
+        useBoardStore((state) => [
+            state.removeUser,
+        ]);
+
+    const [removeUserModalOpen, toggleRemoveUserModal, focusedUser] = useUIStore(state => [state.removeUserModalOpen, state.toggleRemoveUserModal, state.focusedUser])
 
     const userData = useUserStore((state) => state.userData);
-    const [leaveBoardLoading, setLeaveBoardLoading] = useState<boolean>(false)
-    const router = useRouter();
+    const [removeUserLoading, setRemoveUserLoading] = useState<boolean>(false)
 
-    const handleLeaveBoard = async () => {
-        setLeaveBoardLoading(true);
-        toast.loading('Leaving board...', {
-            toastId: 'leave-board',
-        });
+    const handleRemoveUser = async () => {
+        if (!focusedUser) return
 
+        setRemoveUserLoading(true)
+        toast.loading('Removing user...', {
+            toastId: 'remove-user'
+        })
         try {
-            await leaveBoard(userData?.uid!);
-            router.push('/boards');
+            await removeUser(focusedUser, userData?.uid!)
         } catch (error: any) {
-            toast.error(error.message);
+            toast.error(error.message)
         } finally {
-            setLeaveBoardLoading(false);
-            toggleLeaveBoardModal();
-            toast.dismiss('leave-board');
+            setRemoveUserLoading(false)
+            toggleRemoveUserModal(null)
+            toast.dismiss('remove-user')
         }
-    };
+    }
+
     return (
         <>
-            <Transition show={leaveBoardModalOpen} as={Fragment}>
+            <Transition show={removeUserModalOpen} as={Fragment}>
                 <Dialog
                     as="div"
                     className="relative z-50"
-                    onClose={toggleLeaveBoardModal}
+                    onClose={() => toggleRemoveUserModal(null)}
                 >
                     <Transition.Child
                         as={Fragment}
@@ -70,28 +73,29 @@ const LeaveBoardModal = (props: Props) => {
                                             as="h3"
                                             className="text-lg font-medium leading-6 text-gray-900"
                                         >
-                                            Leave Board
+                                            Remove User
                                         </Dialog.Title>
                                         <div className="mt-2">
                                             <p className="text-sm text-gray-500">
-                                                Are you sure you want to leave this board?
+                                                Are you sure you want to remove <span className='font-bold'>{focusedUser?.name}</span>?
                                             </p>
                                         </div>
                                     </div>
 
                                     <div className="mt-4 flex items-center space-x-4">
                                         <button
-                                            onClick={toggleLeaveBoardModal}
+                                            onClick={() => toggleRemoveUserModal(null)}
                                             className="modalBtnPrev"
+                                            disabled={removeUserLoading}
                                         >
                                             Cancel
                                         </button>
                                         <button
-                                            onClick={handleLeaveBoard}
                                             className="modalBtnNext"
-                                            disabled={leaveBoardLoading}
+                                            onClick={handleRemoveUser}
+                                            disabled={removeUserLoading}
                                         >
-                                            Leave Board
+                                            Remove User
                                         </button>
                                     </div>
                                 </Dialog.Panel>
@@ -104,4 +108,4 @@ const LeaveBoardModal = (props: Props) => {
     );
 };
 
-export default LeaveBoardModal;
+export default RemoveUserModal;

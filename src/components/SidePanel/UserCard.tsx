@@ -5,6 +5,7 @@ import { BiDotsVerticalRounded } from 'react-icons/bi';
 import { Menu, Transition } from '@headlessui/react'
 import useBoardStore from '@/store/boardStore';
 import Link from 'next/link';
+import useUIStore from '@/store/uiStore';
 
 type Props = {
   user: BoardUser;
@@ -12,6 +13,7 @@ type Props = {
 
 const UserCard = ({ user }: Props) => {
   const [userAccess, owner] = useBoardStore((state) => [state.userAccess, state.board?.owner]);
+  const [toggleUpdateUserAccessModal, toggleRemoveUserModal] = useUIStore((state) => [state.toggleUpdateUserAccessModal, state.toggleRemoveUserModal])
 
   return (
     <div className="relative flex items-center justify-between rounded-md p-3">
@@ -28,7 +30,7 @@ const UserCard = ({ user }: Props) => {
       </div>
 
       {
-        (userAccess === BoardAccess.ADMIN || userAccess === BoardAccess.OWNER) && user.uid !== owner ?
+        (userAccess === BoardAccess.ADMIN || userAccess === BoardAccess.OWNER) && user.access !== BoardAccess.OWNER ?
           <Menu as="div" className="relative inline-block text-left">
             <div>
               <Menu.Button className="inline-flex w-full justify-center rounded-md bg-black bg-opacity-5 p-2 text-sm font-medium text-gray-900 hover:bg-opacity-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
@@ -51,6 +53,7 @@ const UserCard = ({ user }: Props) => {
                       <button
                         className={`${active ? 'bg-gray-100' : 'text-gray-900'
                           } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                        onClick={() => toggleUpdateUserAccessModal(user)}
                       >
                         Edit Access
                       </button>
@@ -62,6 +65,7 @@ const UserCard = ({ user }: Props) => {
                       <button
                         className={`${active ? 'bg-gray-100' : 'text-gray-900'
                           } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                        onClick={() => toggleRemoveUserModal(user)}
                       >
                         Remove User
                       </button>

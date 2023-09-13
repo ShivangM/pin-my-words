@@ -29,7 +29,7 @@ const fetchBoardUsers = async (boardId: string, userId: string): Promise<BoardUs
             const docData = userDoc.data();
             const access = docData.access as BoardAccess;
             const user = await fetchUser(docData.userId);
-            userResults.push({ access, ...user });
+            userResults.push({ access, ...user, uid: docData.userId });
         }
 
         return userResults;

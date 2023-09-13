@@ -43,7 +43,7 @@ const WordsCard = ({ word, idx }: { word: Word; idx: number }) => {
     <div
       className={classNames(
         'flex flex-col overflow-hidden bg-gray-100 rounded-md shadow-sm',
-        idx % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'
+        idx % 2 === 0 ? 'xl:flex-row' : 'xl:flex-row-reverse'
       )}
     >
       <div className="relative h-80 aspect-square">
@@ -57,7 +57,7 @@ const WordsCard = ({ word, idx }: { word: Word; idx: number }) => {
 
       <div className="flex flex-col relative justify-center space-y-6 flex-1 p-6">
         <div className="flex items-center justify-between">
-          <p className='text-xs text-gray-400' >Last Updated {moment(word.updatedAt.toDate()).fromNow()}</p>
+          <p className='text-xs text-gray-400' ><span className='font-medium text-gray-500' >Last Updated:</span> {moment(word.updatedAt.toDate()).fromNow()}</p>
           {
             userAccess === BoardAccess.READ_ONLY ? null
               :

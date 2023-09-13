@@ -24,6 +24,8 @@ const createBoard = async (board: Board, users?: BoardUser[], image?: File): Pro
                     boardId: boardRef.id,
                     userId: user.uid!,
                     access: user.access,
+                    addedOn: Timestamp.now(),
+                    updatedOn: Timestamp.now(),
                 });
 
                 addUserPromises.push(addUserPromise);

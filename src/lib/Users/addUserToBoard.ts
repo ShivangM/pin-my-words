@@ -1,5 +1,5 @@
 import db from "@/utils/firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { Timestamp, doc, getDoc, setDoc } from "firebase/firestore";
 import fetchUserAccess from "./fetchUserAccess";
 import { BoardAccess, BoardUser } from "@/interfaces/Board.d";
 
@@ -27,6 +27,8 @@ const addUserToBoard = async (
             boardId: boardRef.id,
             userId: user.uid!,
             access: user.access,
+            addedOn: Timestamp.now(),
+            updatedOn: Timestamp.now(),
         });
 
         return user;

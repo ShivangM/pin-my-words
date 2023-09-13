@@ -27,6 +27,7 @@ const DateFilter = () => {
         month: today.getMonth() + 1,
         day: today.getDate(),
       }}
+      calendarClassName='!w-full'
     />
   );
 };

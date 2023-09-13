@@ -1,9 +1,10 @@
-import { RootWord, Word } from '@/interfaces/Word';
+import { Word } from '@/interfaces/Word';
 import db from '@/utils/firebase';
-import { DocumentData, DocumentSnapshot, collection, doc, getDoc, getDocs, orderBy, query, where } from 'firebase/firestore';
+import { Timestamp, collection, getDocs, orderBy, query, where } from 'firebase/firestore';
 import fetchUserAccess from '../Users/fetchUserAccess';
+import { DayValue } from 'react-modern-calendar-datepicker';
 
-const fetchWords = async (boardId: string, userId: string): Promise<Word[]> => {
+const fetchWords = async (boardId: string, userId: string, date?: DayValue): Promise<Word[]> => {
   try {
     const userAccess = await fetchUserAccess(
       boardId,
@@ -15,7 +16,17 @@ const fetchWords = async (boardId: string, userId: string): Promise<Word[]> => {
     }
 
     const wordsCollection = collection(db, 'boards', boardId, 'words');
-    const q = query(wordsCollection, orderBy('createdAt', 'desc'));
+    let q = query(wordsCollection, orderBy('createdAt', 'desc'));
+
+    if (date) {
+      const startDate = new Date(date.year, date.month - 1, date.day);
+      const endDate = new Date(date.year, date.month - 1, date.day + 1);
+      const startDateTimestamp = Timestamp.fromDate(startDate);
+      const endDateTimestamp = Timestamp.fromDate(endDate);
+
+      q = query(wordsCollection, where('createdAt', '>=', startDateTimestamp), where('createdAt', '<', endDateTimestamp), orderBy('createdAt', 'desc'));
+    }
+
     const wordsDocs = await getDocs(q);
 
     const words: Word[] = [];

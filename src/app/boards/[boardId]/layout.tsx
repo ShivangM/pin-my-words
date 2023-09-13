@@ -11,6 +11,8 @@ import ViewRootWordModal from '@/components/Board/ViewRootWordModal';
 import ViewWordModal from '@/components/Board/ViewWordModal';
 import AddUserModal from '@/components/SidePanel/AddUserModal';
 import LeaveBoardModal from '@/components/SidePanel/LeaveBoardModal';
+import RemoveUserModal from '@/components/SidePanel/RemoveUserModal';
+import UpdateUserAccessModal from '@/components/SidePanel/UpdateUserAccessModal';
 import React from 'react';
 
 export default function BoardLayout({
@@ -26,6 +28,8 @@ export default function BoardLayout({
       {/* Users  */}
       <LeaveBoardModal />
       <AddUserModal />
+      <RemoveUserModal />
+      <UpdateUserAccessModal />
 
       {/* Root Word Options  */}
       <AddRootWordModal />

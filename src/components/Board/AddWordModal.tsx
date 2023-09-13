@@ -60,6 +60,7 @@ const AddWordModal = () => {
 
     try {
       await addWord(wordData, userData?.uid!, image);
+      toast.success('Word added successfully!');
     } catch (error: any) {
       toast.error(error.message)
     } finally {
