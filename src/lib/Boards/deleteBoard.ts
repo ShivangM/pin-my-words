@@ -45,7 +45,7 @@ const deleteBoard = async (
     await deleteDoc(boardRef);
 
     //Deleting images from storage if existed
-    if (board.metadata.image) {
+    if (board.image) {
       const imageRef = ref(storage, 'boards/' + boardId + "/cover");
       await deleteObject(imageRef);
     }
