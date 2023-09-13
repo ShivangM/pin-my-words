@@ -4,6 +4,7 @@ import React, { Fragment } from 'react';
 import { BiDotsVerticalRounded } from 'react-icons/bi';
 import { Menu, Transition } from '@headlessui/react'
 import useBoardStore from '@/store/boardStore';
+import Link from 'next/link';
 
 type Props = {
   user: BoardUser;
@@ -17,7 +18,7 @@ const UserCard = ({ user }: Props) => {
       <div className="flex items-center space-x-2">
         <Image height={30} width={30} src={user.image || '/assets/Dummy Profile.png'} alt={user.name} className="rounded-full" />
         <div className="">
-          <h3 className="text-sm font-medium leading-5">{user.name}</h3>
+          <Link href={`/profile/${user.uid}`} className="text-sm hover:underline font-medium leading-5">{user.name}</Link>
           <ul className="mt-1 flex space-x-1 text-xs font-normal leading-4 text-gray-500">
             <li className='w-28 truncate'>{user?.email}</li>
             <li>&middot;</li>

@@ -9,15 +9,11 @@ import { HiMiniSpeakerWave } from 'react-icons/hi2';
 import { MdUpdate } from 'react-icons/md';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import useUIStore from '@/store/uiStore';
 type Props = {};
 
 const ViewWordModal = (props: Props) => {
-    const [closeViewWordModal, viewWordModalOpen, focusedWord] =
-        useBoardStore((state) => [
-            state.closeViewWordModal,
-            state.viewWordModalOpen,
-            state.focusedWord
-        ]);
+    const [viewWordModalOpen, toggleViewWordModal, focusedWord] = useUIStore((state) => [state.viewWordModalOpen, state.toggleViewWordModal, state.focusedWord]);
 
     const [utterance, setUtterance] = useState<SpeechSynthesisUtterance | null>(null);
     const [synth, setSynth] = useState<SpeechSynthesis | null>(null);
@@ -40,7 +36,7 @@ const ViewWordModal = (props: Props) => {
                 <Dialog
                     as="div"
                     className="relative z-50"
-                    onClose={closeViewWordModal}
+                    onClose={() => toggleViewWordModal(null)}
                 >
                     <Transition.Child
                         as={Fragment}
@@ -146,7 +142,7 @@ const ViewWordModal = (props: Props) => {
 
                                     <div className="mt-4 flex items-center space-x-4">
                                         <button
-                                            onClick={closeViewWordModal}
+                                            onClick={() => toggleViewWordModal(null)}
                                             className="modalBtnPrev"
                                         >
                                             Close

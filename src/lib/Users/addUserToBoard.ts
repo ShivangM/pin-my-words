@@ -5,8 +5,8 @@ import { BoardAccess, BoardUser } from "@/interfaces/Board.d";
 
 const addUserToBoard = async (
     boardId: string,
-    user: BoardUser,
     userId: string,
+    user: BoardUser,
 ): Promise<BoardUser> => {
 
     try {
@@ -19,8 +19,8 @@ const addUserToBoard = async (
 
         const userAccess = await fetchUserAccess(boardId, userId);
 
-        if (!userAccess || userAccess === BoardAccess.READ_ONLY) {
-            throw new Error('User does not have write access to this board');
+        if (!userAccess || userAccess === BoardAccess.READ_ONLY || userAccess === BoardAccess.READ_WRITE) {
+            throw new Error('User does not have access to add users to this board');
         }
 
         await setDoc(doc(db, 'users-boards', user.uid! + '_' + boardRef.id), {

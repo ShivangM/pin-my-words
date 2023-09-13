@@ -5,7 +5,7 @@ import { Board } from '@/interfaces/Board';
 import useUserStore from '@/store/userStore';
 
 const BoardCard = ({ board }: { board: Board }) => {
-  const { _id, createdAt, metadata, owner } = board;
+  const { _id, description, image, name, owner } = board;
   const userData = useUserStore((state) => state.userData);
 
   return (
@@ -15,8 +15,8 @@ const BoardCard = ({ board }: { board: Board }) => {
     >
       <div className="w-full relative rounded-md overflow-hidden aspect-square">
         <Image
-          src={metadata?.image || '/assets/board-placeholder.svg'}
-          alt={metadata?.name}
+          src={image || '/assets/board-placeholder.svg'}
+          alt={name}
           fill
           className="group-hover:scale-105 transition-all ease-in-out duration-500 object-cover object-center"
           objectFit="cover"
@@ -27,10 +27,10 @@ const BoardCard = ({ board }: { board: Board }) => {
           {owner === userData?.uid ? 'Owned' : 'Shared with you'}
         </span>
         <h2 className="text-xl font-semibold group-hover:underline">
-          {metadata?.name}
+          {name}
         </h2>
       </div>
-      <p className="">{metadata?.description}</p>
+      <p className="">{description}</p>
     </Link>
   );
 };

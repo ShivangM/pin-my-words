@@ -11,11 +11,14 @@ import { Timestamp } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import Select from 'react-select';
 import options from '@/constants/root-word-types.json';
+import useUIStore from '@/store/uiStore';
 
 const AddRootWordModal = () => {
-    const [closeAddRootWordModal, addRootWordModalOpen, addRootWord] = useBoardStore(
-        (state) => [state.closeAddRootWordModal, state.addRootWordModalOpen, state.addRootWord]
+    const [addRootWord] = useBoardStore(
+        (state) => [state.addRootWord]
     );
+
+    const [addRootWordModalOpen, toggleAddRootWordModal] = useUIStore(state => [state.addRootWordModalOpen, state.toggleAddRootWordModal])
 
     const [userData] = useUserStore((state) => [state.userData]);
     const { register, handleSubmit, formState: { errors, isSubmitting }, reset, control } = useForm<RootWord>();
@@ -40,7 +43,7 @@ const AddRootWordModal = () => {
             toast.error(error.message)
         } finally {
             toast.dismiss('add-rootword');
-            closeAddRootWordModal();
+            toggleAddRootWordModal();
             reset();
         }
     }
@@ -48,7 +51,7 @@ const AddRootWordModal = () => {
     return (
         <>
             <Transition show={addRootWordModalOpen} as={Fragment}>
-                <Dialog as="div" className="relative z-50" onClose={closeAddRootWordModal}>
+                <Dialog as="div" className="relative z-50" onClose={toggleAddRootWordModal}>
                     <Transition.Child
                         as={Fragment}
                         enter="ease-out duration-300"
@@ -78,11 +81,11 @@ const AddRootWordModal = () => {
                                             as="h3"
                                             className="text-lg font-medium leading-6 text-gray-900"
                                         >
-                                            Add Word To Board
+                                            Add Root Word To Board
                                         </Dialog.Title>
                                         <div className="mt-2">
                                             <p className="text-sm text-gray-500">
-                                                Add a word to this board.
+                                                Add a root word to this board.
                                             </p>
                                         </div>
                                     </div>
@@ -210,7 +213,7 @@ const AddRootWordModal = () => {
                                         <div className="mt-4 flex items-center space-x-4">
                                             <button
                                                 type="button"
-                                                onClick={closeAddRootWordModal}
+                                                onClick={toggleAddRootWordModal}
                                                 className="modalBtnPrev"
                                                 disabled={isSubmitting}
                                             >

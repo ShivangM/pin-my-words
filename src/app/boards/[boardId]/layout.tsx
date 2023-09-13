@@ -9,6 +9,8 @@ import SidePanel from '@/components/Board/SidePanel';
 import SidePanelBackdrop from '@/components/Board/SidePanelBackdrop';
 import ViewRootWordModal from '@/components/Board/ViewRootWordModal';
 import ViewWordModal from '@/components/Board/ViewWordModal';
+import AddUserModal from '@/components/SidePanel/AddUserModal';
+import LeaveBoardModal from '@/components/SidePanel/LeaveBoardModal';
 import React from 'react';
 
 export default function BoardLayout({
@@ -20,6 +22,10 @@ export default function BoardLayout({
     <>
       <SidePanelBackdrop />
       <OpenSidePanelButton />
+
+      {/* Users  */}
+      <LeaveBoardModal />
+      <AddUserModal />
 
       {/* Root Word Options  */}
       <AddRootWordModal />

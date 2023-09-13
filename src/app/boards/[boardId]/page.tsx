@@ -12,6 +12,7 @@ import { Parallax } from 'react-parallax';
 import SearchWord from '@/components/Board/SearchWord';
 import { BoardAccess } from '@/interfaces/Board.d';
 import WordCardPlaceholder from '@/components/Board/WordCardPlaceholder';
+import useUIStore from '@/store/uiStore';
 
 type Props = {
   params: {
@@ -43,10 +44,6 @@ const Board = ({ params: { boardId } }: Props) => {
     fetchWords,
     rootWords,
     fetchRootWords,
-    openDeleteBoardModal,
-    openEditBoardModal,
-    openAddWordModal,
-    openAddRootWordModal,
     reset,
   ] = useBoardStore((state) => [
     state.userAccess,
@@ -57,12 +54,10 @@ const Board = ({ params: { boardId } }: Props) => {
     state.fetchWords,
     state.rootWords,
     state.fetchRootWords,
-    state.openDeleteBoardModal,
-    state.openEditBoardModal,
-    state.openAddWordModal,
-    state.openAddRootWordModal,
     state.reset
   ]);
+
+  const [toggleAddWordModal, toggleAddRootWordModal, toggleDeleteBoardModal, toggleEditBoardModal] = useUIStore(state => [state.toggleAddWordModal, state.toggleAddRootWordModal, state.toggleDeleteBoardModal, state.toggleEditBoardModal])
 
   useEffect(() => {
     const fetchUserAccessFunction = async () => {
@@ -134,8 +129,8 @@ const Board = ({ params: { boardId } }: Props) => {
     <div className="space-y-8">
       <Parallax
         blur={{ min: -15, max: 15 }}
-        bgImage={board?.metadata?.image || '/assets/board-placeholder.svg'}
-        bgImageAlt={board?.metadata?.name}
+        bgImage={board?.image || '/assets/board-placeholder.svg'}
+        bgImageAlt={board?.name}
         bgStyle={{ objectFit: 'cover' }}
         bgImageStyle={{ objectFit: 'cover' }}
         strength={-300}
@@ -147,23 +142,23 @@ const Board = ({ params: { boardId } }: Props) => {
         <div className="">
           <div className="flex items-center justify-between w-full">
             <h1 className="text-2xl text-gray-900 font-bold flex-1 text-left">
-              {board?.metadata?.name}
+              {board?.name}
             </h1>
             {userAccess === BoardAccess.OWNER ? (
               <div className="w-fit flex items-center space-x-2">
                 <IoMdSettings
-                  onClick={openEditBoardModal}
+                  onClick={toggleEditBoardModal}
                   className="w-6 h-6 cursor-pointer text-gray-700"
                 />
                 <AiFillDelete
-                  onClick={openDeleteBoardModal}
+                  onClick={toggleDeleteBoardModal}
                   className="w-6 h-6 cursor-pointer text-red-500"
                 />
               </div>
             ) : null}
           </div>
           <p className="text-gray-500 text-sm">
-            {board?.metadata?.description}
+            {board?.description}
           </p>
         </div>
 
@@ -199,11 +194,11 @@ const Board = ({ params: { boardId } }: Props) => {
           userAccess === BoardAccess.READ_ONLY ? null
             :
             <div className="flex items-center space-x-2">
-              <button onClick={openAddRootWordModal} className="btn">
+              <button onClick={toggleAddRootWordModal} className="btn">
                 Add Root Word
               </button>
 
-              <button onClick={openAddWordModal} className="btn">
+              <button onClick={toggleAddWordModal} className="btn">
                 Add Word
               </button>
             </div>

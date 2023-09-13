@@ -9,14 +9,16 @@ import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import Select from 'react-select';
 import options from '@/constants/parts-of-speech.json';
 import { IoIosCloseCircle } from 'react-icons/io';
-import Image from 'next/image';
 import useUserStore from '@/store/userStore';
 import { Timestamp } from 'firebase/firestore';
 import { toast } from 'react-toastify';
+import useUIStore from '@/store/uiStore';
+import UploadImage from '../UploadImage';
+import useImageUploadStore from '@/store/imageUploadStore';
 
 const EditWordModal = () => {
-  const [closeEditWordModal, editWordModalOpen, editWord, focusedWord, rootWords] = useBoardStore(state => [state.closeEditWordModal, state.editWordModalOpen, state.editWord, state.focusedWord, state.rootWords]
-  );
+  const [editWord, rootWords] = useBoardStore(state => [state.editWord, state.rootWords]);
+  const [editWordModalOpen, toggleEditWordModal, focusedWord] = useUIStore(state => [state.editWordModalOpen, state.toggleEditWordModal, state.focusedWord]);
 
   const [userData] = useUserStore((state) => [state.userData]);
   const { register, handleSubmit, control, formState: { errors, isSubmitting }, reset } = useForm<Word>();
@@ -26,7 +28,6 @@ const EditWordModal = () => {
     if (focusedWord) {
       reset(focusedWord)
       setExamples(focusedWord.examples || [])
-      setPreviewImage(focusedWord.image)
     }
   }, [focusedWord])
 
@@ -46,54 +47,7 @@ const EditWordModal = () => {
     setExamples(examples.filter((_, index) => index !== idx));
   }
 
-  // Image Upload and Preview
-  const imageRef = useRef<HTMLInputElement | null>(null);
-  const [image, setImage] = useState<File>()
-  const [previewImage, setPreviewImage] = useState<string>()
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      setImage(file);
-      setPreviewImage(URL.createObjectURL(file));
-    }
-  };
-
-  const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
-    if (e.clipboardData.files.length > 0) {
-      const file = e.clipboardData.files[0];
-      setImage(file);
-      setPreviewImage(URL.createObjectURL(file));
-    }
-  }
-
-  // drag state
-  const [dragActive, setDragActive] = useState(false);
-
-  // handle drag events
-  const handleDrag = function (e: React.DragEvent<HTMLDivElement>) {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    if (e.dataTransfer.files.length > 0) {
-      const file = e.dataTransfer.files[0];
-      setImage(file);
-      setPreviewImage(URL.createObjectURL(file));
-    }
-  }
-
-  const resetImage = () => {
-    setImage(undefined);
-    setPreviewImage(undefined);
-  }
+  const [image] = useImageUploadStore((state) => [state.image]);
 
   const onSubmit: SubmitHandler<Word> = async (data) => {
     const wordData: Word = {
@@ -116,7 +70,7 @@ const EditWordModal = () => {
       toast.error(error.message)
     } finally {
       toast.dismiss('edit-word');
-      closeEditWordModal();
+      toggleEditWordModal(null);
       reset();
     }
   }
@@ -124,7 +78,7 @@ const EditWordModal = () => {
   return (
     <>
       <Transition show={editWordModalOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50" onClose={closeEditWordModal}>
+        <Dialog as="div" className="relative z-50" onClose={() => toggleEditWordModal(null)}>
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -354,20 +308,7 @@ const EditWordModal = () => {
                           Image (Optional)
                         </label>
 
-                        <input hidden onChange={handleChange} ref={imageRef} type="file" />
-
-                        <div onPaste={handlePaste} onDragEnter={handleDrag} onDragLeave={() => setDragActive(false)} onDrop={handleDrop} className={classNames("border-2 space-y-3 rounded-md border-dashed p-4 flex flex-col items-center justify-center focus:border-gray-600 transition-all ease-in-out duration-300", dragActive ? "border-brand" : "border-gray-500")}>
-                          <Image
-                            src={previewImage || '/assets/board-placeholder.svg'}
-                            onClick={() => imageRef?.current?.click()}
-                            alt="Board Image"
-                            width={500}
-                            height={288}
-                            className="object-cover cursor-pointer object-center w-full rounded-md"
-                          />
-                          <p className='text-sm text-gray-900' >Add image by selecting, or paste it.</p>
-                          <button type='button' onClick={resetImage} className='modalBtnPrev text-sm' >Reset</button>
-                        </div>
+                        <UploadImage />
                       </div>
                     </div>
 
@@ -375,7 +316,7 @@ const EditWordModal = () => {
                     <div className="mt-4 flex items-center space-x-4">
                       <button
                         type="button"
-                        onClick={closeEditWordModal}
+                        onClick={() => toggleEditWordModal(null)}
                         className="modalBtnPrev"
                         disabled={isSubmitting}
                       >

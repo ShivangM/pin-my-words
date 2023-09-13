@@ -1,23 +1,21 @@
-import { Board, BoardAccess, BoardUser, Metadata } from "@/interfaces/Board.d";
+import { Board, BoardAccess, BoardUser } from "@/interfaces/Board.d";
 import db, { storage } from "@/utils/firebase";
 import { Timestamp, addDoc, collection, doc, setDoc, updateDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
-const createBoard = async (metadata: Metadata, owner: string, image: File | null, users: BoardUser[] | null): Promise<Board> => {
-    let board: Board = {
-        _id: '',
-        metadata,
-        owner,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
-    };
-
+const createBoard = async (board: Board, users?: BoardUser[], image?: File): Promise<Board> => {
     try {
         const boardsCollection = collection(db, 'boards');
-        const boardRef = await addDoc(boardsCollection, board);
+        const boardRef = await addDoc(boardsCollection, { ...board, createdAt: Timestamp.now(), updatedAt: Timestamp.now() });
 
-        board = { ...board, _id: boardRef.id };
+        //Add owner to board
+        await setDoc(doc(db, 'users-boards', board.owner + '_' + boardRef.id), {
+            boardId: boardRef.id,
+            userId: board.owner,
+            access: BoardAccess.OWNER,
+        });
 
+        //Add users to board
         if (users) {
             let addUserPromises: Promise<void>[] = [];
 
@@ -34,40 +32,25 @@ const createBoard = async (metadata: Metadata, owner: string, image: File | null
             await Promise.all(addUserPromises);
         }
 
-        setDoc(doc(db, 'users-boards', owner + '_' + boardRef.id), {
-            boardId: boardRef.id,
-            userId: owner,
-            access: BoardAccess.OWNER,
-        });
-
         //Upload Image to Storage
+        let imageUrl = undefined;
+
         if (image) {
             const imageRef = ref(storage, 'boards/' + boardRef.id + "/" + "cover");
-            const imageBlob = new Blob([image], { type: 'image/jpeg' });
-
-            await uploadBytes(imageRef, imageBlob, {
-                contentType: 'image/jpeg',
-            }).then((snapshot) => {
-                getDownloadURL(snapshot.ref).then((downloadURL) => {
-                    updateDoc(boardRef, {
-                        metadata: {
-                            ...metadata,
-                            image: downloadURL,
-                        },
-                    });
-
-                    board = {
-                        ...board,
-                        metadata: {
-                            ...metadata,
-                            image: downloadURL,
-                        },
-                    } as Board;
-                });
-            });
+            await uploadBytes(imageRef, image);
+            imageUrl = await getDownloadURL(imageRef);
+            updateDoc(boardRef, { image: imageUrl });
         }
 
-        return board;
+        const createdBoard = {
+            ...board,
+            _id: boardRef.id,
+            createdAt: Timestamp.now(),
+            updatedAt: Timestamp.now(),
+            image: imageUrl,
+        };
+
+        return createdBoard;
     } catch (error) {
         throw error;
     }

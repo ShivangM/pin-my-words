@@ -9,7 +9,7 @@ import {
   where,
 } from 'firebase/firestore';
 
-const fetchBoardsByUid = async (uid: string): Promise<Board[]> => {
+const fetchBoards = async (uid: string): Promise<Board[]> => {
   let boards: Board[] = [];
 
   try {
@@ -40,4 +40,4 @@ const fetchBoardsByUid = async (uid: string): Promise<Board[]> => {
   return boards;
 };
 
-export default fetchBoardsByUid;
+export default fetchBoards;

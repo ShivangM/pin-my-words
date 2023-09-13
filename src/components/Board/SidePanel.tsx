@@ -7,11 +7,12 @@ import { useState } from 'react';
 import DateFilter from '../SidePanel/DateFilter';
 import Users from '../SidePanel/Users';
 import Activity from '../SidePanel/Activity';
+import useUIStore from '@/store/uiStore';
 
 const SidePanel = () => {
-  const [sidePanelOpen, closeSidePanel] = useBoardStore((state) => [
+  const [sidePanelOpen, toggleSidePanel] = useUIStore((state) => [
     state.sidePanelOpen,
-    state.closeSidePanel,
+    state.toggleSidePanel,
   ]);
 
   let [options] = useState({
@@ -29,7 +30,7 @@ const SidePanel = () => {
     >
       {/* Side Panel  */}
       <div className="w-full flex mb-4 items-center justify-end">
-        <button onClick={closeSidePanel} className="text-red-500 lg:hidden">
+        <button onClick={toggleSidePanel} className="text-red-500 lg:hidden">
           <AiFillCloseCircle className="h-6 w-6" />
         </button>
       </div>
@@ -46,7 +47,7 @@ const SidePanel = () => {
                     'ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2',
                     selected
                       ? 'bg-white shadow'
-                      : 'text-blue-100 hover:bg-white/[0.12] hover:text-white'
+                      : 'hover:bg-white/[0.12]'
                   )
                 }
               >

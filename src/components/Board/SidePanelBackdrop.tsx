@@ -1,11 +1,11 @@
 'use client';
-import useBoardStore from '@/store/boardStore';
+import useUIStore from '@/store/uiStore';
 import classNames from 'classnames';
 
 type Props = {};
 
 const SidePanelBackdrop = (props: Props) => {
-  const [sidePanelOpen] = useBoardStore((state) => [state.sidePanelOpen]);
+  const [sidePanelOpen] = useUIStore((state) => [state.sidePanelOpen]);
 
   return (
     <div

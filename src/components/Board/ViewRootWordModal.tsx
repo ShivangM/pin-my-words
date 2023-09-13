@@ -5,20 +5,12 @@ import classNames from 'classnames';
 import moment from 'moment';
 import { Fragment } from 'react';
 import { BiTimeFive } from 'react-icons/bi';
-import { HiMiniSpeakerWave } from 'react-icons/hi2';
 import { MdUpdate } from 'react-icons/md';
-import { useEffect, useState } from 'react';
-import Image from 'next/image';
-import { RootWord } from '@/interfaces/Word';
+import useUIStore from '@/store/uiStore';
 type Props = {};
 
 const ViewRootWordModal = (props: Props) => {
-    const [closeViewRootWordModal, viewRootWordModalOpen, focusedRootWord] =
-        useBoardStore((state) => [
-            state.closeViewRootWordModal,
-            state.viewRootWordModalOpen,
-            state.focusedRootWord,
-        ]);
+    const [viewRootWordModalOpen, toggleViewRootWordModal, focusedRootWord] = useUIStore((state) => [state.viewRootWordModalOpen, state.toggleViewRootWordModal, state.focusedRootWord]);
 
     return (
         <>
@@ -26,7 +18,7 @@ const ViewRootWordModal = (props: Props) => {
                 <Dialog
                     as="div"
                     className="relative z-50"
-                    onClose={closeViewRootWordModal}
+                    onClose={() => toggleViewRootWordModal(null)}
                 >
                     <Transition.Child
                         as={Fragment}
@@ -92,7 +84,7 @@ const ViewRootWordModal = (props: Props) => {
 
                                     <div className="mt-4 flex items-center space-x-4">
                                         <button
-                                            onClick={closeViewRootWordModal}
+                                            onClick={() => toggleViewRootWordModal(null)}
                                             className="modalBtnPrev"
                                         >
                                             Close

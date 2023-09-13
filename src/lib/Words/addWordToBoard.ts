@@ -51,7 +51,7 @@ const addWordToBoard = async (
             }
         }
 
-        let imageUrl = word.image;
+        let imageUrl = undefined;
 
         if (image) {
             const storageRef = ref(storage, `boards/${boardId}/words/${wordDoc.id}`);

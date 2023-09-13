@@ -1,4 +1,4 @@
-import { Board, Metadata } from '@/interfaces/Board.d';
+import { Board } from '@/interfaces/Board.d';
 import db, { storage } from '@/utils/firebase';
 import { doc, getDoc, Timestamp, updateDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
@@ -6,7 +6,7 @@ import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 const updateBoard = async (
   userId: string,
   boardId: string,
-  metadata: Metadata,
+  boardData: Board,
   image?: File
 ): Promise<Board> => {
   try {
@@ -23,9 +23,9 @@ const updateBoard = async (
       throw new Error('User does not have access to edit this board');
     }
 
-    await updateDoc(boardRef, { metadata, updatedAt: Timestamp.now() });
+    await updateDoc(boardRef, { ...boardData, updatedAt: Timestamp.now() });
 
-    let imageUrl = board.metadata.image;
+    let imageUrl = board.image;
 
     // Updating image from storage if existed
     if (image) {
@@ -34,21 +34,16 @@ const updateBoard = async (
       imageUrl = await getDownloadURL(imageRef);
 
       updateDoc(boardRef, {
-        metadata: {
-          ...metadata,
-          image: imageUrl,
-          updatedAt: Timestamp.now(),
-        },
+        ...boardData,
+        image: imageUrl,
+        updatedAt: Timestamp.now(),
       });
     }
 
     const updatedBoard = {
-      ...board,
-      metadata: {
-        ...metadata,
-        updatedAt: Timestamp.now(),
-        image: imageUrl,
-      },
+      ...boardData,
+      image: imageUrl,
+      updatedAt: Timestamp.now(),
     }
 
     return updatedBoard;

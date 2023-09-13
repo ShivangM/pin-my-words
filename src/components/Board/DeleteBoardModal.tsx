@@ -1,5 +1,6 @@
 'use client';
 import useBoardStore from '@/store/boardStore';
+import useUIStore from '@/store/uiStore';
 import useUserStore from '@/store/userStore';
 import { Dialog, Transition } from '@headlessui/react';
 import { useRouter } from 'next/navigation';
@@ -8,12 +9,12 @@ import { toast } from 'react-toastify';
 type Props = {};
 
 const DeleteBoardModal = (props: Props) => {
-  const [deleteBoard, closeDeleteBoardModal, deleteBoardModalOpen] =
+  const [deleteBoard] =
     useBoardStore((state) => [
       state.deleteBoard,
-      state.closeDeleteBoardModal,
-      state.deleteBoardModalOpen,
     ]);
+
+  const [deleteBoardModalOpen, toggleDeleteBoardModal] = useUIStore(state => [state.deleteBoardModalOpen, state.toggleDeleteBoardModal])
 
   const userData = useUserStore((state) => state.userData);
   const [deleteBoardLoading, setDeleteBoardLoading] = useState<boolean>(false)
@@ -32,7 +33,7 @@ const DeleteBoardModal = (props: Props) => {
       toast.error(error.message);
     } finally {
       setDeleteBoardLoading(false);
-      closeDeleteBoardModal();
+      toggleDeleteBoardModal();
       toast.dismiss('delete-board');
     }
   };
@@ -42,7 +43,7 @@ const DeleteBoardModal = (props: Props) => {
         <Dialog
           as="div"
           className="relative z-50"
-          onClose={closeDeleteBoardModal}
+          onClose={toggleDeleteBoardModal}
         >
           <Transition.Child
             as={Fragment}
@@ -82,7 +83,7 @@ const DeleteBoardModal = (props: Props) => {
 
                   <div className="mt-4 flex items-center space-x-4">
                     <button
-                      onClick={closeDeleteBoardModal}
+                      onClick={toggleDeleteBoardModal}
                       className="modalBtnPrev"
                     >
                       Cancel

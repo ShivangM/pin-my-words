@@ -1,6 +1,7 @@
 import { BoardAccess } from '@/interfaces/Board.d';
 import { Word } from '@/interfaces/Word.d';
 import useBoardStore from '@/store/boardStore';
+import useUIStore from '@/store/uiStore';
 import classNames from 'classnames';
 import moment from 'moment';
 import Image from 'next/image';
@@ -10,13 +11,12 @@ import { BiSolidEdit } from 'react-icons/bi';
 import { HiMiniSpeakerWave } from 'react-icons/hi2';
 
 const WordsCard = ({ word, idx }: { word: Word; idx: number }) => {
-  const [openDeleteWordModal, openEditWordModal, openViewWordModal, openViewRootWordModal, userAccess] = useBoardStore((state) => [
-    state.openDeleteWordModal,
-    state.openEditWordModal,
-    state.openViewWordModal,
-    state.openViewRootWordModal,
+  const [userAccess, rootWords] = useBoardStore((state) => [
     state.userAccess,
+    state.rootWords
   ]);
+
+  const [toggleViewWordModal, toggleViewRootWordModal, toggleEditWordModal, toggleDeleteWordModal] = useUIStore((state) => [state.toggleViewWordModal, state.toggleViewRootWordModal, state.toggleEditWordModal, state.toggleDeleteWordModal]);
 
   const [utterance, setUtterance] = useState<SpeechSynthesisUtterance | null>(null);
   const [synth, setSynth] = useState<SpeechSynthesis | null>(null);
@@ -32,6 +32,12 @@ const WordsCard = ({ word, idx }: { word: Word; idx: number }) => {
       synth.cancel();
     };
   }, [word]);
+
+  const handleViewRootWord = (rootWordId: string) => {
+    const rootWord = rootWords?.find((root) => root._id === rootWordId);
+    if (!rootWord) return;
+    toggleViewRootWordModal(rootWord)
+  }
 
   return (
     <div
@@ -57,11 +63,11 @@ const WordsCard = ({ word, idx }: { word: Word; idx: number }) => {
               :
               <div className="w-fit flex items-center space-x-2">
                 <BiSolidEdit
-                  onClick={() => openEditWordModal(word)}
+                  onClick={() => toggleEditWordModal(word)}
                   className="w-6 h-6 cursor-pointer text-gray-700"
                 />
                 <AiFillDelete
-                  onClick={() => openDeleteWordModal(word)}
+                  onClick={() => toggleDeleteWordModal(word)}
                   className="w-6 h-6 cursor-pointer text-red-500"
                 />
               </div>
@@ -81,7 +87,7 @@ const WordsCard = ({ word, idx }: { word: Word; idx: number }) => {
           <h4 className="text-sm font-bold">Root Word(s): </h4>
           <ul className="space-x-2 overflow-x-auto text-sm text-gray-900 font-medium cursor-pointer list-inside list-none flex items-center">
             {word.roots && word.roots.length > 0 ? word.roots.map((root) => (
-              <li key={root.value} onClick={() => openViewRootWordModal(root.value)} className="px-2 py-0.5 transition-all ease-in-out duration-300 bg-gray-200 hover:bg-gray-300 rounded-lg">
+              <li key={root.value} onClick={() => handleViewRootWord(root.value)} className="px-2 py-0.5 transition-all ease-in-out duration-300 bg-gray-200 hover:bg-gray-300 rounded-lg">
                 {root.label}
               </li>
             ))
@@ -93,7 +99,7 @@ const WordsCard = ({ word, idx }: { word: Word; idx: number }) => {
         <button
           type="button"
           className="modalBtn bg-slate-200 hover:bg-slate-300 w-fit"
-          onClick={() => openViewWordModal(word)}
+          onClick={() => toggleViewWordModal(word)}
         >
           View More
         </button>

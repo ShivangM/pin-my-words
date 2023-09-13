@@ -1,5 +1,6 @@
 'use client';
 import useBoardStore from '@/store/boardStore';
+import useUIStore from '@/store/uiStore';
 import useUserStore from '@/store/userStore';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useState } from 'react';
@@ -7,29 +8,30 @@ import { toast } from 'react-toastify';
 type Props = {};
 
 const DeleteWordModal = (props: Props) => {
-  const [deleteWord, closeDeleteWordModal, deleteWordModalOpen, focusedWord] =
+  const [deleteWord] =
     useBoardStore((state) => [
       state.deleteWord,
-      state.closeDeleteWordModal,
-      state.deleteWordModalOpen,
-      state.focusedWord
     ]);
+
+  const [deleteWordModalOpen, toggleDeleteWordModal, focusedWord] = useUIStore(state => [state.deleteWordModalOpen, state.toggleDeleteWordModal, state.focusedWord])
 
   const userData = useUserStore((state) => state.userData);
   const [deleteWordLoading, setDeleteWordLoading] = useState<boolean>(false)
 
   const handleDeleteWord = async () => {
+    if (!focusedWord) return
+
     setDeleteWordLoading(true)
     toast.loading('Deleting word...', {
       toastId: 'deleting-word'
     })
     try {
-      await deleteWord(userData?.uid!)
+      await deleteWord(focusedWord?._id, userData?.uid!)
     } catch (error: any) {
       toast.error(error.message)
     } finally {
       setDeleteWordLoading(false)
-      closeDeleteWordModal()
+      toggleDeleteWordModal(null)
       toast.dismiss('deleting-word')
     }
   }
@@ -40,7 +42,7 @@ const DeleteWordModal = (props: Props) => {
         <Dialog
           as="div"
           className="relative z-50"
-          onClose={closeDeleteWordModal}
+          onClose={() => toggleDeleteWordModal(null)}
         >
           <Transition.Child
             as={Fragment}
@@ -80,7 +82,7 @@ const DeleteWordModal = (props: Props) => {
 
                   <div className="mt-4 flex items-center space-x-4">
                     <button
-                      onClick={closeDeleteWordModal}
+                      onClick={() => toggleDeleteWordModal(null)}
                       className="modalBtnPrev"
                       disabled={deleteWordLoading}
                     >

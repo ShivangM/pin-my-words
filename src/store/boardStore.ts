@@ -1,4 +1,4 @@
-import { Board, BoardAccess, BoardUser, Metadata } from '@/interfaces/Board.d';
+import { Board, BoardAccess, BoardUser } from '@/interfaces/Board.d';
 import { RootWord, Word } from '@/interfaces/Word.d';
 import addRootWordToBoard from '@/lib/Root Words/addRootWordToBoard';
 import addWordToBoard from '@/lib/Words/addWordToBoard';
@@ -14,91 +14,94 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import addUserToBoard from '@/lib/Users/addUserToBoard';
 import fetchBoardUsers from '@/lib/Users/fetchBoardUsers';
-import fetchRootWordHelper from '@/lib/Root Words/fetchRootWord';
+import leaveBoardHelper from '@/lib/Users/leaveBoard';
+import createBoard from '@/lib/Boards/createBoard';
+import fetchBoardsHelper from '@/lib/Boards/fetchBoards';
 
 interface BoardState {
+  //Board operations
+  boards: null | Board[];
   board: null | Board;
-  words: null | Word[];
-  userAccess: null | BoardAccess;
-  rootWords: null | RootWord[]
-  users: null | BoardUser[];
-
-  deleteBoardModalOpen: boolean;
-  openDeleteBoardModal: () => void;
-  closeDeleteBoardModal: () => void;
+  addBoard: (board: Board, users?: BoardUser[], image?: File) => Promise<void>;
+  fetchBoards: (userId: string) => Promise<void>;
+  fetchBoard: (boardId: string, userId: string) => void;
   deleteBoard: (userId: string) => Promise<void>;
+  leaveBoard: (userId: string) => Promise<void>;
+  editBoard: (userId: string, board: Board, image?: File) => Promise<void>;
 
-  editBoardModalOpen: boolean;
-  openEditBoardModal: () => void;
-  closeEditBoardModal: () => void;
-  editBoard: (userId: string, metadata: Metadata, image?: File) => Promise<void>;
-
-  fetchUserAccess: (boardId: string, userId: string) => Promise<void>;
-  fetchWords: (boardId: string, userId: string) => Promise<void>;
-  fetchRootWords: (boardId: string, userId: string) => Promise<void>;
+  //User operations
+  users: null | BoardUser[];
+  userAccess: null | BoardAccess;
   fetchUsers: (userId: string) => Promise<void>;
-
-  addUserModalOpen: boolean;
-  openAddUserModal: () => void;
-  closeAddUserModal: () => void;
+  fetchUserAccess: (boardId: string, userId: string) => Promise<void>;
   addUser: (user: BoardUser, userId: string) => Promise<void>;
 
-  addWordModalOpen: boolean;
-  openAddWordModal: () => void;
-  closeAddWordModal: () => void;
+  //Words operations
+  words: null | Word[];
+  fetchWords: (boardId: string, userId: string) => Promise<void>;
   addWord: (word: Word, userId: string, image?: File) => Promise<void>;
-
-  addRootWordModalOpen: boolean;
-  openAddRootWordModal: () => void;
-  closeAddRootWordModal: () => void;
-  addRootWord: (word: RootWord, userId: string) => Promise<void>;
-
-  deleteWordModalOpen: boolean;
-  openDeleteWordModal: (word: Word) => void;
-  closeDeleteWordModal: () => void;
-  deleteWord: (userId: string) => Promise<void>;
-
-  editWordModalOpen: boolean;
-  openEditWordModal: (word: Word) => void;
-  closeEditWordModal: () => void;
+  deleteWord: (wordId: string, userId: string) => Promise<void>;
   editWord: (word: Word, userId: string, image?: File) => Promise<void>;
 
-  focusedWord: Word | null;
-  viewWordModalOpen: boolean;
-  openViewWordModal: (word: Word) => void;
-  closeViewWordModal: () => void;
+  //Root Words operations
+  rootWords: null | RootWord[]
+  fetchRootWords: (boardId: string, userId: string) => Promise<void>;
+  addRootWord: (word: RootWord, userId: string) => Promise<void>;
 
-  focusedRootWord: RootWord | null;
-  viewRootWordModalOpen: boolean;
-  openViewRootWordModal: (rootWordId: string) => void;
-  closeViewRootWordModal: () => void;
-  // fetchRootWord: (userId: string) => Promise<RootWord>;
-
-  sidePanelOpen: boolean;
-  openSidePanel: () => void;
-  closeSidePanel: () => void;
-
-  fetchBoard: (boardId: string, userId: string) => void;
+  //Reset
   reset: () => void;
+}
+
+const initialState = {
+  //Board operations
+  boards: null,
+  board: null,
+
+  //User operations
+  users: null,
+  userAccess: null,
+
+  //Words operations
+  words: null,
+
+  //Root Words operations
+  rootWords: null,
 }
 
 const useBoardStore = create<BoardState>()(
   devtools((set, get) => ({
-    board: null,
-    userAccess: null,
-    words: null,
-    rootWords: null,
-    users: null,
+    ...initialState,
 
-    //Side Panel
-    sidePanelOpen: false,
-    openSidePanel: () => set({ sidePanelOpen: true }),
-    closeSidePanel: () => set({ sidePanelOpen: false }),
+    //Board operations
+    addBoard: async (board, users, image) => {
+      try {
+        const newBoard = await createBoard(board, users, image);
 
-    //Delete Board Modal
-    deleteBoardModalOpen: false,
-    openDeleteBoardModal: () => set({ deleteBoardModalOpen: true }),
-    closeDeleteBoardModal: () => set({ deleteBoardModalOpen: false }),
+        set({
+          boards: [newBoard, ...get().boards!],
+        });
+      } catch (error) {
+        throw error;
+      }
+    },
+
+    fetchBoards: async (userId) => {
+      try {
+        const boards = await fetchBoardsHelper(userId);
+        set({ boards });
+      } catch (error) {
+        throw error;
+      }
+    },
+
+    fetchBoard: async (boardId, userId) => {
+      try {
+        const board = await fetchBoardHelper(boardId, userId);
+        set({ board });
+      } catch (error) {
+        throw error;
+      }
+    },
 
     deleteBoard: async (userId) => {
       const boardId = get().board?._id;
@@ -113,142 +116,20 @@ const useBoardStore = create<BoardState>()(
       }
     },
 
-    //Add User Modal
-    addUserModalOpen: false,
-    openAddUserModal: () => set({ addUserModalOpen: true }),
-    closeAddUserModal: () => set({ addUserModalOpen: false }),
-
-    addUser: async (user, userId) => {
+    leaveBoard: async (userId) => {
       const boardId = get().board?._id;
-      if (!boardId) return;
-
-      try {
-        const userAdded = await addUserToBoard(boardId, user, userId);
-        set({ addUserModalOpen: false, users: [userAdded, ...get().users!] });
-      } catch (error) {
-        throw error;
-      }
-    },
-
-    //Add Word Modal
-    addWordModalOpen: false,
-    openAddWordModal: () => set({ addWordModalOpen: true }),
-    closeAddWordModal: () => set({ addWordModalOpen: false }),
-
-    addWord: async (word, userId, image) => {
-      const boardId = get().board?._id;
-      if (!boardId) return;
-
-      try {
-        const wordAdded = await addWordToBoard(boardId, word, userId, image);
-        set({ addWordModalOpen: false, words: [wordAdded, ...get().words!] });
-      } catch (error) {
-        throw error;
-      }
-    },
-
-    //Add Root Word Modal
-    addRootWordModalOpen: false,
-    openAddRootWordModal: () => set({ addRootWordModalOpen: true }),
-    closeAddRootWordModal: () => set({ addRootWordModalOpen: false }),
-
-    addRootWord: async (rootWord, userId) => {
-      const boardId = get().board?._id;
-      if (!boardId) return;
-
-      try {
-        const rootWordAdded = await addRootWordToBoard(boardId, rootWord, userId);
-        set({ addRootWordModalOpen: false, rootWords: [rootWordAdded, ...get().rootWords!] });
-      } catch (error) {
-        throw error;
-      }
-    },
-
-    //Delete Word Modal
-    deleteWordModalOpen: false,
-    openDeleteWordModal: (word) => set({ deleteWordModalOpen: true, focusedWord: word }),
-    closeDeleteWordModal: () => set({ deleteWordModalOpen: false, focusedWord: null }),
-
-    deleteWord: async (userId) => {
-      if (!get().focusedWord) return;
-      try {
-        await deleteWordFromBoard(get().board!._id, get().focusedWord!._id, userId);
-        set({
-          deleteWordModalOpen: false,
-          focusedWord: null,
-          words: get().words?.filter((word) => word._id !== get().focusedWord!._id),
-        });
-      } catch (error) {
-        throw error;
-      }
-    },
-
-    //Edit Word Modal
-    editWordModalOpen: false,
-    openEditWordModal: (word) => set({ editWordModalOpen: true, focusedWord: word }),
-    closeEditWordModal: () => set({ editWordModalOpen: false, focusedWord: null }),
-
-    editWord: async (word, userId, image) => {
-      const boardId = get().board?._id;
-
       if (!boardId) {
         throw new Error('Board does not exist');
       }
 
       try {
-        const editedWord = await editWordFromBoard(word, boardId, userId, image);
-        set({
-          editWordModalOpen: false,
-          focusedWord: null,
-          words: get().words?.map((word) => {
-            if (word._id === editedWord._id) {
-              return editedWord;
-            }
-            return word;
-          }),
-        });
+        await leaveBoardHelper(boardId, userId);
       } catch (error) {
         throw error;
       }
     },
 
-    //View Word Modal
-    focusedWord: null,
-    viewWordModalOpen: false,
-    openViewWordModal: (word) => set({ viewWordModalOpen: true, focusedWord: word }),
-    closeViewWordModal: () => set({ viewWordModalOpen: false, focusedWord: null }),
-
-    //View Root Word Modal
-    focusedRootWord: null,
-    viewRootWordModalOpen: false,
-    openViewRootWordModal: (rootWordId) => set({ viewRootWordModalOpen: true, focusedRootWord: get().rootWords?.find(rootWord => rootWord._id === rootWordId) }),
-    closeViewRootWordModal: () => set({ viewRootWordModalOpen: false, focusedRootWord: null }),
-
-
-    // fetchRootWord: async (userId) => {
-    //   const boardId = get().board?._id;
-    //   const rootId = get().focusedRootWord;
-
-    //   if (!boardId) {
-    //     throw new Error('Board does not exist');
-    //   } else if (!rootId) {
-    //     throw new Error('Root word does not exist');
-    //   }
-
-    //   try {
-    //     const rootWord = await fetchRootWordHelper(boardId, rootId, userId);
-    //     return rootWord;
-    //   } catch (error) {
-    //     throw error;
-    //   }
-    // },
-
-    //Edit Board Modal
-    editBoardModalOpen: false,
-    openEditBoardModal: () => set({ editBoardModalOpen: true }),
-    closeEditBoardModal: () => set({ editBoardModalOpen: false }),
-
-    editBoard: async (userId, metadata, image) => {
+    editBoard: async (userId, board, image) => {
       const boardId = get().board?._id;
 
       if (!boardId) {
@@ -259,7 +140,7 @@ const useBoardStore = create<BoardState>()(
         const updatedBoard = await updateBoard(
           userId,
           boardId,
-          metadata,
+          board,
           image
         );
 
@@ -269,7 +150,8 @@ const useBoardStore = create<BoardState>()(
       }
     },
 
-    //Fetch And Reset
+    //User operations
+
     fetchUsers: async (userId) => {
       const boardId = get().board?._id;
       if (!boardId) return;
@@ -291,15 +173,19 @@ const useBoardStore = create<BoardState>()(
       }
     },
 
-    fetchBoard: async (boardId, userId) => {
+    addUser: async (user, userId) => {
+      const boardId = get().board?._id;
+      if (!boardId) return;
+
       try {
-        const board = await fetchBoardHelper(boardId, userId);
-        set({ board });
+        const userAdded = await addUserToBoard(boardId, userId, user);
+        set({ users: [userAdded, ...get().users!] });
       } catch (error) {
         throw error;
       }
     },
 
+    //Words operations
     fetchWords: async (boardId, userId) => {
       try {
         const words = await fetchWordsHelper(boardId, userId);
@@ -309,6 +195,52 @@ const useBoardStore = create<BoardState>()(
       }
     },
 
+    addWord: async (word, userId, image) => {
+      const boardId = get().board?._id;
+      if (!boardId) return;
+
+      try {
+        const wordAdded = await addWordToBoard(boardId, word, userId, image);
+        set({ words: [wordAdded, ...get().words!] });
+      } catch (error) {
+        throw error;
+      }
+    },
+
+    deleteWord: async (wordId, userId) => {
+      try {
+        await deleteWordFromBoard(get().board!._id, wordId, userId);
+        set({
+          words: get().words?.filter((word) => word._id !== wordId),
+        });
+      } catch (error) {
+        throw error;
+      }
+    },
+
+    editWord: async (word, userId, image) => {
+      const boardId = get().board?._id;
+
+      if (!boardId) {
+        throw new Error('Board does not exist');
+      }
+
+      try {
+        const editedWord = await editWordFromBoard(word, boardId, userId, image);
+        set({
+          words: get().words?.map((word) => {
+            if (word._id === editedWord._id) {
+              return editedWord;
+            }
+            return word;
+          }),
+        });
+      } catch (error) {
+        throw error;
+      }
+    },
+
+    //Root Words operations
     fetchRootWords: async (boardId, userId) => {
       try {
         const rootWords = await fetchRootWordsHelper(boardId, userId);
@@ -318,16 +250,39 @@ const useBoardStore = create<BoardState>()(
       }
     },
 
+    addRootWord: async (rootWord, userId) => {
+      const boardId = get().board?._id;
+      if (!boardId) return;
+
+      try {
+        const rootWordAdded = await addRootWordToBoard(boardId, rootWord, userId);
+        set({ rootWords: [rootWordAdded, ...get().rootWords!] });
+      } catch (error) {
+        throw error;
+      }
+    },
+
+
+    // fetchRootWord: async (userId) => {
+    //   const boardId = get().board?._id;
+    //   const rootId = get().focusedRootWord;
+
+    //   if (!boardId) {
+    //     throw new Error('Board does not exist');
+    //   } else if (!rootId) {
+    //     throw new Error('Root word does not exist');
+    //   }
+
+    //   try {
+    //     const rootWord = await fetchRootWordHelper(boardId, rootId, userId);
+    //     return rootWord;
+    //   } catch (error) {
+    //     throw error;
+    //   }
+    // },
+
     reset: () => {
-      set({
-        board: null,
-        userAccess: null,
-        sidePanelOpen: false,
-        words: null,
-        users: null,
-        rootWords: null,
-        focusedWord: null,
-      });
+      set(initialState);
     }
   }))
 );

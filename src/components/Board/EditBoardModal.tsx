@@ -1,73 +1,63 @@
 'use client';
-import { Metadata } from '@/interfaces/Board.d';
+import { Board } from '@/interfaces/Board.d';
 import useBoardStore from '@/store/boardStore';
 import useUserStore from '@/store/userStore';
 import { Dialog, Transition } from '@headlessui/react';
 import { ErrorMessage } from '@hookform/error-message';
 import classNames from 'classnames';
-import Image from 'next/image';
-import { Fragment, useState } from 'react';
-import { SubmitHandler, set, useForm } from 'react-hook-form';
-import { useRef, useEffect } from 'react';
+import { Fragment } from 'react';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { useEffect } from 'react';
 import { toast } from 'react-toastify';
+import useUIStore from '@/store/uiStore';
+import UploadImage from '../UploadImage';
+import useImageUploadStore from '@/store/imageUploadStore';
 type Props = {};
 
 const EditBoardModal = (props: Props) => {
   const [
     editBoard,
-    closeEditBoardModal,
-    editBoardModalOpen,
     board,
   ] = useBoardStore((state) => [
     state.editBoard,
-    state.closeEditBoardModal,
-    state.editBoardModalOpen,
     state.board,
   ]);
 
-  const userData = useUserStore((state) => state.userData);
+  const [editBoardModalOpen, toggleEditBoardModal] = useUIStore((state) => [
+    state.editBoardModalOpen,
+    state.toggleEditBoardModal,
+  ]);
 
-  // Image Upload and Preview
-  const imageRef = useRef<HTMLInputElement | null>(null);
-  const [image, setImage] = useState<File>()
-  const [previewImage, setPreviewImage] = useState<string>()
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      setImage(file);
-      setPreviewImage(URL.createObjectURL(file));
-    }
-  };
+  const userData = useUserStore((state) => state.userData);
+  const [image] = useImageUploadStore((state) => [state.image]);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
     reset
-  } = useForm<Metadata>();
+  } = useForm<Board>();
 
   useEffect(() => {
     if (board) {
-      reset(board.metadata)
-      setPreviewImage(board.metadata.image)
+      reset(board)
     }
   }, [board])
 
-  const onSubmit: SubmitHandler<Metadata> = async (data) => {
+  const onSubmit: SubmitHandler<Board> = async (data) => {
     toast.loading('Updating board...', {
       toastId: 'update-board',
     });
 
     try {
       await editBoard(userData?.uid!, data, image);
+      toast.success('Board updated successfully.');
     } catch (error: any) {
       toast.error(error.message);
     } finally {
-      closeEditBoardModal();
+      toggleEditBoardModal();
       toast.dismiss('update-board');
-      setImage(undefined)
       reset()
-      setPreviewImage(undefined)
     }
   };
 
@@ -77,7 +67,7 @@ const EditBoardModal = (props: Props) => {
         <Dialog
           as="div"
           className="relative z-50"
-          onClose={closeEditBoardModal}
+          onClose={toggleEditBoardModal}
         >
           <Transition.Child
             as={Fragment}
@@ -158,24 +148,7 @@ const EditBoardModal = (props: Props) => {
                         Image (Optional)
                       </label>
 
-                      <input
-                        hidden
-                        onChange={handleChange}
-                        ref={imageRef}
-                        type="file"
-                      />
-
-                      <Image
-                        src={
-                          previewImage ||
-                          '/assets/board-placeholder.svg'
-                        }
-                        onClick={() => imageRef?.current?.click()}
-                        alt="Board Image"
-                        width={500}
-                        height={288}
-                        className="object-cover cursor-pointer object-center w-full rounded-md"
-                      />
+                      <UploadImage />
                     </div>
 
                     {/* Description  */}
@@ -215,7 +188,7 @@ const EditBoardModal = (props: Props) => {
                     <div className="mt-4 flex items-center space-x-4">
                       <button
                         type="button"
-                        onClick={closeEditBoardModal}
+                        onClick={toggleEditBoardModal}
                         className="modalBtnPrev"
                         disabled={isSubmitting}
                       >
