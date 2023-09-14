@@ -77,7 +77,7 @@ const ViewRootWordModal = (props: Props) => {
 
                                         <div className="space-y-1">
                                             <h4 className="text-sm font-bold">Description: </h4>
-                                            <p>{focusedRootWord?.meaning}</p>
+                                            <p>{focusedRootWord?.description}</p>
                                         </div>
                                     </div>
 
