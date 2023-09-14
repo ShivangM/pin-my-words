@@ -23,7 +23,7 @@ const SidePanel = () => {
   return (
     <aside
       className={classNames(
-        'h-screen overflow-y-auto transition-all duration-300 ease-in-out bg-gray-100 fixed z-50 lg:z-30 lg:sticky right-0 top-0 lg:top-24 lg:translate-x-0 lg:transform p-4',
+        'h-screen overflow-y-hidden transition-all duration-300 ease-in-out bg-gray-100 fixed z-50 lg:z-30 lg:sticky right-0 top-0 lg:top-24 lg:translate-x-0 lg:transform p-4',
         sidePanelOpen ? 'translate-x-0' : 'translate-x-full'
       )}
     >
@@ -34,7 +34,7 @@ const SidePanel = () => {
         </button>
       </div>
 
-      <div className="w-80">
+      <div className="w-80 h-full">
         <Tab.Group>
           <Tab.List className="w-full flex space-x-1 rounded-xl bg-blue-900/20 p-1">
             {Object.keys(options).map((category) => (
@@ -54,11 +54,11 @@ const SidePanel = () => {
               </Tab>
             ))}
           </Tab.List>
-          <Tab.Panels className="w-full mt-2">
+          <Tab.Panels className="w-full h-full mt-2">
             {Object.values(options).map((OptionTab, idx) => (
               <Tab.Panel
                 key={idx}
-                className={classNames('w-full rounded-xl bg-white')}
+                className={classNames('w-full rounded-xl overflow-y-auto bg-white p-2 h-5/6')}
               >
                 <OptionTab />
               </Tab.Panel>

@@ -21,8 +21,8 @@ const Users = (props: Props) => {
 
 
   return (
-    <div className="h-full w-full py-2">
-      <div className='w-full divide-y'>
+    <div className="h-full w-full">
+      <div className='w-full space-y-1'>
         {
           users ? users.map((user) => {
             return <UserCard key={user.uid} user={user} />

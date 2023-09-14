@@ -27,9 +27,6 @@ const AddRootWordModal = () => {
         const rootWordData = {
             ...data,
             root: data.root.toLowerCase(),
-            createdAt: Timestamp.now(),
-            updatedAt: Timestamp.now(),
-            createdBy: userData?.uid!,
         }
 
         toast.loading('Adding root word...', {
@@ -37,7 +34,7 @@ const AddRootWordModal = () => {
         });
 
         try {
-            await addRootWord(rootWordData, userData?.uid!);
+            await addRootWord(rootWordData, userData!);
             toast.success('Root word added successfully.')
         } catch (error: any) {
             toast.error(error.message)

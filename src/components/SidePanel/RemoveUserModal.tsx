@@ -26,7 +26,7 @@ const RemoveUserModal = (props: Props) => {
             toastId: 'remove-user'
         })
         try {
-            await removeUser(focusedUser, userData?.uid!)
+            await removeUser(focusedUser, userData!)
         } catch (error: any) {
             toast.error(error.message)
         } finally {

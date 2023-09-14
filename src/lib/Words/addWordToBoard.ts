@@ -37,7 +37,12 @@ const addWordToBoard = async (
         const roots = word.roots;
         delete word.roots;
 
-        const wordDoc = await addDoc(wordsCollection, word);
+        const wordDoc = await addDoc(wordsCollection, {
+            ...word,
+            createdAt: Timestamp.now(),
+            updatedAt: Timestamp.now(),
+            createdBy: userId,
+        });
 
         if (roots) {
             const rootWordsCollection = collection(db, boardRef.path, "roots-words");
@@ -46,7 +51,9 @@ const addWordToBoard = async (
                 await setDoc(doc(rootWordsCollection, root.value + "_" + wordDoc.id), {
                     rootId: root.value,
                     wordId: wordDoc.id,
-                    label: root.label
+                    label: root.label,
+                    createdAt: Timestamp.now(),
+                    updatedAt: Timestamp.now(),
                 });
             }
         }
@@ -67,6 +74,7 @@ const addWordToBoard = async (
             image: imageUrl,
             createdAt: Timestamp.now(),
             updatedAt: Timestamp.now(),
+            createdBy: userId,
         };
 
         return wordAdded;

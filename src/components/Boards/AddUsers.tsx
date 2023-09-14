@@ -37,9 +37,13 @@ const AddUsers = () => {
   };
 
   const promiseOptions = (inputValue: string, callback: (res: User[]) => void) => {
-    fetchUsersByEmailSearch(inputValue).then((res) => {
-      callback(res);
-    });
+    try {
+      fetchUsersByEmailSearch(inputValue).then((res) => {
+        callback(res);
+      });
+    } catch (error) {
+      // Todo: Handle error
+    }
   };
 
   const loadOptions = debounce(promiseOptions, 1000);

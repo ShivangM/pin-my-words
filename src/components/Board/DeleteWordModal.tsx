@@ -26,7 +26,7 @@ const DeleteWordModal = (props: Props) => {
       toastId: 'deleting-word'
     })
     try {
-      await deleteWord(focusedWord?._id, userData?.uid!)
+      await deleteWord(focusedWord!, userData!)
     } catch (error: any) {
       toast.error(error.message)
     } finally {

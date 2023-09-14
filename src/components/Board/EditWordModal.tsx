@@ -55,9 +55,6 @@ const EditWordModal = () => {
       word: data.word.toLowerCase(),
       _id: focusedWord?._id!,
       examples,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-      createdBy: userData?.uid!,
     }
 
     toast.loading('Updating word...', {
@@ -65,7 +62,7 @@ const EditWordModal = () => {
     });
 
     try {
-      await editWord(wordData, userData?.uid!, image);
+      await editWord(wordData, userData!, image);
     } catch (error: any) {
       toast.error(error.message)
     } finally {

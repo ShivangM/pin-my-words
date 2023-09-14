@@ -11,7 +11,7 @@ const BoardCard = ({ board }: { board: Board }) => {
   return (
     <Link
       href={`/boards/${_id}`}
-      className="group p-6 cursor-pointer rounded-md shadow-md"
+      className="group p-6 cursor-pointer w-full rounded-md shadow-md"
     >
       <div className="w-full relative rounded-md overflow-hidden aspect-square">
         <Image
@@ -22,6 +22,7 @@ const BoardCard = ({ board }: { board: Board }) => {
           objectFit="cover"
         />
       </div>
+
       <div className="mt-6 mb-2">
         <span className="block text-xs font-medium uppercase text-green-400">
           {owner === userData?.uid ? 'Owned' : 'Shared with you'}
@@ -30,7 +31,8 @@ const BoardCard = ({ board }: { board: Board }) => {
           {name}
         </h2>
       </div>
-      <p className="">{description}</p>
+
+      <p className="w-full text-sm text-gray-400 line-clamp-3 break-all whitespace-normal">{description}</p>
     </Link>
   );
 };

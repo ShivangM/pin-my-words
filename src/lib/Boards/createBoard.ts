@@ -6,7 +6,11 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 const createBoard = async (board: Board, users?: BoardUser[], image?: File): Promise<Board> => {
     try {
         const boardsCollection = collection(db, 'boards');
-        const boardRef = await addDoc(boardsCollection, { ...board, createdAt: Timestamp.now(), updatedAt: Timestamp.now() });
+        const boardRef = await addDoc(boardsCollection, {
+            ...board,
+            createdAt: Timestamp.now(),
+            updatedAt: Timestamp.now(),
+        });
 
         //Add owner to board
         await setDoc(doc(db, 'users-boards', board.owner + '_' + boardRef.id), {
@@ -24,8 +28,8 @@ const createBoard = async (board: Board, users?: BoardUser[], image?: File): Pro
                     boardId: boardRef.id,
                     userId: user.uid!,
                     access: user.access,
-                    addedOn: Timestamp.now(),
-                    updatedOn: Timestamp.now(),
+                    createdAt: Timestamp.now(),
+                    updatedAt: Timestamp.now(),
                 });
 
                 addUserPromises.push(addUserPromise);

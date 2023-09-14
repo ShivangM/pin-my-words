@@ -23,7 +23,7 @@ const LeaveBoardModal = (props: Props) => {
         });
 
         try {
-            await leaveBoard(userData?.uid!);
+            await leaveBoard(userData!);
             router.push('/boards');
         } catch (error: any) {
             toast.error(error.message);

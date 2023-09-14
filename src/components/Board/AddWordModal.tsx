@@ -1,5 +1,5 @@
 'use client';
-import { RootWord, Word } from '@/interfaces/Word';
+import { Word } from '@/interfaces/Word';
 import useBoardStore from '@/store/boardStore';
 import { Dialog, Transition } from '@headlessui/react';
 import { ErrorMessage } from '@hookform/error-message';
@@ -9,9 +9,7 @@ import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import Select from 'react-select';
 import options from '@/constants/parts-of-speech.json';
 import { IoIosCloseCircle } from 'react-icons/io';
-import Image from 'next/image';
 import useUserStore from '@/store/userStore';
-import { Timestamp } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import useUIStore from '@/store/uiStore';
 import UploadImage from '../UploadImage';
@@ -49,9 +47,6 @@ const AddWordModal = () => {
       ...data,
       word: data.word.toLowerCase(),
       examples,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-      createdBy: userData?.uid!,
     }
 
     toast.loading('Adding word...', {
@@ -59,7 +54,7 @@ const AddWordModal = () => {
     });
 
     try {
-      await addWord(wordData, userData?.uid!, image);
+      await addWord(wordData, userData!, image);
       toast.success('Word added successfully!');
     } catch (error: any) {
       toast.error(error.message)

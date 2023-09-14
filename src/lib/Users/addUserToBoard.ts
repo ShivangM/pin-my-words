@@ -27,8 +27,8 @@ const addUserToBoard = async (
             boardId: boardRef.id,
             userId: user.uid!,
             access: user.access,
-            addedOn: Timestamp.now(),
-            updatedOn: Timestamp.now(),
+            createdAt: Timestamp.now(),
+            updatedAt: Timestamp.now(),
         });
 
         return user;

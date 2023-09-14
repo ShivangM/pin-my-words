@@ -16,12 +16,12 @@ const UserCard = ({ user }: Props) => {
   const [toggleUpdateUserAccessModal, toggleRemoveUserModal] = useUIStore((state) => [state.toggleUpdateUserAccessModal, state.toggleRemoveUserModal])
 
   return (
-    <div className="relative flex items-center justify-between rounded-md p-3">
+    <div className="relative bg-white rounded-lg shadow flex items-center justify-between p-3">
       <div className="flex items-center space-x-2">
         <Image height={30} width={30} src={user.image || '/assets/Dummy Profile.png'} alt={user.name} className="rounded-full" />
         <div className="">
           <Link href={`/profile/${user.uid}`} className="text-sm hover:underline font-medium leading-5">{user.name}</Link>
-          <ul className="mt-1 flex space-x-1 text-xs font-normal leading-4 text-gray-500">
+          <ul className="flex space-x-1 text-xs font-normal leading-4 text-gray-500">
             <li className='w-28 truncate'>{user?.email}</li>
             <li>&middot;</li>
             <li>{user?.access}</li>

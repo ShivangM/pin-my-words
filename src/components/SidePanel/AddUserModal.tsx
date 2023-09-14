@@ -47,7 +47,7 @@ const AddUserModal = (props: Props) => {
         }
 
         try {
-            await addUser(boardUser, userData?.uid!);
+            await addUser(boardUser, userData!);
             toast.success('User added successfully!');
         } catch (error: any) {
             toast.error(error.message);
@@ -59,9 +59,13 @@ const AddUserModal = (props: Props) => {
     };
 
     const promiseOptions = (inputValue: string, callback: (res: User[]) => void) => {
-        fetchUsersByEmailSearch(inputValue).then((res) => {
-            callback(res);
-        });
+        try {
+            fetchUsersByEmailSearch(inputValue).then((res) => {
+                callback(res);
+            });
+        } catch (error) {
+            //To-Do: Handle error
+        }
     };
 
     const loadOptions = debounce(promiseOptions, 1000);

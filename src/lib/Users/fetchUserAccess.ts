@@ -5,13 +5,13 @@ import { doc, getDoc } from 'firebase/firestore';
 const fetchUserAccess = async (
   boardId: string,
   userId: string
-): Promise<BoardAccess> => {
+): Promise<BoardAccess | null> => {
   try {
     const userBoardRef = doc(db, 'users-boards', userId + '_' + boardId);
     const userBoardDoc = await getDoc(userBoardRef);
 
     if (!userBoardDoc.exists()) {
-      throw new Error('User does not have access to this board');
+      return null;
     }
 
     return userBoardDoc.data().access as BoardAccess;

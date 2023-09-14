@@ -9,6 +9,7 @@ const updateBoard = async (
   boardData: Board,
   image?: File
 ): Promise<Board> => {
+  console.log(boardData, image)
   try {
     const boardRef = doc(db, 'boards', boardId);
     const boardDoc = await getDoc(boardRef);
@@ -23,8 +24,6 @@ const updateBoard = async (
       throw new Error('User does not have access to edit this board');
     }
 
-    await updateDoc(boardRef, { ...boardData, updatedAt: Timestamp.now() });
-
     let imageUrl = board.image;
 
     // Updating image from storage if existed
@@ -38,6 +37,8 @@ const updateBoard = async (
         image: imageUrl,
         updatedAt: Timestamp.now(),
       });
+    } else {
+      await updateDoc(boardRef, { ...boardData, updatedAt: Timestamp.now() });
     }
 
     const updatedBoard = {

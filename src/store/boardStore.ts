@@ -22,6 +22,10 @@ import updateUserAccess from '@/lib/Users/updateUserAccess';
 import { DayValue } from '@hassanmojab/react-modern-calendar-datepicker';
 import fetchWords from '@/lib/Words/fetchWords';
 import fetchWordsByRoot from '@/lib/Words/fetchWordsByRoot';
+import { Notification, NotificationType } from '@/interfaces/Notification.d';
+import fetchNotificationsFromBoard from '@/lib/Notifications/fetchNotifications';
+import addNotificationToBoard from '@/lib/Notifications/addNotifictionToBoard';
+import { User } from '@/interfaces/User.d';
 
 interface BoardState {
   //Board operations
@@ -31,35 +35,40 @@ interface BoardState {
   fetchBoards: (userId: string) => Promise<void>;
   fetchBoard: (boardId: string, userId: string) => void;
   deleteBoard: (userId: string) => Promise<void>;
-  leaveBoard: (userId: string) => Promise<void>;
-  editBoard: (userId: string, board: Board, image?: File) => Promise<void>;
+  editBoard: (user: User, board: Board, image?: File) => Promise<void>;
 
   //User operations
   users: null | BoardUser[];
   userAccess: null | BoardAccess;
   fetchUsers: (userId: string) => Promise<void>;
   fetchUserAccess: (boardId: string, userId: string) => Promise<void>;
-  addUser: (user: BoardUser, userId: string) => Promise<void>;
-  removeUser: (user: BoardUser, userId: string) => Promise<void>;
-  updateAccess: (user: BoardUser, userId: string, access: BoardAccess) => Promise<void>;
+  addUser: (user: BoardUser, admin: User) => Promise<void>;
+  leaveBoard: (user: User) => Promise<void>;
+  removeUser: (user: BoardUser, admin: User) => Promise<void>;
+  updateAccess: (user: BoardUser, admin: User, access: BoardAccess) => Promise<void>;
 
   //Words operations
   words: null | Word[];
   fetchWords: (boardId: string, userId: string) => Promise<void>;
-  addWord: (word: Word, userId: string, image?: File) => Promise<void>;
-  deleteWord: (wordId: string, userId: string) => Promise<void>;
-  editWord: (word: Word, userId: string, image?: File) => Promise<void>;
+  addWord: (word: Word, user: User, image?: File) => Promise<void>;
+  deleteWord: (word: Word, user: User) => Promise<void>;
+  editWord: (word: Word, user: User, image?: File) => Promise<void>;
 
   //Root Words operations
   rootWords: null | RootWord[]
   fetchRootWords: (boardId: string, userId: string) => Promise<void>;
-  addRootWord: (word: RootWord, userId: string) => Promise<void>;
+  addRootWord: (word: RootWord, user: User) => Promise<void>;
 
   //Filter operations
   filteredWords: null | Word[];
   filterByDate: (date: DayValue, userId: string) => Promise<void>;
   filterByRootWord: (rootWordId: string, userId: string) => Promise<void>;
   resetFilter: () => void;
+
+  //Notifications operations
+  notifications: null | Notification[];
+  fetchNotifications: (userId: string) => Promise<void>;
+  addNotification: (notification: Notification, userId: string) => Promise<void>;
 
   //Reset
   reset: () => void;
@@ -82,6 +91,9 @@ const initialState = {
 
   //Filter operations
   filteredWords: null,
+
+  //Notifications operations
+  notifications: null,
 }
 
 const useBoardStore = create<BoardState>()(
@@ -132,25 +144,11 @@ const useBoardStore = create<BoardState>()(
       }
     },
 
-    leaveBoard: async (userId) => {
+    editBoard: async (user, board, image) => {
       const boardId = get().board?._id;
-      if (!boardId) {
-        throw new Error('Board does not exist');
-      }
+      const userId = user.uid;
 
-      try {
-        await leaveBoardHelper(boardId, userId);
-      } catch (error) {
-        throw error;
-      }
-    },
-
-    editBoard: async (userId, board, image) => {
-      const boardId = get().board?._id;
-
-      if (!boardId) {
-        throw new Error('Board does not exist');
-      }
+      if (!boardId || !userId) return;
 
       try {
         const updatedBoard = await updateBoard(
@@ -161,6 +159,13 @@ const useBoardStore = create<BoardState>()(
         );
 
         set({ board: updatedBoard });
+
+        const notification = {
+          type: NotificationType.BOARD_UPDATED,
+          message: `Board settings updated by ${user.name}`,
+        } as Notification;
+
+        get().addNotification(notification, userId);
       } catch (error) {
         throw error;
       }
@@ -189,38 +194,72 @@ const useBoardStore = create<BoardState>()(
       }
     },
 
-    addUser: async (user, userId) => {
+    addUser: async (user, admin) => {
       const boardId = get().board?._id;
-      if (!boardId) return;
+      if (!boardId || !admin) return;
 
       try {
-        const userAdded = await addUserToBoard(boardId, userId, user);
+        const userAdded = await addUserToBoard(boardId, admin.uid, user);
         set({ users: [userAdded, ...get().users!] });
+
+        const notification = {
+          type: NotificationType.USER_ADDED,
+          message: `${user.name} added by ${admin.name}`,
+        } as Notification;
+
+        get().addNotification(notification, admin.uid);
       } catch (error) {
         throw error;
       }
     },
 
-    removeUser: async (user, userId) => {
+    leaveBoard: async (user) => {
+      const boardId = get().board?._id;
+      const userId = user.uid;
+
+      if (!boardId || !userId) return
+
+      try {
+        await leaveBoardHelper(boardId, userId);
+
+        const notification = {
+          type: NotificationType.USER_LEFT,
+          message: `${user.name} left the board`,
+        } as Notification;
+
+        get().addNotification(notification, userId);
+      } catch (error) {
+        throw error;
+      }
+    },
+
+    removeUser: async (user, admin) => {
       const boardId = get().board?._id;
       if (!boardId) return;
 
       try {
-        await removeUserFromBoard(user, userId, boardId);
+        await removeUserFromBoard(user, admin.uid, boardId);
         set({
           users: get().users?.filter((u) => u.uid !== user.uid),
         });
+
+        const notification = {
+          type: NotificationType.USER_REMOVED,
+          message: `${user.name} removed by ${admin.name}`,
+        } as Notification;
+
+        get().addNotification(notification, admin.uid);
       } catch (error) {
         throw error;
       }
     },
 
-    updateAccess: async (user, userId, access) => {
+    updateAccess: async (user, admin, access) => {
       const boardId = get().board?._id;
       if (!boardId) return;
 
       try {
-        await updateUserAccess(user, userId, boardId, access);
+        await updateUserAccess(user, admin.uid, boardId, access);
         set({
           users: get().users?.map((u) => {
             if (u.uid === user.uid) {
@@ -229,6 +268,13 @@ const useBoardStore = create<BoardState>()(
             return u;
           }),
         });
+
+        const notification = {
+          type: NotificationType.USER_UPDATED,
+          message: `${user.name} access updated to ${access} by ${admin.name}`,
+        } as Notification;
+
+        get().addNotification(notification, admin.uid);
       } catch (error) {
         throw error;
       }
@@ -244,31 +290,54 @@ const useBoardStore = create<BoardState>()(
       }
     },
 
-    addWord: async (word, userId, image) => {
+    addWord: async (word, user, image) => {
       const boardId = get().board?._id;
-      if (!boardId) return;
+      const userId = user.uid;
+
+      if (!boardId || !userId) return;
 
       try {
         const wordAdded = await addWordToBoard(boardId, word, userId, image);
         set({ words: [wordAdded, ...get().words!] });
+
+        const notification = {
+          type: NotificationType.WORD_ADDED,
+          message: `Word ${word.word} added by ${user.name}`,
+        } as Notification;
+
+        get().addNotification(notification, userId);
       } catch (error) {
         throw error;
       }
     },
 
-    deleteWord: async (wordId, userId) => {
+    deleteWord: async (word, user) => {
+      const boardId = get().board?._id;
+      const wordId = word._id;
+      const userId = user.uid;
+
+      if (!boardId || !userId || !wordId) return;
+
       try {
-        await deleteWordFromBoard(get().board!._id, wordId, userId);
+        await deleteWordFromBoard(boardId, wordId, userId);
         set({
           words: get().words?.filter((word) => word._id !== wordId),
         });
+
+        const notification = {
+          type: NotificationType.WORD_DELETED,
+          message: `Word ${word.word} deleted by ${user.name}`,
+        } as Notification;
+
+        get().addNotification(notification, userId);
       } catch (error) {
         throw error;
       }
     },
 
-    editWord: async (word, userId, image) => {
+    editWord: async (word, user, image) => {
       const boardId = get().board?._id;
+      const userId = user.uid;
 
       if (!boardId) {
         throw new Error('Board does not exist');
@@ -284,6 +353,13 @@ const useBoardStore = create<BoardState>()(
             return word;
           }),
         });
+
+        const notification = {
+          type: NotificationType.WORD_UPDATED,
+          message: `Word ${word.word} updated by ${user.name}`,
+        } as Notification;
+
+        get().addNotification(notification, userId);
       } catch (error) {
         throw error;
       }
@@ -299,13 +375,23 @@ const useBoardStore = create<BoardState>()(
       }
     },
 
-    addRootWord: async (rootWord, userId) => {
+    addRootWord: async (rootWord, user) => {
       const boardId = get().board?._id;
       if (!boardId) return;
+
+      const userId = user.uid;
 
       try {
         const rootWordAdded = await addRootWordToBoard(boardId, rootWord, userId);
         set({ rootWords: [rootWordAdded, ...get().rootWords!] });
+
+        const notification = {
+          type: NotificationType.ROOT_WORD_ADDED,
+          message: `Root word ${rootWordAdded.root} added by ${user.name}`,
+        } as Notification;
+
+        get().addNotification(notification, userId);
+
       } catch (error) {
         throw error;
       }
@@ -350,6 +436,33 @@ const useBoardStore = create<BoardState>()(
       try {
         const filteredWords = await fetchWordsByRoot(boardId, userId, rootWordId);
         set({ filteredWords });
+      } catch (error) {
+        throw error;
+      }
+    },
+
+    //Notifications operations
+    fetchNotifications: async (userId) => {
+      const boardId = get().board?._id;
+      if (!boardId) return;
+
+      try {
+        const notifications = await fetchNotificationsFromBoard(boardId, userId);
+        set({ notifications });
+      } catch (error) {
+        throw error;
+      }
+    },
+
+    addNotification: async (notification, userId) => {
+      const boardId = get().board?._id;
+      if (!boardId) return;
+
+      try {
+        const notificationAdded = await addNotificationToBoard(boardId, userId, notification);
+        if (notificationAdded.type !== NotificationType.USER_LEFT) {
+          set({ notifications: [notificationAdded, ...get().notifications!] });
+        }
       } catch (error) {
         throw error;
       }

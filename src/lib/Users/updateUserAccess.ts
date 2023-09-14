@@ -34,7 +34,7 @@ const updateUserAccess = async (
 
         await updateDoc(doc(db, 'users-boards', user.uid! + '_' + boardRef.id), {
             access,
-            updatedOn: Timestamp.now(),
+            updatedAt: Timestamp.now(),
         });
     } catch (error) {
         throw error;

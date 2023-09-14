@@ -29,7 +29,7 @@ const EditBoardModal = (props: Props) => {
   ]);
 
   const userData = useUserStore((state) => state.userData);
-  const [image] = useImageUploadStore((state) => [state.image]);
+  const [image, setPreviewImage] = useImageUploadStore((state) => [state.image, state.setPreviewImage]);
 
   const {
     register,
@@ -41,6 +41,7 @@ const EditBoardModal = (props: Props) => {
   useEffect(() => {
     if (board) {
       reset(board)
+      setPreviewImage(board.image)
     }
   }, [board])
 
@@ -50,7 +51,7 @@ const EditBoardModal = (props: Props) => {
     });
 
     try {
-      await editBoard(userData?.uid!, data, image);
+      await editBoard(userData!, data, image);
       toast.success('Board updated successfully.');
     } catch (error: any) {
       toast.error(error.message);

@@ -32,13 +32,20 @@ const addRootWordToBoard = async (
             throw new Error('Root word already exists');
         }
 
-        const rootWordDoc = await addDoc(rootWordCollection, { ...rootWord, root: rootWord.root.toLowerCase() });
+        const rootWordDoc = await addDoc(rootWordCollection, {
+            ...rootWord,
+            root: rootWord.root.toLowerCase(),
+            createdAt: Timestamp.now(),
+            updatedAt: Timestamp.now(),
+            createdBy: userId,
+        });
 
         const rootWordAdded = {
             ...rootWord,
             _id: rootWordDoc.id,
             createdAt: Timestamp.now(),
             updatedAt: Timestamp.now(),
+            createdBy: userId,
         };
 
         return rootWordAdded;

@@ -38,7 +38,7 @@ const UpdateUserAccessModal = (props: Props) => {
         });
 
         try {
-            await updateAccess(focusedUser, userData?.uid!, access)
+            await updateAccess(focusedUser, userData!, access)
         } catch (error: any) {
             toast.error(error.message);
         } finally {
