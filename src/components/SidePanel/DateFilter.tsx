@@ -1,21 +1,21 @@
-import { useState } from 'react';
 import 'react-modern-calendar-datepicker/lib/DatePicker.css';
 import {
   Calendar,
-  DayValue,
 } from '@hassanmojab/react-modern-calendar-datepicker';
 import useBoardStore from '@/store/boardStore';
+import useUserStore from '@/store/userStore';
 
 const DateFilter = () => {
-  const [selectedDay, setSelectedDay] = useState<DayValue>(null);
-  const [createdAt] = useBoardStore((state) => [state.board?.createdAt]);
+  const [createdAt, selectedDate, filterByDate] = useBoardStore((state) => [state.board?.createdAt, state.selectedDate, state.filterByDate]);
+
+  const [userData] = useUserStore((state) => [state.userData]);
 
   const today = new Date();
 
   return (
     <Calendar
-      value={selectedDay}
-      onChange={(date) => setSelectedDay(date)}
+      value={selectedDate}
+      onChange={(date) => filterByDate(date, userData?.uid!)}
       shouldHighlightWeekends
       minimumDate={{
         year: createdAt?.toDate().getFullYear()!,

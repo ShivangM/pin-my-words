@@ -13,6 +13,7 @@ import SearchWord from '@/components/Board/SearchWord';
 import { BoardAccess } from '@/interfaces/Board.d';
 import WordCardPlaceholder from '@/components/Board/WordCardPlaceholder';
 import useUIStore from '@/store/uiStore';
+import Words from '@/components/Board/Words';
 
 type Props = {
   params: {
@@ -41,6 +42,7 @@ const Board = ({ params: { boardId } }: Props) => {
     board,
     fetchBoard,
     words,
+    filteredWords,
     fetchWords,
     rootWords,
     fetchRootWords,
@@ -51,6 +53,7 @@ const Board = ({ params: { boardId } }: Props) => {
     state.board,
     state.fetchBoard,
     state.words,
+    state.filteredWords,
     state.fetchWords,
     state.rootWords,
     state.fetchRootWords,
@@ -68,17 +71,6 @@ const Board = ({ params: { boardId } }: Props) => {
         setUserAccessFetchError(error)
       } finally {
         setUserAccessLoading(false)
-      }
-    }
-
-    const fetchWordsFunction = async () => {
-      setWordsLoading(true)
-      try {
-        await fetchWords(boardId, userData?.uid!);
-      } catch (error: any) {
-        setWordsFetchError(error)
-      } finally {
-        setWordsLoading(false)
       }
     }
 
@@ -107,7 +99,6 @@ const Board = ({ params: { boardId } }: Props) => {
     if (userData) {
       if (userAccess) {
         if (!board) fetchBoardFunction()
-        if (board && !words) fetchWordsFunction()
         if (board && !rootWords) fetchRootWordsFunction()
       } else {
         fetchUserAccessFunction()
@@ -205,13 +196,7 @@ const Board = ({ params: { boardId } }: Props) => {
         }
       </div>
 
-      <div className="flex flex-col space-y-6">
-        {words && words.length > 0 ? words.map((word, idx) => (
-          <WordsCard key={idx} idx={idx} word={word} />
-        ))
-          : wordsLoading || boardLoading ? Array.apply(null, Array(5)).map((_, idx) => <WordCardPlaceholder key={idx} idx={idx} />) : <div className="">No word found.</div>
-        }
-      </div>
+      <Words />
     </div>
   );
 };

@@ -49,6 +49,7 @@ interface BoardState {
 
   //Words operations
   words: null | Word[];
+  wordsLoading: boolean;
   fetchWords: (boardId: string, userId: string) => Promise<void>;
   addWord: (word: Word, user: User, image?: File) => Promise<void>;
   deleteWord: (word: Word, user: User) => Promise<void>;
@@ -61,6 +62,8 @@ interface BoardState {
 
   //Filter operations
   filteredWords: null | Word[];
+  selectedDate: null | DayValue;
+  selectedRootWord: null | RootWord;
   filterByDate: (date: DayValue, userId: string) => Promise<void>;
   filterByRootWord: (rootWordId: string, userId: string) => Promise<void>;
   resetFilter: () => void;
@@ -85,12 +88,15 @@ const initialState = {
 
   //Words operations
   words: null,
+  wordsLoading: false,
 
   //Root Words operations
   rootWords: null,
 
   //Filter operations
   filteredWords: null,
+  selectedDate: null,
+  selectedRootWord: null,
 
   //Notifications operations
   notifications: null,
@@ -282,11 +288,14 @@ const useBoardStore = create<BoardState>()(
 
     //Words operations
     fetchWords: async (boardId, userId) => {
+      set({ wordsLoading: true });
       try {
         const words = await fetchWordsHelper(boardId, userId);
         set({ words });
       } catch (error) {
         throw error;
+      } finally {
+        set({ wordsLoading: false });
       }
     },
 
@@ -421,17 +430,23 @@ const useBoardStore = create<BoardState>()(
       const boardId = get().board?._id;
       if (!boardId) return;
 
+      set({ selectedDate: date, wordsLoading: true });
+
       try {
         const filteredWords = await fetchWords(boardId, userId, date);
         set({ filteredWords });
       } catch (error) {
         throw error;
+      } finally {
+        set({ wordsLoading: false });
       }
     },
 
     filterByRootWord: async (rootWordId, userId) => {
       const boardId = get().board?._id;
       if (!boardId) return;
+
+      set({ selectedRootWord: get().rootWords?.find((rootWord) => rootWord._id === rootWordId) });
 
       try {
         const filteredWords = await fetchWordsByRoot(boardId, userId, rootWordId);
@@ -464,12 +479,12 @@ const useBoardStore = create<BoardState>()(
           set({ notifications: [notificationAdded, ...get().notifications!] });
         }
       } catch (error) {
-        throw error;
+        get().fetchNotifications(userId);
       }
     },
 
     resetFilter: () => {
-      set({ filteredWords: null });
+      set({ filteredWords: null, selectedDate: null, selectedRootWord: null });
     },
 
     reset: () => {
