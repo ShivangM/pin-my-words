@@ -39,7 +39,7 @@ const AddWordModal = () => {
   }
 
   const removeExample = (idx: number) => {
-    setExamples(examples.splice(idx, 1));
+    setExamples(examples.filter((_, index) => index !== idx));
   }
 
   const onSubmit: SubmitHandler<Word> = async (data) => {
