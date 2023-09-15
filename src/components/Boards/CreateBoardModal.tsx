@@ -9,7 +9,7 @@ import { Board } from '@/interfaces/Board';
 import useBoardStore from '@/store/boardStore';
 import useUserStore from '@/store/userStore';
 import AddUsers from './AddUsers';
-import UploadImage from '../UploadImage';
+import UploadImage from '../Common/UploadImage';
 import useImageUploadStore from '@/store/imageUploadStore';
 import useAddUsersStore from '@/store/addUsersStore';
 import { toast } from 'react-toastify';

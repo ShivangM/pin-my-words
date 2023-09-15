@@ -1,5 +1,4 @@
 'use client';
-import WordsCard from '@/components/Board/WordCard';
 import useBoardStore from '@/store/boardStore';
 import useUserStore from '@/store/userStore';
 import { useEffect, useState } from 'react';
@@ -11,9 +10,8 @@ import { MdUpdate } from 'react-icons/md';
 import { Parallax } from 'react-parallax';
 import SearchWord from '@/components/Board/SearchWord';
 import { BoardAccess } from '@/interfaces/Board.d';
-import WordCardPlaceholder from '@/components/Board/WordCardPlaceholder';
 import useUIStore from '@/store/uiStore';
-import Words from '@/components/Board/Words';
+import WordsSection from '@/components/Board/Words/WordsSection';
 
 type Props = {
   params: {
@@ -29,9 +27,6 @@ const Board = ({ params: { boardId } }: Props) => {
 
   const [boardLoading, setBoardLoading] = useState(false);
   const [boardFetchError, setBoardFetchError] = useState<Error | null>(null)
-
-  const [wordsLoading, setWordsLoading] = useState(false);
-  const [wordsFetchError, setWordsFetchError] = useState<Error | null>(null)
 
   const [rootWordsLoading, setRootWordsLoading] = useState(false);
   const [rootWordsFetchError, setRootWordsFetchError] = useState<Error | null>(null)
@@ -196,7 +191,7 @@ const Board = ({ params: { boardId } }: Props) => {
         }
       </div>
 
-      <Words />
+      <WordsSection />
     </div>
   );
 };

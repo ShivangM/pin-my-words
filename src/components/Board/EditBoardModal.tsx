@@ -10,7 +10,7 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { useEffect } from 'react';
 import { toast } from 'react-toastify';
 import useUIStore from '@/store/uiStore';
-import UploadImage from '../UploadImage';
+import UploadImage from '../Common/UploadImage';
 import useImageUploadStore from '@/store/imageUploadStore';
 type Props = {};
 
@@ -29,7 +29,7 @@ const EditBoardModal = (props: Props) => {
   ]);
 
   const userData = useUserStore((state) => state.userData);
-  const [image, setPreviewImage] = useImageUploadStore((state) => [state.image, state.setPreviewImage]);
+  const [image] = useImageUploadStore((state) => [state.image]);
 
   const {
     register,
@@ -41,7 +41,6 @@ const EditBoardModal = (props: Props) => {
   useEffect(() => {
     if (board) {
       reset(board)
-      setPreviewImage(board.image)
     }
   }, [board])
 

@@ -84,7 +84,7 @@ const ViewWordModal = (props: Props) => {
                                         <div className="flex items-center space-x-4">
                                             <div className="flex items-center space-x-1">
                                                 <BiTimeFive className="text-xl" />
-                                                <time className="text-gray-500 flex flex-col text-sm">
+                                                <time className="text-gray-500 flex flex-col text-xs">
                                                     <span className="font-semibold text-gray-900">Created At: </span>
                                                     <span className='whitespace-nowrap' >
                                                         {moment(focusedWord?.createdAt?.toDate()).format('MMM Do YYYY')}
@@ -94,7 +94,7 @@ const ViewWordModal = (props: Props) => {
 
                                             <div className="flex items-center space-x-1">
                                                 <MdUpdate className="text-xl" />
-                                                <time className="text-gray-500 flex flex-col text-sm">
+                                                <time className="text-gray-500 flex flex-col text-xs">
                                                     <span className="font-semibold text-gray-900">Updated At: </span>
                                                     <span className='whitespace-nowrap' >
                                                         {moment(focusedWord?.updatedAt.toDate()).format('MMMM Do YYYY')}

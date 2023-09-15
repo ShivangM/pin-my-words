@@ -12,7 +12,7 @@ import { IoIosCloseCircle } from 'react-icons/io';
 import useUserStore from '@/store/userStore';
 import { toast } from 'react-toastify';
 import useUIStore from '@/store/uiStore';
-import UploadImage from '../UploadImage';
+import UploadImage from '../../Common/UploadImage';
 import useImageUploadStore from '@/store/imageUploadStore';
 
 const AddWordModal = () => {

@@ -3,10 +3,10 @@ import { Tab } from '@headlessui/react';
 import classNames from 'classnames';
 import { AiFillCloseCircle } from 'react-icons/ai';
 import { useState } from 'react';
-import Users from '../SidePanel/Users';
-import Activity from '../SidePanel/Activity';
+import Users from './Users/Users';
+import Activity from './Activity/Activity';
 import useUIStore from '@/store/uiStore';
-import Filters from '../SidePanel/Filters';
+import Filters from './Filters/Filters';
 
 const SidePanel = () => {
   const [sidePanelOpen, toggleSidePanel] = useUIStore((state) => [

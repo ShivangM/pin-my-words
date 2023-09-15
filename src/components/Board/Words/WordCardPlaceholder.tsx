@@ -3,7 +3,7 @@ import React from 'react';
 import classNames from 'classnames';
 import { HiMiniSpeakerWave } from 'react-icons/hi2';
 
-const LoadingWordsCardPlaceholder = ({ idx }: { idx: number }) => {
+const WordsCardPlaceholder = ({ idx }: { idx: number }) => {
     return (
         <div
             className={classNames(
@@ -17,6 +17,12 @@ const LoadingWordsCardPlaceholder = ({ idx }: { idx: number }) => {
             </div>
 
             <div className="flex flex-col relative justify-center space-y-6 flex-1 p-6">
+                <div className="flex items-center justify-between">
+                    <p className='bg-gray-200 w-32' >
+                        <div className="bar bg-gray-300 h-2"></div>
+                    </p>
+                </div>
+
                 <div className="">
                     <div className="bg-gray-200 w-40">
                         <div className="bar bg-gray-300 h-3"></div>
@@ -25,7 +31,7 @@ const LoadingWordsCardPlaceholder = ({ idx }: { idx: number }) => {
                         <div className="bg-gray-200 w-80">
                             <div className="bar bg-gray-300 h-5"></div>
                         </div>
-                        <HiMiniSpeakerWave className='inline text-3xl text-gray-400 cursor-pointer' />
+                        <HiMiniSpeakerWave className='inline text-3xl text-gray-400' />
                     </h3>
                     <div className=" bg-gray-200 w-60">
                         <div className="bar bg-gray-300 h-3"></div>
@@ -33,30 +39,30 @@ const LoadingWordsCardPlaceholder = ({ idx }: { idx: number }) => {
                 </div>
 
                 <div className="space-y-1">
-                    <h4 className="text-sm font-bold">Root Word(s):</h4>
-                    <ul className="space-x-2 text-sm text-gray-900 font-medium cursor-pointer list-inside list-none flex items-center">
+                    <h4 className="w-20 bg-gray-200 ">
+                        <div className="bar bg-gray-300 h-3"></div>
+                    </h4>
+                    <ul className="space-x-2 list-inside list-none flex items-center">
                         {/* Loading bar bg-gray-300 s for Roots */}
-                        <li className="w-16 py-0.5 transition-all ease-in-out duration-300  hover:bg-gray-300 bg-gray-200 rounded-lg">
+                        <li className="w-16 py-0.5 bg-gray-200 rounded-lg">
                             <div className="bar bg-gray-300 h-3"></div>
                         </li>
-                        <li className="w-12 py-0.5 transition-all ease-in-out duration-300  hover:bg-gray-300 bg-gray-200 rounded-lg">
+                        <li className="w-12 py-0.5 bg-gray-200 rounded-lg">
                             <div className="bar bg-gray-300 h-3"></div>
                         </li>
-                        <li className="w-14 py-0.5 transition-all ease-in-out duration-300  hover:bg-gray-300 bg-gray-200 rounded-lg">
+                        <li className="w-14 py-0.5 bg-gray-200 rounded-lg">
                             <div className="bar bg-gray-300 h-3"></div>
                         </li>
                     </ul>
                 </div>
 
-                <button
-                    type="button"
-                    className="modalBtn bg-slate-200 hover:bg-slate-300 w-fit"
+                <div
+                    className="bg-gray-200 w-20 h-8"
                 >
-                    View More
-                </button>
+                </div>
             </div>
         </div>
     );
 };
 
-export default LoadingWordsCardPlaceholder;
+export default WordsCardPlaceholder;
