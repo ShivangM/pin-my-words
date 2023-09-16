@@ -7,9 +7,7 @@ import convertDayValueToDate from '@/utils/convertDayValueToDate'
 import Words from './Words'
 import WordsPlaceholder from './WordsPlaceholder'
 
-type Props = {}
-
-const WordsSection = (props: Props) => {
+const WordsSection = () => {
     const [words, filteredWords, wordsLoading, fetchWords, board, selectedDate] = useBoardStore((state) => [state.words, state.filteredWords, state.wordsLoading, state.fetchWords, state.board, state.selectedDate])
 
     const [userData] = useUserStore((state) => [state.userData])
@@ -34,9 +32,7 @@ const WordsSection = (props: Props) => {
                 }
             </div>
 
-            {
-                wordsLoading ? <WordsPlaceholder /> : <Words words={filteredWords || words} />
-            }
+            {wordsLoading ? <WordsPlaceholder /> : <Words words={filteredWords || words} />}
         </div>
     )
 }

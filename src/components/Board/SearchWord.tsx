@@ -1,9 +1,8 @@
 'use client';
 import { ChangeEvent, useMemo, useState } from 'react';
 import debounce from 'lodash.debounce';
-type Props = {};
 
-const SearchWord = (props: Props) => {
+const SearchWord = () => {
   const [searchTerm, setSearchTerm] = useState<string>();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {

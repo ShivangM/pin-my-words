@@ -1,4 +1,9 @@
 import CreateBoardModal from '@/components/Boards/CreateBoardModal';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: "Boards",
+}
 
 export default function BoardLayout({
   children,

@@ -1,4 +1,4 @@
-import { Board, BoardAccess, BoardUser } from '@/interfaces/Board.d';
+import { Board, BoardAccess, BoardModes, BoardUser } from '@/interfaces/Board.d';
 import { RootWord, Word } from '@/interfaces/Word.d';
 import addRootWordToBoard from '@/lib/Root Words/addRootWordToBoard';
 import addWordToBoard from '@/lib/Words/addWordToBoard';
@@ -26,11 +26,15 @@ import { Notification, NotificationType } from '@/interfaces/Notification.d';
 import fetchNotificationsFromBoard from '@/lib/Notifications/fetchNotifications';
 import addNotificationToBoard from '@/lib/Notifications/addNotifictionToBoard';
 import { User } from '@/interfaces/User.d';
+import editRootWordFromBoard from '@/lib/Root Words/editRootWordFromBoard';
+import deleteRootWordFromBoard from '@/lib/Root Words/deleteRootWordFromBoard';
 
 interface BoardState {
   //Board operations
   boards: null | Board[];
   board: null | Board;
+  boardMode: null | BoardModes;
+  toggleBoardMode: () => void;
   addBoard: (board: Board, users?: BoardUser[], image?: File) => Promise<void>;
   fetchBoards: (userId: string) => Promise<void>;
   fetchBoard: (boardId: string, userId: string) => void;
@@ -56,9 +60,12 @@ interface BoardState {
   editWord: (word: Word, user: User, image?: File) => Promise<void>;
 
   //Root Words operations
-  rootWords: null | RootWord[]
+  rootWords: null | RootWord[];
+  rootWordsLoading: boolean;
   fetchRootWords: (boardId: string, userId: string) => Promise<void>;
   addRootWord: (word: RootWord, user: User) => Promise<void>;
+  deleteRootWord: (word: RootWord, user: User) => Promise<void>;
+  editRootWord: (word: RootWord, user: User) => Promise<void>;
 
   //Filter operations
   filteredWords: null | Word[];
@@ -81,6 +88,7 @@ const initialState = {
   //Board operations
   boards: null,
   board: null,
+  boardMode: BoardModes.WORDS,
 
   //User operations
   users: null,
@@ -92,6 +100,7 @@ const initialState = {
 
   //Root Words operations
   rootWords: null,
+  rootWordsLoading: false,
 
   //Filter operations
   filteredWords: null,
@@ -107,6 +116,16 @@ const useBoardStore = create<BoardState>()(
     ...initialState,
 
     //Board operations
+
+    toggleBoardMode: () => {
+      const boardMode = get().boardMode;
+      if (boardMode === BoardModes.WORDS) {
+        set({ boardMode: BoardModes.ROOT_WORDS });
+      } else {
+        set({ boardMode: BoardModes.WORDS });
+      }
+    },
+
     addBoard: async (board, users, image) => {
       try {
         const newBoard = await createBoard(board, users, image);
@@ -376,11 +395,14 @@ const useBoardStore = create<BoardState>()(
 
     //Root Words operations
     fetchRootWords: async (boardId, userId) => {
+      set({ rootWordsLoading: true });
       try {
         const rootWords = await fetchRootWordsHelper(boardId, userId);
         set({ rootWords });
       } catch (error) {
         throw error;
+      } finally {
+        set({ rootWordsLoading: false });
       }
     },
 
@@ -406,6 +428,57 @@ const useBoardStore = create<BoardState>()(
       }
     },
 
+    deleteRootWord: async (rootWord, user) => {
+      const boardId = get().board?._id;
+      const rootWordId = rootWord._id;
+      const userId = user.uid;
+
+      if (!boardId || !rootWordId || !userId) return;
+
+      try {
+        await deleteRootWordFromBoard(boardId, rootWordId, userId);
+        set({
+          rootWords: get().rootWords?.filter((rootWord) => rootWord._id !== rootWordId),
+        });
+
+        const notification = {
+          type: NotificationType.ROOT_WORD_DELETED,
+          message: `Root Word ${rootWord.root} deleted by ${user.name}`,
+        } as Notification;
+
+        get().addNotification(notification, userId);
+      } catch (error) {
+        throw error;
+      }
+    },
+
+    editRootWord: async (rootWord, user) => {
+      const boardId = get().board?._id;
+      const userId = user.uid;
+
+      if (!boardId || !userId || !rootWord) return;
+
+      try {
+        const updatedRootWord = await editRootWordFromBoard(rootWord, boardId, userId);
+        set({
+          rootWords: get().rootWords?.map((rootWord) => {
+            if (rootWord._id === updatedRootWord._id) {
+              return updatedRootWord;
+            }
+            return rootWord;
+          }),
+        });
+
+        const notification = {
+          type: NotificationType.ROOT_WORD_UPDATED,
+          message: `Root Word ${rootWord.root} updated by ${user.name}`,
+        } as Notification;
+
+        get().addNotification(notification, userId);
+      } catch (error) {
+        throw error;
+      }
+    },
 
     // fetchRootWord: async (userId) => {
     //   const boardId = get().board?._id;

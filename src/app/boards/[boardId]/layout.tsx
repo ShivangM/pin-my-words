@@ -3,7 +3,7 @@ import AddWordModal from '@/components/Board/Words/AddWordModal';
 import DeleteBoardModal from '@/components/Board/DeleteBoardModal';
 import DeleteWordModal from '@/components/Board/Words/DeleteWordModal';
 import EditBoardModal from '@/components/Board/EditBoardModal';
-import EditWordModal from '@/components/Board/EditWordModal';
+import EditWordModal from '@/components/Board/Words/EditWordModal';
 import OpenSidePanelButton from '@/components/Board/OpenSidePanelButton';
 import SidePanel from '@/components/Board/SidePanel/SidePanel';
 import ViewRootWordModal from '@/components/Board/RootWords/ViewRootWordModal';
@@ -14,6 +14,8 @@ import UpdateUserAccessModal from '@/components/Board/SidePanel/Users/UpdateUser
 import React from 'react';
 import SidePanelBackdrop from '@/components/Board/SidePanel/SidePanelBackdrop';
 import ViewWordModal from '@/components/Board/Words/ViewWordModal';
+import DeleteRootWordModal from '@/components/Board/RootWords/DeleteRootWordModal';
+import EditRootWordModal from '@/components/Board/RootWords/EditRootWordModal';
 
 export default function BoardLayout({
   children,
@@ -33,6 +35,8 @@ export default function BoardLayout({
 
       {/* Root Word Options  */}
       <AddRootWordModal />
+      <DeleteRootWordModal />
+      <EditRootWordModal />
       <ViewRootWordModal />
 
       {/* Word Options  */}

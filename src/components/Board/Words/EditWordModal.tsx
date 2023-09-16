@@ -13,7 +13,7 @@ import useUserStore from '@/store/userStore';
 import { Timestamp } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import useUIStore from '@/store/uiStore';
-import UploadImage from '../Common/UploadImage';
+import UploadImage from '../../Common/UploadImage';
 import useImageUploadStore from '@/store/imageUploadStore';
 
 const EditWordModal = () => {

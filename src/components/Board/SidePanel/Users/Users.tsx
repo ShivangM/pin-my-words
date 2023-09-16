@@ -44,7 +44,7 @@ const Users = (props: Props) => {
         </button>
 
         <button
-          type="submit"
+          type="button"
           className="border-blue-500 disabled:cursor-not-allowed disabled:opacity-60 border-2 text-blue-600 font-medium w-full py-2 rounded-lg transition-all ease-in-out duration-300 hover:border-blue-600"
           onClick={toggleAddUserModal}
           disabled={!(userAccess === BoardAccess.ADMIN || userAccess === BoardAccess.OWNER)}

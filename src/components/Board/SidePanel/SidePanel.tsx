@@ -23,7 +23,7 @@ const SidePanel = () => {
   return (
     <aside
       className={classNames(
-        'h-screen overflow-y-hidden transition-all duration-300 ease-in-out bg-gray-100 fixed z-50 lg:z-30 lg:sticky right-0 top-0 lg:top-24 lg:translate-x-0 lg:transform p-4',
+        'h-full overflow-y-hidden transition-all duration-300 ease-in-out bg-gray-100 fixed z-50 lg:z-30 lg:sticky right-0 top-0 lg:top-24 lg:translate-x-0 lg:transform p-4',
         sidePanelOpen ? 'translate-x-0' : 'translate-x-full'
       )}
     >
