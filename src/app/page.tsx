@@ -1,10 +1,14 @@
 import Carousel from '@/components/Home/Carousel';
+import Features from '@/components/Home/Features/Features';
+import Hero from '@/components/Home/Hero';
 import Image from 'next/image';
 
 export default function Home() {
   return (
-    <main className="">
-      <Carousel />
-    </main>
+    <div className="">
+      <Hero />
+      <Features />
+      {/* <Carousel /> */}
+    </div>
   );
 }

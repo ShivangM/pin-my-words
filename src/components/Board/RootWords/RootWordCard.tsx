@@ -46,19 +46,6 @@ const RootWordCard = ({ rootWord }: Props) => {
                     <p className="">{meaning}</p>
                 </div>
 
-                {/* <div className="space-y-1 w-full">
-                    <h4 className="text-sm font-bold">Root Word(s): </h4>
-                    <ul className="space-x-2 overflow-x-auto text-sm text-gray-900 font-medium cursor-pointer list-inside list-none flex items-center">
-                        {word.roots && word.roots.length > 0 ? word.roots.map((root) => (
-                            <li key={root.value} onClick={() => handleViewRootWord(root.value)} className="px-2 py-0.5 transition-all ease-in-out duration-300 bg-gray-200 hover:bg-gray-300 rounded-lg">
-                                {root.label}
-                            </li>
-                        ))
-                            : <div className="text-gray-500">No Root Word(s) Provided.</div>
-                        }
-                    </ul>
-                </div> */}
-
                 <button
                     type="button"
                     onClick={() => toggleViewRootWordModal(rootWord)}

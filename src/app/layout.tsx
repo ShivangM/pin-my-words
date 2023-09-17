@@ -58,7 +58,7 @@ export const metadata: Metadata = {
     ],
   },
   creator: "Shivang Mishra",
-  manifest:"/site.webmanifest",
+  manifest: "/site.webmanifest",
   themeColor: "#ffffff",
   keywords: [
     "Pin My Words",
@@ -85,7 +85,9 @@ export default function RootLayout({
         <ClientProvider>
           <ToastContainer position="bottom-left" />
           <Navbar />
-          {children}
+          <main className="container mx-auto p-4 sm:p-6 lg:p-8 xl:p-10">
+            {children}
+          </main>
           <Footer />
         </ClientProvider>
       </body>

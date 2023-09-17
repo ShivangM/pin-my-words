@@ -138,6 +138,9 @@ const AddRootWordModal = () => {
                                                     placeholder="Root Word"
                                                     {...register('root', {
                                                         required: 'Root Word is required.',
+                                                        validate: (value) => {
+                                                            return /^[a-zA-Z]+$/.test(value) || 'Root word must be a single word.'
+                                                        }
                                                     })}
                                                 />
 

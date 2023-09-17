@@ -4,7 +4,7 @@ import useBoardStore from '@/store/boardStore';
 import { Dialog, Transition } from '@headlessui/react';
 import { ErrorMessage } from '@hookform/error-message';
 import classNames from 'classnames';
-import { Fragment } from 'react';
+import { Fragment, useEffect } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import Select from 'react-select';
 import options from '@/constants/parts-of-speech.json';
@@ -40,6 +40,12 @@ const EditRootWordModal = () => {
       reset();
     }
   }
+
+  useEffect(() => {
+    if (focusedRootWord) {
+      reset(focusedRootWord)
+    }
+  }, [focusedRootWord])
 
   return (
     <>
@@ -97,7 +103,6 @@ const EditRootWordModal = () => {
                           control={control}
                           name="type"
                           rules={{ required: 'Type is required.' }}
-                          defaultValue={focusedRootWord?.type}
                           render={({ field: { onChange, ref } }) => (
                             <Select
                               //@ts-ignore
@@ -129,14 +134,17 @@ const EditRootWordModal = () => {
 
                         <input
                           className={classNames(
-                            'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline',
+                            'shadow appearance-none border rounded disabled:cursor-not-allowed w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline',
                             errors?.root ? 'border-red-500' : null
                           )}
                           type="text"
                           placeholder="Root Word"
-                          defaultValue={focusedRootWord?.root}
                           {...register('root', {
                             required: 'Root Word is required.',
+                            validate: (value) => {
+                              return /^[a-zA-Z]+$/.test(value) || 'Root word must be a single word.'
+                            },
+                            disabled: true,
                           })}
                         />
 
@@ -164,7 +172,6 @@ const EditRootWordModal = () => {
                           )}
                           type="text"
                           placeholder="Meaning"
-                          defaultValue={focusedRootWord?.meaning}
                           {...register('meaning', {
                             required: 'Meaning is required.',
                           })}
@@ -192,10 +199,10 @@ const EditRootWordModal = () => {
                             'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline',
                             errors?.description ? 'border-red-500' : null
                           )}
-                          defaultValue={focusedRootWord?.description}
                           placeholder="Description"
                           {...register('description')}
-                        />
+                        >
+                        </textarea>
 
                         <ErrorMessage
                           errors={errors}
