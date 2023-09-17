@@ -2,8 +2,8 @@ import CreateBoardModal from '@/components/Boards/CreateBoardModal';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: "Boards",
-}
+  title: 'Boards',
+};
 
 export default function BoardLayout({
   children,
@@ -13,7 +13,7 @@ export default function BoardLayout({
   return (
     <>
       <CreateBoardModal />
-      <main className="container mx-auto p-4 sm:p-6 lg:p-8 xl:p-10">
+      <main className="container mx-auto">
         <div className="flex flex-1 min-h-screen flex-col">{children}</div>
       </main>
     </>

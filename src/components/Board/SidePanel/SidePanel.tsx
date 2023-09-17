@@ -34,7 +34,7 @@ const SidePanel = () => {
         </button>
       </div>
 
-      <div className="w-80 h-full">
+      <div className="w-80 h-[600px]">
         <Tab.Group>
           <Tab.List className="w-full flex space-x-1 rounded-xl bg-blue-900/20 p-1">
             {Object.keys(options).map((category) => (
@@ -44,9 +44,7 @@ const SidePanel = () => {
                   classNames(
                     'w-full rounded-lg py-2.5 text-sm font-medium leading-5 text-blue-700',
                     'ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2',
-                    selected
-                      ? 'bg-white shadow'
-                      : 'hover:bg-white/[0.12]'
+                    selected ? 'bg-white shadow' : 'hover:bg-white/[0.12]'
                   )
                 }
               >
@@ -58,7 +56,9 @@ const SidePanel = () => {
             {Object.values(options).map((OptionTab, idx) => (
               <Tab.Panel
                 key={idx}
-                className={classNames('w-full rounded-xl overflow-y-auto bg-white p-2 h-5/6')}
+                className={classNames(
+                  'w-full rounded-xl overflow-y-auto bg-white p-2 h-5/6'
+                )}
               >
                 <OptionTab />
               </Tab.Panel>

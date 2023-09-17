@@ -49,7 +49,7 @@ export default function BoardLayout({
       <DeleteBoardModal />
       <EditBoardModal />
 
-      <main className="container relative flex lg:space-x-10 mx-auto sm:p-6 lg:p-8 xl:p-10">
+      <main className="container relative flex lg:space-x-10 mx-auto">
         <div className="flex flex-1 min-h-screen flex-col">{children}</div>
         <SidePanel />
       </main>
