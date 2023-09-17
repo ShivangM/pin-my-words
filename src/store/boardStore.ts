@@ -1,4 +1,9 @@
-import { Board, BoardAccess, BoardModes, BoardUser } from '@/interfaces/Board.d';
+import {
+  Board,
+  BoardAccess,
+  BoardModes,
+  BoardUser,
+} from '@/interfaces/Board.d';
 import { RootWord, Word } from '@/interfaces/Word.d';
 import addRootWordToBoard from '@/lib/Root Words/addRootWordToBoard';
 import addWordToBoard from '@/lib/Words/addWordToBoard';
@@ -28,6 +33,7 @@ import addNotificationToBoard from '@/lib/Notifications/addNotifictionToBoard';
 import { User } from '@/interfaces/User.d';
 import editRootWordFromBoard from '@/lib/Root Words/editRootWordFromBoard';
 import deleteRootWordFromBoard from '@/lib/Root Words/deleteRootWordFromBoard';
+import fetchRootWordHelper from '@/lib/Root Words/fetchRootWord';
 
 interface BoardState {
   //Board operations
@@ -49,7 +55,11 @@ interface BoardState {
   addUser: (user: BoardUser, admin: User) => Promise<void>;
   leaveBoard: (user: User) => Promise<void>;
   removeUser: (user: BoardUser, admin: User) => Promise<void>;
-  updateAccess: (user: BoardUser, admin: User, access: BoardAccess) => Promise<void>;
+  updateAccess: (
+    user: BoardUser,
+    admin: User,
+    access: BoardAccess
+  ) => Promise<void>;
 
   //Words operations
   words: null | Word[];
@@ -66,6 +76,7 @@ interface BoardState {
   addRootWord: (word: RootWord, user: User) => Promise<void>;
   deleteRootWord: (word: RootWord, user: User) => Promise<void>;
   editRootWord: (word: RootWord, user: User) => Promise<void>;
+  fetchRootWord: (rootWordId: string, userId: string) => Promise<RootWord>;
 
   //Filter operations
   filteredWords: null | Word[];
@@ -78,7 +89,10 @@ interface BoardState {
   //Notifications operations
   notifications: null | Notification[];
   fetchNotifications: (userId: string) => Promise<void>;
-  addNotification: (notification: Notification, userId: string) => Promise<void>;
+  addNotification: (
+    notification: Notification,
+    userId: string
+  ) => Promise<void>;
 
   //Reset
   reset: () => void;
@@ -109,7 +123,7 @@ const initialState = {
 
   //Notifications operations
   notifications: null,
-}
+};
 
 const useBoardStore = create<BoardState>()(
   devtools((set, get) => ({
@@ -176,12 +190,7 @@ const useBoardStore = create<BoardState>()(
       if (!boardId || !userId) return;
 
       try {
-        const updatedBoard = await updateBoard(
-          userId,
-          boardId,
-          board,
-          image
-        );
+        const updatedBoard = await updateBoard(userId, boardId, board, image);
 
         set({ board: updatedBoard });
 
@@ -242,7 +251,7 @@ const useBoardStore = create<BoardState>()(
       const boardId = get().board?._id;
       const userId = user.uid;
 
-      if (!boardId || !userId) return
+      if (!boardId || !userId) return;
 
       try {
         await leaveBoardHelper(boardId, userId);
@@ -372,7 +381,12 @@ const useBoardStore = create<BoardState>()(
       }
 
       try {
-        const editedWord = await editWordFromBoard(word, boardId, userId, image);
+        const editedWord = await editWordFromBoard(
+          word,
+          boardId,
+          userId,
+          image
+        );
         set({
           words: get().words?.map((word) => {
             if (word._id === editedWord._id) {
@@ -413,7 +427,11 @@ const useBoardStore = create<BoardState>()(
       const userId = user.uid;
 
       try {
-        const rootWordAdded = await addRootWordToBoard(boardId, rootWord, userId);
+        const rootWordAdded = await addRootWordToBoard(
+          boardId,
+          rootWord,
+          userId
+        );
         set({ rootWords: [rootWordAdded, ...get().rootWords!] });
 
         const notification = {
@@ -422,7 +440,6 @@ const useBoardStore = create<BoardState>()(
         } as Notification;
 
         get().addNotification(notification, userId);
-
       } catch (error) {
         throw error;
       }
@@ -438,7 +455,9 @@ const useBoardStore = create<BoardState>()(
       try {
         await deleteRootWordFromBoard(boardId, rootWordId, userId);
         set({
-          rootWords: get().rootWords?.filter((rootWord) => rootWord._id !== rootWordId),
+          rootWords: get().rootWords?.filter(
+            (rootWord) => rootWord._id !== rootWordId
+          ),
         });
 
         const notification = {
@@ -459,7 +478,11 @@ const useBoardStore = create<BoardState>()(
       if (!boardId || !userId || !rootWord) return;
 
       try {
-        const updatedRootWord = await editRootWordFromBoard(rootWord, boardId, userId);
+        const updatedRootWord = await editRootWordFromBoard(
+          rootWord,
+          boardId,
+          userId
+        );
         set({
           rootWords: get().rootWords?.map((rootWord) => {
             if (rootWord._id === updatedRootWord._id) {
@@ -480,23 +503,20 @@ const useBoardStore = create<BoardState>()(
       }
     },
 
-    // fetchRootWord: async (userId) => {
-    //   const boardId = get().board?._id;
-    //   const rootId = get().focusedRootWord;
+    fetchRootWord: async (rootWordId, userId) => {
+      const boardId = get().board?._id;
 
-    //   if (!boardId) {
-    //     throw new Error('Board does not exist');
-    //   } else if (!rootId) {
-    //     throw new Error('Root word does not exist');
-    //   }
+      if (!boardId) {
+        throw new Error('Board does not exist');
+      }
 
-    //   try {
-    //     const rootWord = await fetchRootWordHelper(boardId, rootId, userId);
-    //     return rootWord;
-    //   } catch (error) {
-    //     throw error;
-    //   }
-    // },
+      try {
+        const rootWord = await fetchRootWordHelper(boardId, rootWordId, userId);
+        return rootWord;
+      } catch (error) {
+        throw error;
+      }
+    },
 
     //Filter operations
     filterByDate: async (date, userId) => {
@@ -519,10 +539,18 @@ const useBoardStore = create<BoardState>()(
       const boardId = get().board?._id;
       if (!boardId) return;
 
-      set({ selectedRootWord: get().rootWords?.find((rootWord) => rootWord._id === rootWordId) });
+      set({
+        selectedRootWord: get().rootWords?.find(
+          (rootWord) => rootWord._id === rootWordId
+        ),
+      });
 
       try {
-        const filteredWords = await fetchWordsByRoot(boardId, userId, rootWordId);
+        const filteredWords = await fetchWordsByRoot(
+          boardId,
+          userId,
+          rootWordId
+        );
         set({ filteredWords });
       } catch (error) {
         throw error;
@@ -535,7 +563,10 @@ const useBoardStore = create<BoardState>()(
       if (!boardId) return;
 
       try {
-        const notifications = await fetchNotificationsFromBoard(boardId, userId);
+        const notifications = await fetchNotificationsFromBoard(
+          boardId,
+          userId
+        );
         set({ notifications });
       } catch (error) {
         throw error;
@@ -547,7 +578,11 @@ const useBoardStore = create<BoardState>()(
       if (!boardId) return;
 
       try {
-        const notificationAdded = await addNotificationToBoard(boardId, userId, notification);
+        const notificationAdded = await addNotificationToBoard(
+          boardId,
+          userId,
+          notification
+        );
         if (notificationAdded.type !== NotificationType.USER_LEFT) {
           set({ notifications: [notificationAdded, ...get().notifications!] });
         }
@@ -562,7 +597,7 @@ const useBoardStore = create<BoardState>()(
 
     reset: () => {
       set(initialState);
-    }
+    },
   }))
 );
 
