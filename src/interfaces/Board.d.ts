@@ -10,20 +10,21 @@ export enum BoardAccess {
 
 export interface BoardUser extends User {
   access: BoardAccess;
-};
+}
 
 export enum BoardModes {
-  WORDS = "words",
-  ROOT_WORDS = "root_words",
+  WORDS = 'words',
+  ROOT_WORDS = 'root_words',
 }
 
 export interface Board {
   _id: string;
   name: string;
   owner: string;
+  totalWords: number;
+  totalRootWords: number;
   createdAt: Timestamp;
   updatedAt: Timestamp;
-  access: BoardAccess;
   description?: string;
   image?: string;
 }

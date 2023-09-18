@@ -94,6 +94,10 @@ interface BoardState {
     userId: string
   ) => Promise<void>;
 
+  //Pagination operations
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+
   //Reset
   reset: () => void;
 }
@@ -123,6 +127,9 @@ const initialState = {
 
   //Notifications operations
   notifications: null,
+
+  //Pagination operations
+  currentPage: 0,
 };
 
 const useBoardStore = create<BoardState>()(
@@ -589,6 +596,11 @@ const useBoardStore = create<BoardState>()(
       } catch (error) {
         get().fetchNotifications(userId);
       }
+    },
+
+    //Pagination operations
+    setCurrentPage: (page) => {
+      set({ currentPage: page });
     },
 
     resetFilter: () => {

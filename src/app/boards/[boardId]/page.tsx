@@ -13,6 +13,7 @@ import useUIStore from '@/store/uiStore';
 import WordsSection from '@/components/Board/Words/WordsSection';
 import HeaderParallax from '@/components/Board/HeaderParallax';
 import RootWordsSection from '@/components/Board/RootWords/RootWordsSection';
+import Pagination from '@/components/Common/Pagination/Pagination';
 
 type Props = {
   params: {
@@ -24,8 +25,9 @@ const Board = ({ params: { boardId } }: Props) => {
   const [userData] = useUserStore((state) => [state.userData]);
 
   const [userAccessLoading, setUserAccessLoading] = useState(false);
-  const [userAccessFetchError, setUserAccessFetchError] = useState<Error | null>(null)
-  const [boardFetchError, setBoardFetchError] = useState<Error | null>(null)
+  const [userAccessFetchError, setUserAccessFetchError] =
+    useState<Error | null>(null);
+  const [boardFetchError, setBoardFetchError] = useState<Error | null>(null);
 
   const [
     userAccess,
@@ -44,53 +46,73 @@ const Board = ({ params: { boardId } }: Props) => {
     state.fetchBoard,
     state.rootWords,
     state.fetchRootWords,
-    state.reset
+    state.reset,
   ]);
 
-  const [toggleAddWordModal, toggleAddRootWordModal, toggleDeleteBoardModal, toggleEditBoardModal] = useUIStore(state => [state.toggleAddWordModal, state.toggleAddRootWordModal, state.toggleDeleteBoardModal, state.toggleEditBoardModal])
+  const [
+    toggleAddWordModal,
+    toggleAddRootWordModal,
+    toggleDeleteBoardModal,
+    toggleEditBoardModal,
+  ] = useUIStore((state) => [
+    state.toggleAddWordModal,
+    state.toggleAddRootWordModal,
+    state.toggleDeleteBoardModal,
+    state.toggleEditBoardModal,
+  ]);
 
   useEffect(() => {
     const fetchUserAccessFunction = async () => {
-      setUserAccessLoading(true)
+      setUserAccessLoading(true);
       try {
         await fetchUserAccess(boardId, userData?.uid!);
       } catch (error: any) {
-        setUserAccessFetchError(error)
+        setUserAccessFetchError(error);
       } finally {
-        setUserAccessLoading(false)
+        setUserAccessLoading(false);
       }
-    }
+    };
 
     const fetchBoardFunction = async () => {
       try {
         fetchBoard(boardId, userData?.uid!);
       } catch (error: any) {
-        setBoardFetchError(error)
+        setBoardFetchError(error);
       }
-    }
+    };
 
     if (userData) {
       if (userAccess) {
-        if (!board) fetchBoardFunction()
+        if (!board) fetchBoardFunction();
       } else {
-        fetchUserAccessFunction()
+        fetchUserAccessFunction();
       }
     }
-  }, [userData, boardId, fetchUserAccess, fetchBoard, fetchRootWords, userAccess, board, rootWords])
+  }, [
+    userData,
+    boardId,
+    fetchUserAccess,
+    fetchBoard,
+    fetchRootWords,
+    userAccess,
+    board,
+    rootWords,
+  ]);
 
   useEffect(() => {
     return () => {
-      reset()
-    }
-  }, [reset])
+      reset();
+    };
+  }, [reset]);
 
   // if (userAccessLoading || boardLoading) return <div>Loading...</div>
-  if (userAccessFetchError) return <div> You dont have access to this board. </div>
-  if (boardFetchError) return <div> Error fetching board. </div>
-  if (!board) return <div>Loading...</div>
+  if (userAccessFetchError)
+    return <div> You dont have access to this board. </div>;
+  if (boardFetchError) return <div> Error fetching board. </div>;
+  if (!board) return <div>Loading...</div>;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-6">
       <HeaderParallax image={board.image} name={board.name} />
 
       <div className="space-y-4">
@@ -112,9 +134,7 @@ const Board = ({ params: { boardId } }: Props) => {
               </div>
             ) : null}
           </div>
-          <p className="text-gray-500 text-sm">
-            {board.description}
-          </p>
+          <p className="text-gray-500 text-sm">{board.description}</p>
         </div>
 
         <div className="flex items-center space-x-4">
@@ -142,27 +162,24 @@ const Board = ({ params: { boardId } }: Props) => {
 
       <hr />
 
-
       <div className="flex flex-col w-full sm:flex-row items-center gap-4">
         <SearchWord />
-        {
-          userAccess === BoardAccess.READ_ONLY ? null
-            :
-            <div className="flex items-center space-x-2">
-              <button onClick={toggleAddRootWordModal} className="btn">
-                Add Root Word
-              </button>
+        {userAccess === BoardAccess.READ_ONLY ? null : (
+          <div className="flex items-center space-x-2">
+            <button onClick={toggleAddRootWordModal} className="btn">
+              Add Root Word
+            </button>
 
-              <button onClick={toggleAddWordModal} className="btn">
-                Add Word
-              </button>
-            </div>
-        }
+            <button onClick={toggleAddWordModal} className="btn">
+              Add Word
+            </button>
+          </div>
+        )}
       </div>
 
-      {
-        boardMode === BoardModes.WORDS ? <WordsSection /> : <RootWordsSection />
-      }
+      {boardMode === BoardModes.WORDS ? <WordsSection /> : <RootWordsSection />}
+
+      <Pagination />
     </div>
   );
 };
