@@ -47,15 +47,18 @@ const SignIn = () => {
 
           userDoc.then(async (docSnapshot) => {
             if (docSnapshot.exists()) {
-              setUserData({ ...docSnapshot.data(), uid: docSnapshot.id } as User);
-            }
-            else {
+              setUserData({
+                ...docSnapshot.data(),
+                uid: docSnapshot.id,
+              } as User);
+            } else {
               const userData = {
                 email: user.email!,
                 name: user.displayName!,
                 image: user.photoURL || undefined,
                 createdAt: Timestamp.now(),
                 updatedAt: Timestamp.now(),
+                totalBoards: 0,
               };
 
               setDoc(doc(db, 'users', user.uid!), userData);
