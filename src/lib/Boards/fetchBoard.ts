@@ -1,17 +1,16 @@
 import { Board } from '@/interfaces/Board';
 import db from '@/utils/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import {
+  collection,
+  doc,
+  getCountFromServer,
+  getDoc,
+} from 'firebase/firestore';
 import fetchUserAccess from '../Users/fetchUserAccess';
 
-const fetchBoard = async (
-  boardId: string,
-  userId: string
-): Promise<Board> => {
+const fetchBoard = async (boardId: string, userId: string): Promise<Board> => {
   try {
-    const userAccess = await fetchUserAccess(
-      boardId,
-      userId
-    );
+    const userAccess = await fetchUserAccess(boardId, userId);
 
     if (!userAccess) {
       throw new Error('User does not have access to this board');
@@ -24,9 +23,35 @@ const fetchBoard = async (
       throw new Error('Board does not exist');
     }
 
-    const board = { ...boardDoc.data(), _id: boardDoc.id } as Board;
-    return board;
+    const wordsCollection = collection(db, 'boards', boardId, 'words');
+    const rootWordsCollection = collection(db, 'boards', boardId, 'roots');
+    const notificationsCollection = collection(
+      db,
+      'boards',
+      boardId,
+      'notifications'
+    );
 
+    const totalWordsSnapshot = await getCountFromServer(wordsCollection);
+    const totalRootWordsSnapshot = await getCountFromServer(
+      rootWordsCollection
+    );
+    const totalNotificationsSnapshot = await getCountFromServer(
+      notificationsCollection
+    );
+
+    const totalWords = totalWordsSnapshot.data().count;
+    const totalRootWords = totalRootWordsSnapshot.data().count;
+    const totalNotifications = totalNotificationsSnapshot.data().count;
+
+    const board = {
+      ...boardDoc.data(),
+      _id: boardDoc.id,
+      totalWords,
+      totalRootWords,
+      totalNotifications,
+    } as Board;
+    return board;
   } catch (error) {
     throw error;
   }

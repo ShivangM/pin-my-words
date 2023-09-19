@@ -29,7 +29,7 @@ const Hero = (props: Props) => {
             <Link
               rel="noopener noreferrer"
               href="/explore"
-              className="px-8 py-3 text-lg font-semibold border rounded border-gray-100"
+              className="px-8 py-3 text-lg font-semibold border-2 rounded border-gray-400 hover:border-gray-500 transition-all ease-in-out duration-300"
             >
               Explore
             </Link>

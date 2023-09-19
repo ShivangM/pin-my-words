@@ -9,6 +9,7 @@ export enum BoardAccess {
 }
 
 export interface BoardUser extends User {
+  _id: string;
   access: BoardAccess;
 }
 
@@ -23,6 +24,8 @@ export interface Board {
   owner: string;
   totalWords: number;
   totalRootWords: number;
+  totalNotifications: number;
+  totalUsers: number;
   createdAt: Timestamp;
   updatedAt: Timestamp;
   description?: string;

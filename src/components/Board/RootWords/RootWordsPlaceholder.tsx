@@ -1,10 +1,14 @@
-import React from 'react'
-import RootWordCardPlaceholder from './RootWordCardPlaceholder'
+import React from 'react';
+import RootWordCardPlaceholder from './RootWordCardPlaceholder';
 
 const RootWordsPlaceholder = () => {
-    return (
-        Array.apply(null, Array(5)).map((_, idx) => <RootWordCardPlaceholder key={idx} />)
-    )
-}
+  return (
+    <>
+      {Array.apply(null, Array(6)).map((_, idx) => (
+        <RootWordCardPlaceholder key={idx} />
+      ))}
+    </>
+  );
+};
 
-export default RootWordsPlaceholder
+export default RootWordsPlaceholder;

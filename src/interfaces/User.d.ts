@@ -5,4 +5,5 @@ export interface User {
   image?: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
+  totalBoards: number;
 }

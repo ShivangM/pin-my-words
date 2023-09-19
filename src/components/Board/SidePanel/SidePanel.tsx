@@ -52,14 +52,12 @@ const SidePanel = () => {
               </Tab>
             ))}
           </Tab.List>
-          <Tab.Panels className="w-full h-full mt-2">
+          <Tab.Panels
+            id="side-panel"
+            className="w-full rounded-xl overflow-y-auto bg-white p-2 h-5/6 mt-2"
+          >
             {Object.values(options).map((OptionTab, idx) => (
-              <Tab.Panel
-                key={idx}
-                className={classNames(
-                  'w-full rounded-xl overflow-y-auto bg-white p-2 h-5/6'
-                )}
-              >
+              <Tab.Panel key={idx}>
                 <OptionTab />
               </Tab.Panel>
             ))}

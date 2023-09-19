@@ -1,41 +1,66 @@
 import useBoardStore from '@/store/boardStore';
 import useUserStore from '@/store/userStore';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import InfiniteScroll from 'react-infinite-scroll-component';
 import NotificationCard from './NotificationCard';
-import NotificationCardPlaceholder from './NotificationCardPlaceholder';
+import NotificationsPlaceholder from './NotificationsPlaceholder';
 
 type Props = {};
 
 const Activity = (props: Props) => {
-  const [notifications, fetchNotifications, userAccess] = useBoardStore((state) => [state.notifications, state.fetchNotifications, state.userAccess]);
-  const userId = useUserStore((state) => state.userData?.uid);
+  const [notifications, fetchNotifications, board] = useBoardStore((state) => [
+    state.notifications,
+    state.fetchNotifications,
+    state.board,
+  ]);
+  const [userData] = useUserStore((state) => [state.userData]);
 
   useEffect(() => {
-    if (!notifications && userId) {
-
+    if (
+      board &&
+      notifications.length === 0 &&
+      userData &&
+      board?.totalNotifications > 0
+    ) {
       try {
-        fetchNotifications(userId);
+        fetchNotifications(userData?.uid!, 10);
       } catch (error) {
         console.log(error);
       }
     }
-  }, [notifications, userId])
+  }, [notifications, userData, fetchNotifications, board]);
 
-  return <div className="h-full w-full">
-    <div className='w-full space-y-1'>
-      {
-        notifications ?
-          notifications.length > 0 ?
-            notifications.map((notification) => {
-              return <NotificationCard key={notification._id} notification={notification} />
-            })
-            : <div className='text-center text-gray-500'>No notifications</div>
-          : Array.apply(null, Array(5)).map((_, idx) => {
-            return <NotificationCardPlaceholder key={idx} />
-          })
-      }
-    </div>
-  </div>;
+  const handleNext = async () => {
+    const lastNotificationId = notifications[notifications.length - 1]._id;
+    console.log(lastNotificationId);
+
+    if (board && userData) {
+      fetchNotifications(userData?.uid!, 10, lastNotificationId);
+    }
+  };
+
+  const [hasMore, setHasMore] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (board) {
+      setHasMore(notifications.length < board.totalNotifications);
+    }
+  }, [board, notifications]);
+
+  return (
+    <InfiniteScroll
+      dataLength={notifications.length}
+      next={handleNext}
+      hasMore={hasMore}
+      loader={<NotificationsPlaceholder />}
+      className="w-full space-y-1"
+      scrollableTarget="side-panel"
+    >
+      {notifications.map((notification, idx) => (
+        <NotificationCard key={idx} notification={notification} />
+      ))}
+    </InfiniteScroll>
+  );
 };
 
 export default Activity;

@@ -1,10 +1,14 @@
-import React from 'react'
-import WordsCardPlaceholder from './WordCardPlaceholder'
+import React from 'react';
+import WordsCardPlaceholder from './WordCardPlaceholder';
 
 const WordsPlaceholder = () => {
-    return (
-        Array.apply(null, Array(5)).map((_, idx) => <WordsCardPlaceholder key={idx} idx={idx} />)
-    )
-}
+  return (
+    <div className="flex flex-col space-y-6">
+      {Array.apply(null, Array(10)).map((_, idx) => (
+        <WordsCardPlaceholder key={idx} idx={idx} />
+      ))}
+    </div>
+  );
+};
 
-export default WordsPlaceholder
+export default WordsPlaceholder;

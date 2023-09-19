@@ -6,15 +6,14 @@ import {
   doc,
   getDoc,
   getDocs,
+  increment,
   query,
+  updateDoc,
   where,
 } from 'firebase/firestore';
 import { deleteObject, ref } from 'firebase/storage';
 
-const deleteBoard = async (
-  userId: string,
-  boardId: string
-): Promise<void> => {
+const deleteBoard = async (userId: string, boardId: string): Promise<void> => {
   try {
     const boardRef = doc(db, 'boards', boardId);
     const boardDoc = await getDoc(boardRef);
@@ -35,8 +34,16 @@ const deleteBoard = async (
     const q = query(boardsUsersRef, where('boardId', '==', boardId));
     const boardsUsersDocs = await getDocs(q);
 
-    boardsUsersDocs.forEach((doc) => {
-      const fetchPromise = deleteDoc(doc.ref);
+    boardsUsersDocs.forEach((boardUserDoc) => {
+      const docData = boardUserDoc.data();
+      const userId = docData.userId;
+      const userDoc = doc(db, 'users', userId);
+
+      updateDoc(userDoc, {
+        totalBoards: increment(-1),
+      });
+
+      const fetchPromise = deleteDoc(boardUserDoc.ref);
       fetchPromises.push(fetchPromise);
     });
 
@@ -46,7 +53,7 @@ const deleteBoard = async (
 
     //Deleting images from storage if existed
     if (board.image) {
-      const imageRef = ref(storage, 'boards/' + boardId + "/cover");
+      const imageRef = ref(storage, 'boards/' + boardId + '/cover');
       await deleteObject(imageRef);
     }
   } catch (error) {

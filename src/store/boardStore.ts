@@ -37,20 +37,28 @@ import fetchRootWordHelper from '@/lib/Root Words/fetchRootWord';
 
 interface BoardState {
   //Board operations
-  boards: null | Board[];
+  boards: Board[];
   board: null | Board;
   boardMode: null | BoardModes;
   toggleBoardMode: () => void;
   addBoard: (board: Board, users?: BoardUser[], image?: File) => Promise<void>;
-  fetchBoards: (userId: string) => Promise<void>;
+  fetchBoards: (
+    userId: string,
+    limit: number,
+    lastVisibleDocId?: string
+  ) => Promise<void>;
   fetchBoard: (boardId: string, userId: string) => void;
   deleteBoard: (userId: string) => Promise<void>;
   editBoard: (user: User, board: Board, image?: File) => Promise<void>;
 
   //User operations
-  users: null | BoardUser[];
+  users: BoardUser[];
   userAccess: null | BoardAccess;
-  fetchUsers: (userId: string) => Promise<void>;
+  fetchUsers: (
+    userId: string,
+    limit: number,
+    lastVisibleDocId?: string
+  ) => Promise<void>;
   fetchUserAccess: (boardId: string, userId: string) => Promise<void>;
   addUser: (user: BoardUser, admin: User) => Promise<void>;
   leaveBoard: (user: User) => Promise<void>;
@@ -62,33 +70,52 @@ interface BoardState {
   ) => Promise<void>;
 
   //Words operations
-  words: null | Word[];
+  words: Word[];
   wordsLoading: boolean;
-  fetchWords: (boardId: string, userId: string) => Promise<void>;
+  fetchWords: (
+    boardId: string,
+    userId: string,
+    limit: number,
+    lastVisibleDocId?: string
+  ) => Promise<void>;
   addWord: (word: Word, user: User, image?: File) => Promise<void>;
   deleteWord: (word: Word, user: User) => Promise<void>;
   editWord: (word: Word, user: User, image?: File) => Promise<void>;
 
   //Root Words operations
-  rootWords: null | RootWord[];
+  rootWords: RootWord[];
   rootWordsLoading: boolean;
-  fetchRootWords: (boardId: string, userId: string) => Promise<void>;
+  fetchRootWords: (
+    boardId: string,
+    userId: string,
+    limit: number,
+    lastVisibleDocId?: string
+  ) => Promise<void>;
   addRootWord: (word: RootWord, user: User) => Promise<void>;
   deleteRootWord: (word: RootWord, user: User) => Promise<void>;
   editRootWord: (word: RootWord, user: User) => Promise<void>;
   fetchRootWord: (rootWordId: string, userId: string) => Promise<RootWord>;
 
   //Filter operations
-  filteredWords: null | Word[];
+  filteredWords: Word[];
   selectedDate: null | DayValue;
   selectedRootWord: null | RootWord;
-  filterByDate: (date: DayValue, userId: string) => Promise<void>;
+  filterByDate: (
+    date: DayValue,
+    userId: string,
+    limit: number,
+    lastVisibleDocId?: string
+  ) => Promise<void>;
   filterByRootWord: (rootWordId: string, userId: string) => Promise<void>;
   resetFilter: () => void;
 
   //Notifications operations
-  notifications: null | Notification[];
-  fetchNotifications: (userId: string) => Promise<void>;
+  notifications: Notification[];
+  fetchNotifications: (
+    userId: string,
+    limit: number,
+    lastVisibleDocId?: string
+  ) => Promise<void>;
   addNotification: (
     notification: Notification,
     userId: string
@@ -104,29 +131,29 @@ interface BoardState {
 
 const initialState = {
   //Board operations
-  boards: null,
+  boards: [],
   board: null,
   boardMode: BoardModes.WORDS,
 
   //User operations
-  users: null,
+  users: [],
   userAccess: null,
 
   //Words operations
-  words: null,
+  words: [],
   wordsLoading: false,
 
   //Root Words operations
-  rootWords: null,
+  rootWords: [],
   rootWordsLoading: false,
 
   //Filter operations
-  filteredWords: null,
+  filteredWords: [],
   selectedDate: null,
   selectedRootWord: null,
 
   //Notifications operations
-  notifications: null,
+  notifications: [],
 
   //Pagination operations
   currentPage: 0,
@@ -159,10 +186,10 @@ const useBoardStore = create<BoardState>()(
       }
     },
 
-    fetchBoards: async (userId) => {
+    fetchBoards: async (userId, limit, lastVisibleDocId) => {
       try {
-        const boards = await fetchBoardsHelper(userId);
-        set({ boards });
+        const boards = await fetchBoardsHelper(userId, limit, lastVisibleDocId);
+        set({ boards: [...get().boards!, ...boards] });
       } catch (error) {
         throw error;
       }
@@ -185,6 +212,10 @@ const useBoardStore = create<BoardState>()(
 
       try {
         await deleteBoardHelper(userId, boardId);
+        set({
+          board: null,
+          boards: get().boards?.filter((b) => b._id !== boardId),
+        });
       } catch (error) {
         throw error;
       }
@@ -214,13 +245,18 @@ const useBoardStore = create<BoardState>()(
 
     //User operations
 
-    fetchUsers: async (userId) => {
+    fetchUsers: async (userId, limit, lastVisibleDocId) => {
       const boardId = get().board?._id;
       if (!boardId) return;
 
       try {
-        const users = await fetchBoardUsers(boardId, userId);
-        set({ users });
+        const users = await fetchBoardUsers(
+          boardId,
+          userId,
+          limit,
+          lastVisibleDocId
+        );
+        set({ users: [...get().users!, ...users] });
       } catch (error) {
         throw error;
       }
@@ -241,7 +277,10 @@ const useBoardStore = create<BoardState>()(
 
       try {
         const userAdded = await addUserToBoard(boardId, admin.uid, user);
-        set({ users: [userAdded, ...get().users!] });
+        set({
+          users: [userAdded, ...get().users!],
+          board: { ...get().board!, totalUsers: get().board?.totalUsers! + 1 },
+        });
 
         const notification = {
           type: NotificationType.USER_ADDED,
@@ -282,6 +321,7 @@ const useBoardStore = create<BoardState>()(
         await removeUserFromBoard(user, admin.uid, boardId);
         set({
           users: get().users?.filter((u) => u.uid !== user.uid),
+          board: { ...get().board!, totalUsers: get().board?.totalUsers! - 1 },
         });
 
         const notification = {
@@ -322,11 +362,16 @@ const useBoardStore = create<BoardState>()(
     },
 
     //Words operations
-    fetchWords: async (boardId, userId) => {
+    fetchWords: async (boardId, userId, limit, lastVisibleDocId) => {
       set({ wordsLoading: true });
       try {
-        const words = await fetchWordsHelper(boardId, userId);
-        set({ words });
+        const words = await fetchWordsHelper(
+          boardId,
+          userId,
+          limit,
+          lastVisibleDocId
+        );
+        set({ words: [...get().words, ...words] });
       } catch (error) {
         throw error;
       } finally {
@@ -342,7 +387,10 @@ const useBoardStore = create<BoardState>()(
 
       try {
         const wordAdded = await addWordToBoard(boardId, word, userId, image);
-        set({ words: [wordAdded, ...get().words!] });
+        set({
+          words: [wordAdded, ...get().words!],
+          board: { ...get().board!, totalWords: get().board?.totalWords! + 1 },
+        });
 
         const notification = {
           type: NotificationType.WORD_ADDED,
@@ -366,6 +414,7 @@ const useBoardStore = create<BoardState>()(
         await deleteWordFromBoard(boardId, wordId, userId);
         set({
           words: get().words?.filter((word) => word._id !== wordId),
+          board: { ...get().board!, totalWords: get().board?.totalWords! - 1 },
         });
 
         const notification = {
@@ -415,11 +464,16 @@ const useBoardStore = create<BoardState>()(
     },
 
     //Root Words operations
-    fetchRootWords: async (boardId, userId) => {
+    fetchRootWords: async (boardId, userId, limit, lastVisibleDocId) => {
       set({ rootWordsLoading: true });
       try {
-        const rootWords = await fetchRootWordsHelper(boardId, userId);
-        set({ rootWords });
+        const rootWords = await fetchRootWordsHelper(
+          boardId,
+          userId,
+          limit,
+          lastVisibleDocId
+        );
+        set({ rootWords: [...get().rootWords, ...rootWords] });
       } catch (error) {
         throw error;
       } finally {
@@ -439,7 +493,13 @@ const useBoardStore = create<BoardState>()(
           rootWord,
           userId
         );
-        set({ rootWords: [rootWordAdded, ...get().rootWords!] });
+        set({
+          rootWords: [rootWordAdded, ...get().rootWords!],
+          board: {
+            ...get().board!,
+            totalRootWords: get().board?.totalRootWords! + 1,
+          },
+        });
 
         const notification = {
           type: NotificationType.ROOT_WORD_ADDED,
@@ -465,6 +525,10 @@ const useBoardStore = create<BoardState>()(
           rootWords: get().rootWords?.filter(
             (rootWord) => rootWord._id !== rootWordId
           ),
+          board: {
+            ...get().board!,
+            totalRootWords: get().board?.totalRootWords! - 1,
+          },
         });
 
         const notification = {
@@ -526,15 +590,22 @@ const useBoardStore = create<BoardState>()(
     },
 
     //Filter operations
-    filterByDate: async (date, userId) => {
+    filterByDate: async (date, userId, limit, lastVisibleDocId) => {
       const boardId = get().board?._id;
       if (!boardId) return;
 
       set({ selectedDate: date, wordsLoading: true });
 
       try {
-        const filteredWords = await fetchWords(boardId, userId, date);
-        set({ filteredWords });
+        const filteredWords = await fetchWords(
+          boardId,
+          userId,
+          limit,
+          lastVisibleDocId,
+          date
+        );
+
+        set({ filteredWords: [...get().filteredWords, ...filteredWords] });
       } catch (error) {
         throw error;
       } finally {
@@ -565,16 +636,18 @@ const useBoardStore = create<BoardState>()(
     },
 
     //Notifications operations
-    fetchNotifications: async (userId) => {
+    fetchNotifications: async (userId, limit, lastVisibleDocId) => {
       const boardId = get().board?._id;
       if (!boardId) return;
 
       try {
         const notifications = await fetchNotificationsFromBoard(
           boardId,
-          userId
+          userId,
+          limit,
+          lastVisibleDocId
         );
-        set({ notifications });
+        set({ notifications: [...get().notifications!, ...notifications] });
       } catch (error) {
         throw error;
       }
@@ -591,10 +664,16 @@ const useBoardStore = create<BoardState>()(
           notification
         );
         if (notificationAdded.type !== NotificationType.USER_LEFT) {
-          set({ notifications: [notificationAdded, ...get().notifications!] });
+          set({
+            notifications: [notificationAdded, ...get().notifications!],
+            board: {
+              ...get().board!,
+              totalNotifications: get().board?.totalNotifications! + 1,
+            },
+          });
         }
       } catch (error) {
-        get().fetchNotifications(userId);
+        get().fetchNotifications(userId, 10);
       }
     },
 
@@ -604,7 +683,7 @@ const useBoardStore = create<BoardState>()(
     },
 
     resetFilter: () => {
-      set({ filteredWords: null, selectedDate: null, selectedRootWord: null });
+      set({ filteredWords: [], selectedDate: null, selectedRootWord: null });
     },
 
     reset: () => {

@@ -13,7 +13,7 @@ import useUIStore from '@/store/uiStore';
 import WordsSection from '@/components/Board/Words/WordsSection';
 import HeaderParallax from '@/components/Board/HeaderParallax';
 import RootWordsSection from '@/components/Board/RootWords/RootWordsSection';
-import Pagination from '@/components/Common/Pagination/Pagination';
+import SectionHeading from '@/components/Board/SectionHeading';
 
 type Props = {
   params: {
@@ -177,9 +177,9 @@ const Board = ({ params: { boardId } }: Props) => {
         )}
       </div>
 
-      {boardMode === BoardModes.WORDS ? <WordsSection /> : <RootWordsSection />}
+      <SectionHeading />
 
-      <Pagination />
+      {boardMode === BoardModes.WORDS ? <WordsSection /> : <RootWordsSection />}
     </div>
   );
 };

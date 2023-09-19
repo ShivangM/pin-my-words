@@ -1,37 +1,65 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import UserCard from './UserCard';
 import useBoardStore from '@/store/boardStore';
 import useUserStore from '@/store/userStore';
-import UserCardPlaceholder from './UserCardPlaceholder';
 import useUIStore from '@/store/uiStore';
 import { BoardAccess } from '@/interfaces/Board.d';
+import InfiniteScroll from 'react-infinite-scroll-component';
+import UsersPlaceholder from './UsersPlaceholder';
 
 type Props = {};
 
 const Users = (props: Props) => {
-  const [users, fetchUsers, userAccess] = useBoardStore((state) => [state.users, state.fetchUsers, state.userAccess]);
-  const userId = useUserStore((state) => state.userData?.uid);
-  const [toggleAddUserModal, toggleLeaveBoardModal] = useUIStore((state) => [state.toggleAddUserModal, state.toggleLeaveBoardModal]);
+  const [users, fetchUsers, userAccess, board] = useBoardStore((state) => [
+    state.users,
+    state.fetchUsers,
+    state.userAccess,
+    state.board,
+  ]);
+
+  const [userData] = useUserStore((state) => [state.userData]);
+
+  const [toggleAddUserModal, toggleLeaveBoardModal] = useUIStore((state) => [
+    state.toggleAddUserModal,
+    state.toggleLeaveBoardModal,
+  ]);
 
   useEffect(() => {
-    if (!users && userId) {
-      fetchUsers(userId);
+    if (board && users.length === 0 && userData && board?.totalUsers > 0) {
+      fetchUsers(userData?.uid!, 10);
     }
-  }, [users, userId])
+  }, [users, userData, fetchUsers, board]);
 
+  const handleNext = async () => {
+    const lastUserId = users[users.length - 1]._id;
+
+    if (board && userData) {
+      fetchUsers(userData?.uid!, 10, lastUserId);
+    }
+  };
+
+  const [hasMore, setHasMore] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (board && users) {
+      setHasMore(users.length < board.totalUsers);
+    }
+  }, [board, users]);
 
   return (
     <div className="h-full w-full">
-      <div className='w-full space-y-1'>
-        {
-          users ? users.map((user) => {
-            return <UserCard key={user.uid} user={user} />
-          })
-            : Array.apply(null, Array(5)).map((_, idx) => {
-              return <UserCardPlaceholder key={idx} />
-            })
-        }
-      </div>
+      <InfiniteScroll
+        dataLength={users.length}
+        next={handleNext}
+        hasMore={hasMore}
+        loader={<UsersPlaceholder />}
+        className="w-full space-y-1"
+        height="100%"
+      >
+        {users.map((user, idx) => (
+          <UserCard key={idx} user={user} />
+        ))}
+      </InfiniteScroll>
 
       <div className="mt-4 w-full grid grid-cols-2 p-3 gap-2 ">
         <button
@@ -47,13 +75,18 @@ const Users = (props: Props) => {
           type="button"
           className="border-blue-500 disabled:cursor-not-allowed disabled:opacity-60 border-2 text-blue-600 font-medium w-full py-2 rounded-lg transition-all ease-in-out duration-300 hover:border-blue-600"
           onClick={toggleAddUserModal}
-          disabled={!(userAccess === BoardAccess.ADMIN || userAccess === BoardAccess.OWNER)}
+          disabled={
+            !(
+              userAccess === BoardAccess.ADMIN ||
+              userAccess === BoardAccess.OWNER
+            )
+          }
         >
           Add User
         </button>
       </div>
     </div>
-  )
+  );
 };
 
 export default Users;

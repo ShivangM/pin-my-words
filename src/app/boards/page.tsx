@@ -1,44 +1,61 @@
 'use client';
 import BoardCard from '@/components/Boards/BoardCard';
-import BoardCardPlaceholder from '@/components/Boards/BoardCardPlaceholder';
+import BoardsPlaceholder from '@/components/Boards/BoardsPlaceholder';
 import useBoardStore from '@/store/boardStore';
 import useUIStore from '@/store/uiStore';
 import useUserStore from '@/store/userStore';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import InfiniteScroll from 'react-infinite-scroll-component';
 import { toast } from 'react-toastify';
 
 const Boards = () => {
   const [userData] = useUserStore((state) => [state.userData]);
-  const [boards, fetchBoards] = useBoardStore(
-    (state) => [state.boards, state.fetchBoards]
-  );
+  const [boards, fetchBoards] = useBoardStore((state) => [
+    state.boards,
+    state.fetchBoards,
+  ]);
 
-  const [toggleAddBoardModal] = useUIStore(
-    (state) => [state.toggleAddBoardModal])
-
-  const [loading, setLoading] = useState(false)
+  const [toggleAddBoardModal] = useUIStore((state) => [
+    state.toggleAddBoardModal,
+  ]);
 
   useEffect(() => {
-    const fetchFunction = async () => {
-      if (userData) {
-        setLoading(true)
-
-        try {
-          await fetchBoards(userData.uid!);
-        } catch (error: any) {
-          toast.error(error.message);
-        } finally {
-          setLoading(false)
-        }
+    if (userData) {
+      try {
+        fetchBoards(userData.uid!, 10);
+      } catch (error: any) {
+        toast.error(error.message);
       }
     }
-
-    fetchFunction()
   }, [userData, fetchBoards]);
 
+  const handleNext = async () => {
+    const lastBoardId = boards[boards.length - 1]._id;
+
+    if (userData) {
+      await fetchBoards(userData?.uid!, 10, lastBoardId);
+    }
+  };
+
+  const [hasMore, setHasMore] = useState<boolean>(false);
+
+  console.log(userData?.totalBoards, boards);
+
+  useEffect(() => {
+    if (userData) {
+      setHasMore(boards.length < userData.totalBoards);
+    }
+  }, [boards, userData]);
+
   return (
-    <div className="gap-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <InfiniteScroll
+      dataLength={boards.length}
+      next={handleNext}
+      hasMore={hasMore}
+      loader={<BoardsPlaceholder />}
+      className="gap-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+    >
       {/* Opens Create New Board Modal  */}
       <button
         onClick={toggleAddBoardModal}
@@ -59,12 +76,10 @@ const Boards = () => {
       </button>
 
       {/* Boards */}
-      {boards && boards.length > 0 ? boards.map((board) => (
+      {boards.map((board) => (
         <BoardCard key={board._id} board={board} />
-      ))
-        : loading ? Array.apply(null, Array(7)).map((_, idx) => <BoardCardPlaceholder key={idx} />) : null
-      }
-    </div>
+      ))}
+    </InfiniteScroll>
   );
 };
 
