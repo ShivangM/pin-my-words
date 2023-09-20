@@ -1,6 +1,4 @@
-import {
-  BoardAccess,
-} from '@/interfaces/Board.d';
+import { BoardAccess } from '@/interfaces/Board.d';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { ErrorMessage } from '@hookform/error-message';
 import { IoIosCloseCircle } from 'react-icons/io';
@@ -26,7 +24,11 @@ const AddUsers = () => {
   }>();
 
   const [userData] = useUserStore((state) => [state.userData]);
-  const [users, addUser, removeUser] = useAddUsersStore((state) => [state.users, state.addUser, state.removeUser]);
+  const [users, addUser, removeUser] = useAddUsersStore((state) => [
+    state.users,
+    state.addUser,
+    state.removeUser,
+  ]);
 
   const onSubmit: SubmitHandler<{
     user: User;
@@ -36,7 +38,10 @@ const AddUsers = () => {
     reset();
   };
 
-  const promiseOptions = (inputValue: string, callback: (res: User[]) => void) => {
+  const promiseOptions = (
+    inputValue: string,
+    callback: (res: User[]) => void
+  ) => {
     try {
       fetchUsersByEmailSearch(inputValue).then((res) => {
         callback(res);
@@ -55,41 +60,39 @@ const AddUsers = () => {
   ];
 
   return (
-    <form className='space-y-4' onSubmit={handleSubmit(onSubmit)}>
-      <div
-        className="flex flex-wrap w-full items-center gap-4"
-      >
-        {users ? users.map((user, index) => (
-          <div
-            key={index}
-            className="flex bg-gray-50 rounded-full p-1.5 items-center gap-2"
-          >
-            <div className="flex space-x-2 items-center">
-              <Image
-                src={user.image || '/images/user.png'}
-                alt={user.name}
-                className="rounded-full"
-                height={30}
-                width={30}
-              />
+    <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+      <div className="flex flex-wrap w-full items-center gap-4">
+        {users
+          ? users.map((user, index) => (
+              <div
+                key={index}
+                className="flex bg-gray-50 rounded-full p-1.5 items-center gap-2"
+              >
+                <div className="flex space-x-2 items-center">
+                  <Image
+                    src={user.image || '/images/user.png'}
+                    alt={user.name}
+                    className="rounded-full"
+                    height={30}
+                    width={30}
+                  />
 
-              <div className="text-xs">
-                <p className="text-gray-900 font-medium">{user.name}</p>
-                <p className="text-gray-500">{user.access}</p>
+                  <div className="text-xs">
+                    <p className="text-gray-900 font-medium">{user.name}</p>
+                    <p className="text-gray-500">{user.access}</p>
+                  </div>
+                </div>
+                <button
+                  className=""
+                  onClick={() => {
+                    removeUser(user.uid!);
+                  }}
+                >
+                  <IoIosCloseCircle className="h-5 w-5 text-red-500" />
+                </button>
               </div>
-            </div>
-            <button
-              className=""
-              onClick={() => {
-                removeUser(user.uid!);
-              }}
-            >
-              <IoIosCloseCircle className="h-5 w-5 text-red-500" />
-            </button>
-          </div>
-        ))
-          : null
-        }
+            ))
+          : null}
       </div>
 
       <div className="">
@@ -112,7 +115,6 @@ const AddUsers = () => {
                 }
               },
             }}
-
             render={({ field: { onChange, ref } }) => (
               <AsyncSelect
                 //@ts-ignore
@@ -122,9 +124,17 @@ const AddUsers = () => {
                 loadOptions={loadOptions}
                 getOptionLabel={(user) => user.email}
                 components={{
-                  Option: ({ data, innerProps, innerRef }: OptionProps<User>) => {
+                  Option: ({
+                    data,
+                    innerProps,
+                    innerRef,
+                  }: OptionProps<User>) => {
                     return (
-                      <div className='cursor-pointer' ref={innerRef} {...innerProps}>
+                      <div
+                        className="cursor-pointer"
+                        ref={innerRef}
+                        {...innerProps}
+                      >
                         <div className="flex py-2 px-4 items-center space-x-2">
                           <Image
                             src={data.image || '/images/user.png'}
@@ -134,18 +144,21 @@ const AddUsers = () => {
                             width={30}
                           />
                           <div className="text-sm">
-                            <p className='text-gray-900 font-medium'>{data.name}</p>
-                            <p className='text-gray-500'>{data.email}</p>
+                            <p className="text-gray-900 font-medium">
+                              {data.name}
+                            </p>
+                            <p className="text-gray-500">{data.email}</p>
                           </div>
                         </div>
                       </div>
                     );
                   },
                 }}
-
-                noOptionsMessage={(user) => `No user found with this email ${user.inputValue}`}
+                noOptionsMessage={(user) =>
+                  `No user found with this email ${user.inputValue}`
+                }
                 onChange={(val) => onChange(val)}
-                className='flex-1'
+                className="flex-1"
               />
             )}
           />
@@ -178,7 +191,7 @@ const AddUsers = () => {
               onChange={(val) => onChange(val?.value)}
               options={accessOptions}
               isSearchable={false}
-              menuPlacement='top'
+              menuPlacement="top"
             />
           )}
         />
