@@ -67,7 +67,6 @@ const fetchBoardUsers = async (
         access,
         ...user,
         uid: docData.userId,
-        _id: userDoc.id,
       });
     }
 
