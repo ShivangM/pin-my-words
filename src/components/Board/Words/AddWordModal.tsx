@@ -1,5 +1,5 @@
 'use client';
-import { Word } from '@/interfaces/Word';
+import { Word } from '@/interfaces/Word.d';
 import useBoardStore from '@/store/boardStore';
 import { Dialog, Transition } from '@headlessui/react';
 import { ErrorMessage } from '@hookform/error-message';
@@ -7,6 +7,7 @@ import classNames from 'classnames';
 import { Fragment, useRef, useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import Select from 'react-select';
+import AsyncSelect from 'react-select/async';
 import options from '@/constants/parts-of-speech.json';
 import { IoIosCloseCircle } from 'react-icons/io';
 import useUserStore from '@/store/userStore';
@@ -14,40 +15,52 @@ import { toast } from 'react-toastify';
 import useUIStore from '@/store/uiStore';
 import UploadImage from '../../Common/UploadImage';
 import useImageUploadStore from '@/store/imageUploadStore';
+import debounce from 'lodash.debounce';
+import fetchRootsBySearchTerm from '@/lib/Root Words/fetchRootsBySearchTerm';
 
 const AddWordModal = () => {
-  const [rootWords, addWord] = useBoardStore(
-    (state) => [state.rootWords, state.addWord]
-  );
+  const [addWord, board] = useBoardStore((state) => [
+    state.addWord,
+    state.board,
+  ]);
 
-  const [addWordModalOpen, toggleAddWordModal] = useUIStore((state) => [state.addWordModalOpen, state.toggleAddWordModal]);
+  const [addWordModalOpen, toggleAddWordModal] = useUIStore((state) => [
+    state.addWordModalOpen,
+    state.toggleAddWordModal,
+  ]);
 
   const [userData] = useUserStore((state) => [state.userData]);
-  const { register, handleSubmit, control, formState: { errors, isSubmitting }, reset } = useForm<Word>();
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<Word>();
   const [image] = useImageUploadStore((state) => [state.image]);
 
   //Examples
   const exampleRef = useRef<HTMLInputElement | null>(null);
-  const [examples, setExamples] = useState<string[]>([])
+  const [examples, setExamples] = useState<string[]>([]);
 
   const addExample = () => {
     const value = exampleRef?.current?.value;
     if (!value) return;
     setExamples([...examples, value]);
     //@ts-ignore
-    exampleRef.current.value = ""
-  }
+    exampleRef.current.value = '';
+  };
 
   const removeExample = (idx: number) => {
     setExamples(examples.filter((_, index) => index !== idx));
-  }
+  };
 
   const onSubmit: SubmitHandler<Word> = async (data) => {
     const wordData: Word = {
       ...data,
       word: data.word.toLowerCase(),
       examples,
-    }
+    };
 
     toast.loading('Adding word...', {
       toastId: 'add-word',
@@ -57,14 +70,33 @@ const AddWordModal = () => {
       await addWord(wordData, userData!, image);
       toast.success('Word added successfully!');
     } catch (error: any) {
-      toast.error(error.message)
+      toast.error(error.message);
     } finally {
       toast.dismiss('add-word');
       toggleAddWordModal();
       reset();
       setExamples([]);
     }
-  }
+  };
+
+  const promiseOptions = (
+    inputValue: string,
+    callback: (res: { label: string; value: string }[]) => void
+  ) => {
+    try {
+      fetchRootsBySearchTerm(inputValue, board?._id!).then((res) => {
+        const options = res.map((root) => ({
+          value: root._id,
+          label: root.root,
+        }));
+        callback(options);
+      });
+    } catch (error) {
+      //To-Do: Handle error
+    }
+  };
+
+  const loadOptions = debounce(promiseOptions, 300);
 
   return (
     <>
@@ -109,7 +141,7 @@ const AddWordModal = () => {
                   </div>
 
                   <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                    <div className='space-y-3'>
+                    <div className="space-y-3">
                       <div>
                         <label
                           className="block text-gray-700 text-sm font-bold mb-2"
@@ -123,12 +155,13 @@ const AddWordModal = () => {
                           name="roots"
                           // rules={{ required: 'Root Word(s) is required.' }}
                           render={({ field: { onChange, ref } }) => (
-                            <Select
+                            <AsyncSelect
                               //@ts-ignore
                               inputRef={ref}
-                              options={rootWords?.map((rootWord) => { return { label: rootWord.root, value: rootWord._id } }) || undefined}
+                              loadOptions={loadOptions}
                               onChange={(val) => onChange(val.map((c) => c))}
                               isMulti={true}
+                              components={{}}
                             />
                           )}
                         />
@@ -137,7 +170,9 @@ const AddWordModal = () => {
                           errors={errors}
                           name="roots"
                           render={({ message }) => (
-                            <p className="text-red-500 text-xs italic">{message}</p>
+                            <p className="text-red-500 text-xs italic">
+                              {message}
+                            </p>
                           )}
                         />
                       </div>
@@ -166,7 +201,9 @@ const AddWordModal = () => {
                           errors={errors}
                           name="word"
                           render={({ message }) => (
-                            <p className="text-red-500 text-xs italic">{message}</p>
+                            <p className="text-red-500 text-xs italic">
+                              {message}
+                            </p>
                           )}
                         />
                       </div>
@@ -195,7 +232,9 @@ const AddWordModal = () => {
                           errors={errors}
                           name="meaning"
                           render={({ message }) => (
-                            <p className="text-red-500 text-xs italic">{message}</p>
+                            <p className="text-red-500 text-xs italic">
+                              {message}
+                            </p>
                           )}
                         />
                       </div>
@@ -216,7 +255,9 @@ const AddWordModal = () => {
                             <Select
                               //@ts-ignore
                               inputRef={ref}
-                              onChange={(val) => onChange(val.map((c) => c.value))}
+                              onChange={(val) =>
+                                onChange(val.map((c) => c.value))
+                              }
                               isMulti={true}
                               options={options}
                             />
@@ -227,7 +268,9 @@ const AddWordModal = () => {
                           errors={errors}
                           name="partOfSpeech"
                           render={({ message }) => (
-                            <p className="text-red-500 text-xs italic">{message}</p>
+                            <p className="text-red-500 text-xs italic">
+                              {message}
+                            </p>
                           )}
                         />
                       </div>
@@ -251,7 +294,7 @@ const AddWordModal = () => {
                             >
                               <p className="text-sm text-gray-500">{example}</p>
                               <button
-                                type='button'
+                                type="button"
                                 onClick={() => {
                                   removeExample(index);
                                 }}
@@ -272,7 +315,11 @@ const AddWordModal = () => {
                             placeholder="Write a exmaple over here..."
                           />
 
-                          <button type='button' onClick={addExample} className="modalBtnNext">
+                          <button
+                            type="button"
+                            onClick={addExample}
+                            className="modalBtnNext"
+                          >
                             +
                           </button>
                         </div>
@@ -281,7 +328,9 @@ const AddWordModal = () => {
                           errors={errors}
                           name="examples"
                           render={({ message }) => (
-                            <p className="text-red-500 text-xs italic">{message}</p>
+                            <p className="text-red-500 text-xs italic">
+                              {message}
+                            </p>
                           )}
                         />
                       </div>

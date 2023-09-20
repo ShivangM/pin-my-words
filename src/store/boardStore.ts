@@ -100,13 +100,15 @@ interface BoardState {
   filteredWords: Word[];
   selectedDate: null | DayValue;
   selectedRootWord: null | RootWord;
-  filterByDate: (
-    date: DayValue,
-    userId: string,
-    limit: number,
-    lastVisibleDocId?: string
-  ) => Promise<void>;
-  filterByRootWord: (rootWordId: string, userId: string) => Promise<void>;
+  // filterByDate: (
+  //   date: DayValue,
+  //   userId: string,
+  //   limit: number,
+  //   lastVisibleDocId?: string
+  // ) => Promise<void>;
+  // filterByRootWord: (rootWordId: string, userId: string) => Promise<void>;
+  setSelectedDate: (date: DayValue) => void;
+  setSelectedRootWord: (rootWord: RootWord) => void;
   resetFilter: () => void;
 
   //Notifications operations
@@ -590,50 +592,59 @@ const useBoardStore = create<BoardState>()(
     },
 
     //Filter operations
-    filterByDate: async (date, userId, limit, lastVisibleDocId) => {
-      const boardId = get().board?._id;
-      if (!boardId) return;
 
-      set({ selectedDate: date, wordsLoading: true });
-
-      try {
-        const filteredWords = await fetchWords(
-          boardId,
-          userId,
-          limit,
-          lastVisibleDocId,
-          date
-        );
-
-        set({ filteredWords: [...get().filteredWords, ...filteredWords] });
-      } catch (error) {
-        throw error;
-      } finally {
-        set({ wordsLoading: false });
-      }
+    setSelectedDate: (date) => {
+      set({ selectedDate: date });
     },
 
-    filterByRootWord: async (rootWordId, userId) => {
-      const boardId = get().board?._id;
-      if (!boardId) return;
-
-      set({
-        selectedRootWord: get().rootWords?.find(
-          (rootWord) => rootWord._id === rootWordId
-        ),
-      });
-
-      try {
-        const filteredWords = await fetchWordsByRoot(
-          boardId,
-          userId,
-          rootWordId
-        );
-        set({ filteredWords });
-      } catch (error) {
-        throw error;
-      }
+    setSelectedRootWord: (rootWord) => {
+      set({ selectedRootWord: rootWord });
     },
+
+    // filterByDate: async (date, userId, limit, lastVisibleDocId) => {
+    //   const boardId = get().board?._id;
+    //   if (!boardId) return;
+
+    //   set({ selectedDate: date, wordsLoading: true });
+
+    //   try {
+    //     const filteredWords = await fetchWords(
+    //       boardId,
+    //       userId,
+    //       limit,
+    //       lastVisibleDocId,
+    //       date
+    //     );
+
+    //     set({ filteredWords: [...get().filteredWords, ...filteredWords] });
+    //   } catch (error) {
+    //     throw error;
+    //   } finally {
+    //     set({ wordsLoading: false });
+    //   }
+    // },
+
+    // filterByRootWord: async (rootWordId, userId) => {
+    //   const boardId = get().board?._id;
+    //   if (!boardId) return;
+
+    //   set({
+    //     selectedRootWord: get().rootWords?.find(
+    //       (rootWord) => rootWord._id === rootWordId
+    //     ),
+    //   });
+
+    //   try {
+    //     const filteredWords = await fetchWordsByRoot(
+    //       boardId,
+    //       userId,
+    //       rootWordId
+    //     );
+    //     set({ filteredWords });
+    //   } catch (error) {
+    //     throw error;
+    //   }
+    // },
 
     //Notifications operations
     fetchNotifications: async (userId, limit, lastVisibleDocId) => {

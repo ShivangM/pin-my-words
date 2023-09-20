@@ -7,45 +7,62 @@ import classNames from 'classnames';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import Select from 'react-select';
+import AsyncSelect from 'react-select/async';
 import options from '@/constants/parts-of-speech.json';
 import { IoIosCloseCircle } from 'react-icons/io';
 import useUserStore from '@/store/userStore';
-import { Timestamp } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import useUIStore from '@/store/uiStore';
 import UploadImage from '../../Common/UploadImage';
 import useImageUploadStore from '@/store/imageUploadStore';
+import fetchRootsBySearchTerm from '@/lib/Root Words/fetchRootsBySearchTerm';
+import debounce from 'lodash.debounce';
 
 const EditWordModal = () => {
-  const [editWord, rootWords] = useBoardStore(state => [state.editWord, state.rootWords]);
-  const [editWordModalOpen, toggleEditWordModal, focusedWord] = useUIStore(state => [state.editWordModalOpen, state.toggleEditWordModal, state.focusedWord]);
+  const [editWord, rootWords, board] = useBoardStore((state) => [
+    state.editWord,
+    state.rootWords,
+    state.board,
+  ]);
+  const [editWordModalOpen, toggleEditWordModal, focusedWord] = useUIStore(
+    (state) => [
+      state.editWordModalOpen,
+      state.toggleEditWordModal,
+      state.focusedWord,
+    ]
+  );
 
   const [userData] = useUserStore((state) => [state.userData]);
-  const { register, handleSubmit, control, formState: { errors, isSubmitting }, reset } = useForm<Word>();
-
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<Word>();
 
   useEffect(() => {
     if (focusedWord) {
-      reset(focusedWord)
-      setExamples(focusedWord.examples || [])
+      reset(focusedWord);
+      setExamples(focusedWord.examples || []);
     }
-  }, [focusedWord])
+  }, [focusedWord]);
 
   //Example
   const exampleRef = useRef<HTMLInputElement | null>(null);
-  const [examples, setExamples] = useState<string[]>([])
+  const [examples, setExamples] = useState<string[]>([]);
 
   const addExample = () => {
     const value = exampleRef?.current?.value;
     if (!value) return;
     setExamples([...examples, value]);
     //@ts-ignore
-    exampleRef.current.value = ""
-  }
+    exampleRef.current.value = '';
+  };
 
   const removeExample = (idx: number) => {
     setExamples(examples.filter((_, index) => index !== idx));
-  }
+  };
 
   const [image] = useImageUploadStore((state) => [state.image]);
 
@@ -55,7 +72,7 @@ const EditWordModal = () => {
       word: data.word.toLowerCase(),
       _id: focusedWord?._id!,
       examples,
-    }
+    };
 
     toast.loading('Updating word...', {
       toastId: 'edit-word',
@@ -64,18 +81,55 @@ const EditWordModal = () => {
     try {
       await editWord(wordData, userData!, image);
     } catch (error: any) {
-      toast.error(error.message)
+      toast.error(error.message);
     } finally {
       toast.dismiss('edit-word');
       toggleEditWordModal(null);
       reset();
     }
-  }
+  };
+
+  const [setPreviewImage] = useImageUploadStore((state) => [
+    state.setPreviewImage,
+  ]);
+
+  useEffect(() => {
+    if (focusedWord?.image) {
+      setPreviewImage(focusedWord.image);
+    }
+
+    return () => {
+      setPreviewImage(undefined);
+    };
+  }, [focusedWord, setPreviewImage]);
+
+  const promiseOptions = (
+    inputValue: string,
+    callback: (res: { label: string; value: string }[]) => void
+  ) => {
+    try {
+      fetchRootsBySearchTerm(inputValue, board?._id!).then((res) => {
+        const options = res.map((root) => ({
+          value: root._id,
+          label: root.root,
+        }));
+        callback(options);
+      });
+    } catch (error) {
+      //To-Do: Handle error
+    }
+  };
+
+  const loadOptions = debounce(promiseOptions, 300);
 
   return (
     <>
       <Transition show={editWordModalOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50" onClose={() => toggleEditWordModal(null)}>
+        <Dialog
+          as="div"
+          className="relative z-50"
+          onClose={() => toggleEditWordModal(null)}
+        >
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -115,7 +169,7 @@ const EditWordModal = () => {
                   </div>
 
                   <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                    <div className='space-y-3'>
+                    <div className="space-y-3">
                       <div>
                         <label
                           className="block text-gray-700 text-sm font-bold mb-2"
@@ -129,13 +183,14 @@ const EditWordModal = () => {
                           name="roots"
                           // rules={{ required: 'Root Word(s) is required.' }}
                           render={({ field: { onChange, ref } }) => (
-                            <Select
+                            <AsyncSelect
                               //@ts-ignore
                               inputRef={ref}
-                              defaultValue={focusedWord?.roots || undefined}
-                              options={rootWords?.map((rootWord) => { return { label: rootWord.root, value: rootWord._id } }) || undefined}
+                              loadOptions={loadOptions}
+                              defaultValue={focusedWord?.roots}
                               onChange={(val) => onChange(val.map((c) => c))}
                               isMulti={true}
+                              components={{}}
                             />
                           )}
                         />
@@ -144,7 +199,9 @@ const EditWordModal = () => {
                           errors={errors}
                           name="roots"
                           render={({ message }) => (
-                            <p className="text-red-500 text-xs italic">{message}</p>
+                            <p className="text-red-500 text-xs italic">
+                              {message}
+                            </p>
                           )}
                         />
                       </div>
@@ -173,7 +230,9 @@ const EditWordModal = () => {
                           errors={errors}
                           name="word"
                           render={({ message }) => (
-                            <p className="text-red-500 text-xs italic">{message}</p>
+                            <p className="text-red-500 text-xs italic">
+                              {message}
+                            </p>
                           )}
                         />
                       </div>
@@ -202,7 +261,9 @@ const EditWordModal = () => {
                           errors={errors}
                           name="meaning"
                           render={({ message }) => (
-                            <p className="text-red-500 text-xs italic">{message}</p>
+                            <p className="text-red-500 text-xs italic">
+                              {message}
+                            </p>
                           )}
                         />
                       </div>
@@ -223,8 +284,12 @@ const EditWordModal = () => {
                             <Select
                               //@ts-ignore
                               inputRef={ref}
-                              defaultValue={focusedWord?.partOfSpeech?.map((pos) => ({ label: pos, value: pos }))}
-                              onChange={(pos) => onChange(pos.map((c) => c.value))}
+                              defaultValue={focusedWord?.partOfSpeech?.map(
+                                (pos) => ({ label: pos, value: pos })
+                              )}
+                              onChange={(pos) =>
+                                onChange(pos.map((c) => c.value))
+                              }
                               getOptionLabel={(option) => option.label}
                               getOptionValue={(option) => option.value}
                               isMulti={true}
@@ -237,7 +302,9 @@ const EditWordModal = () => {
                           errors={errors}
                           name="partOfSpeech"
                           render={({ message }) => (
-                            <p className="text-red-500 text-xs italic">{message}</p>
+                            <p className="text-red-500 text-xs italic">
+                              {message}
+                            </p>
                           )}
                         />
                       </div>
@@ -261,7 +328,7 @@ const EditWordModal = () => {
                             >
                               <p className="text-sm text-gray-500">{example}</p>
                               <button
-                                type='button'
+                                type="button"
                                 onClick={() => {
                                   removeExample(index);
                                 }}
@@ -282,7 +349,11 @@ const EditWordModal = () => {
                             placeholder="Write a exmaple over here..."
                           />
 
-                          <button type='button' onClick={addExample} className="modalBtnNext">
+                          <button
+                            type="button"
+                            onClick={addExample}
+                            className="modalBtnNext"
+                          >
                             +
                           </button>
                         </div>
@@ -291,7 +362,9 @@ const EditWordModal = () => {
                           errors={errors}
                           name="examples"
                           render={({ message }) => (
-                            <p className="text-red-500 text-xs italic">{message}</p>
+                            <p className="text-red-500 text-xs italic">
+                              {message}
+                            </p>
                           )}
                         />
                       </div>
@@ -308,7 +381,6 @@ const EditWordModal = () => {
                         <UploadImage />
                       </div>
                     </div>
-
 
                     <div className="mt-4 flex items-center space-x-4">
                       <button

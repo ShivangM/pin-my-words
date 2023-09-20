@@ -15,10 +15,7 @@ import useImageUploadStore from '@/store/imageUploadStore';
 type Props = {};
 
 const EditBoardModal = (props: Props) => {
-  const [
-    editBoard,
-    board,
-  ] = useBoardStore((state) => [
+  const [editBoard, board] = useBoardStore((state) => [
     state.editBoard,
     state.board,
   ]);
@@ -28,6 +25,10 @@ const EditBoardModal = (props: Props) => {
     state.toggleEditBoardModal,
   ]);
 
+  const [setPreviewImage] = useImageUploadStore((state) => [
+    state.setPreviewImage,
+  ]);
+
   const userData = useUserStore((state) => state.userData);
   const [image] = useImageUploadStore((state) => [state.image]);
 
@@ -35,14 +36,19 @@ const EditBoardModal = (props: Props) => {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    reset
+    reset,
   } = useForm<Board>();
 
   useEffect(() => {
     if (board) {
-      reset(board)
+      reset(board);
+      setPreviewImage(board.image);
     }
-  }, [board])
+
+    return () => {
+      setPreviewImage(undefined);
+    };
+  }, [board, setPreviewImage, reset]);
 
   const onSubmit: SubmitHandler<Board> = async (data) => {
     toast.loading('Updating board...', {
@@ -57,7 +63,7 @@ const EditBoardModal = (props: Props) => {
     } finally {
       toggleEditBoardModal();
       toast.dismiss('update-board');
-      reset()
+      reset();
     }
   };
 
