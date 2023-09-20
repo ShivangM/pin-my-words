@@ -1,13 +1,14 @@
 import { User } from '@/interfaces/User';
-import { auth } from '@/utils/firebase';
+import db, { auth } from '@/utils/firebase';
 import { getAuth, signOut } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { create } from 'zustand';
 import { devtools, persist, createJSONStorage } from 'zustand/middleware';
 
 interface UserState {
   userData: null | User;
-  setUserData: (user: User | null) => void;
   logout: () => void;
+  loginUser: (authRes: any) => boolean;
 }
 
 const useUserStore = create<UserState>()(
@@ -15,9 +16,6 @@ const useUserStore = create<UserState>()(
     persist(
       (set) => ({
         userData: null,
-        setUserData: (user) => {
-          set({ userData: user });
-        },
 
         logout: async () => {
           signOut(auth)
@@ -31,6 +29,41 @@ const useUserStore = create<UserState>()(
             });
 
           useUserStore.persist.clearStorage();
+        },
+
+        loginUser: (authResult) => {
+          const user = authResult.user;
+          const userRef = doc(db, 'users', user.uid);
+
+          getDoc(userRef)
+            .then((userDoc) => {
+              if (userDoc.exists()) {
+                set({
+                  userData: { ...userDoc.data(), uid: userDoc.id } as User,
+                });
+              } else {
+                const userData = {
+                  email: user.email!,
+                  name: user.displayName!,
+                  image: user.photoURL || undefined,
+                  totalBoards: 0,
+                } as User;
+
+                setDoc(doc(db, 'users', user.uid!), userData)
+                  .then(() => {
+                    set({
+                      userData: { ...userDoc.data(), uid: user.uid } as User,
+                    });
+                  })
+                  .catch((error) => {
+                    throw error;
+                  });
+              }
+            })
+            .then(() => true)
+            .catch(() => false);
+
+          return true;
         },
       }),
       {

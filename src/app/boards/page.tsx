@@ -21,14 +21,14 @@ const Boards = () => {
   ]);
 
   useEffect(() => {
-    if (userData) {
+    if (userData && boards.length !== userData.totalBoards) {
       try {
         fetchBoards(userData.uid!, 10);
       } catch (error: any) {
         toast.error(error.message);
       }
     }
-  }, [userData, fetchBoards]);
+  }, [userData, fetchBoards, boards]);
 
   const handleNext = async () => {
     const lastBoardId = boards[boards.length - 1]._id;
@@ -39,8 +39,6 @@ const Boards = () => {
   };
 
   const [hasMore, setHasMore] = useState<boolean>(false);
-
-  console.log(userData?.totalBoards, boards);
 
   useEffect(() => {
     if (userData) {
