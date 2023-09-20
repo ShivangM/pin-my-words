@@ -31,7 +31,7 @@ const Users = (props: Props) => {
   }, [users, userData, fetchUsers, board]);
 
   const handleNext = async () => {
-    const lastUserId = users[users.length - 1]._id;
+    const lastUserId = users[users.length - 1].uid + '_' + board?._id;
 
     if (board && userData) {
       fetchUsers(userData?.uid!, 10, lastUserId);

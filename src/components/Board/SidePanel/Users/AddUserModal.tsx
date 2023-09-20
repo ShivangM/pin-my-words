@@ -44,10 +44,10 @@ const AddUserModal = (props: Props) => {
       toastId: 'add-user',
     });
 
-    const boardUser = {
+    const boardUser: BoardUser = {
       ...data.user,
       access: data.access,
-    } as BoardUser;
+    };
 
     try {
       await addUser(boardUser, userData!);

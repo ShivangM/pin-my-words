@@ -9,7 +9,6 @@ export enum BoardAccess {
 }
 
 export interface BoardUser extends User {
-  _id?: string;
   access: BoardAccess;
 }
 

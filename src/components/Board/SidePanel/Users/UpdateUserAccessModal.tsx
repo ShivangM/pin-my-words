@@ -6,7 +6,7 @@ import useUIStore from '@/store/uiStore';
 import useUserStore from '@/store/userStore';
 import { Dialog, Transition } from '@headlessui/react';
 import { ErrorMessage } from '@hookform/error-message';
-import { Fragment, useState } from 'react';
+import { Fragment } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import Select from 'react-select';
 import { toast } from 'react-toastify';
