@@ -26,8 +26,8 @@ const SectionHeading = () => {
       <span className="text-gray-500 text-sm">
         {boardMode === BoardModes.ROOT_WORDS
           ? board?.totalRootWords
-          : filteredWords
-          ? board?.totalWords
+          : selectedDate
+          ? filteredWords.data.length
           : board?.totalWords}{' '}
         words
       </span>

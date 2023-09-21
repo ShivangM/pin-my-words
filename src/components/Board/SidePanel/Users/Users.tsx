@@ -25,38 +25,28 @@ const Users = (props: Props) => {
   ]);
 
   useEffect(() => {
-    if (board && users.length === 0 && userData && board?.totalUsers > 0) {
-      fetchUsers(userData?.uid!, 10);
+    if (board && users.data.length === 0 && userData && users.hasMore) {
+      fetchUsers(userData?.uid!);
     }
   }, [users, userData, fetchUsers, board]);
 
   const handleNext = async () => {
-    const lastUserId = users[users.length - 1].uid + '_' + board?._id;
-
     if (board && userData) {
-      fetchUsers(userData?.uid!, 10, lastUserId);
+      fetchUsers(userData?.uid!);
     }
   };
-
-  const [hasMore, setHasMore] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (board && users) {
-      setHasMore(users.length < board.totalUsers);
-    }
-  }, [board, users]);
 
   return (
     <div className="h-full w-full">
       <InfiniteScroll
-        dataLength={users.length}
+        dataLength={users.data.length}
         next={handleNext}
-        hasMore={hasMore}
+        hasMore={users.hasMore}
         loader={<UsersPlaceholder />}
         className="w-full space-y-1"
         height="100%"
       >
-        {users.map((user, idx) => (
+        {users.data.map((user, idx) => (
           <UserCard key={idx} user={user} />
         ))}
       </InfiniteScroll>

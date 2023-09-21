@@ -1,12 +1,5 @@
 import db from '@/utils/firebase';
-import {
-  Timestamp,
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  increment,
-} from 'firebase/firestore';
+import { Timestamp, doc, getDoc, setDoc } from 'firebase/firestore';
 import fetchUserAccess from './fetchUserAccess';
 import { BoardAccess, BoardUser } from '@/interfaces/Board.d';
 
@@ -39,14 +32,6 @@ const addUserToBoard = async (
       access: user.access,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
-    });
-
-    await updateDoc(boardRef, {
-      totalUsers: increment(1),
-    });
-
-    await updateDoc(doc(db, 'users', user.uid!), {
-      totalBoards: increment(1),
     });
 
     return user;

@@ -1,11 +1,5 @@
 import db from '@/utils/firebase';
-import {
-  deleteDoc,
-  doc,
-  getDoc,
-  increment,
-  updateDoc,
-} from 'firebase/firestore';
+import { deleteDoc, doc, getDoc } from 'firebase/firestore';
 import fetchUserAccess from './fetchUserAccess';
 import { BoardAccess, BoardUser } from '@/interfaces/Board.d';
 
@@ -43,14 +37,6 @@ const removeUserFromBoard = async (
     }
 
     await deleteDoc(doc(db, 'users-boards', user.uid! + '_' + boardRef.id));
-
-    await updateDoc(boardRef, {
-      totalUsers: increment(-1),
-    });
-
-    await updateDoc(doc(db, 'users', user.uid!), {
-      totalBoards: increment(-1),
-    });
   } catch (error) {
     throw error;
   }

@@ -20,41 +20,55 @@ const WordsSection = () => {
   const [userData] = useUserStore((state) => [state.userData]);
 
   useEffect(() => {
-    if (board && userData && words.length === 0 && board.totalWords > 0) {
-      fetchWords(board._id, userData.uid, 10);
+    if (board && userData && words.data.length === 0 && words.hasMore) {
+      fetchWords(board._id, userData.uid);
     }
-  }, [board, userData, fetchWords, words]);
+
+    if (
+      board &&
+      userData &&
+      selectedDate &&
+      filteredWords.data.length === 0 &&
+      filteredWords.hasMore === true
+    ) {
+      fetchWords(board._id, userData.uid);
+    }
+  }, [board, userData, fetchWords, words, selectedDate, filteredWords]);
 
   const handleNext = async () => {
-    const lastWordId = selectedDate
-      ? filteredWords[filteredWords.length - 1]._id
-      : words[words.length - 1]._id;
-
     if (board && userData) {
-      return await fetchWords(board._id, userData.uid, 10, lastWordId);
+      return await fetchWords(board._id, userData.uid);
     }
   };
 
-  const [hasMore, setHasMore] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (board && words) {
-      setHasMore(words.length < board.totalWords);
-    }
-  }, [board, words]);
-
   return (
-    <InfiniteScroll
-      dataLength={words.length}
-      next={handleNext}
-      hasMore={hasMore}
-      loader={<WordsPlaceholder />}
-      className="flex flex-col space-y-6"
-    >
-      {words.map((word, idx) => (
-        <WordsCard key={idx} idx={idx} word={word} />
-      ))}
-    </InfiniteScroll>
+    <>
+      {selectedDate ? (
+        <InfiniteScroll
+          dataLength={filteredWords.data.length}
+          next={handleNext}
+          hasMore={filteredWords.hasMore}
+          loader={<WordsPlaceholder />}
+          className="flex flex-col space-y-6"
+        >
+          {filteredWords.data.map((word, idx) => (
+            <WordsCard key={idx} idx={idx} word={word} />
+          ))}
+        </InfiniteScroll>
+      ) : (
+        <InfiniteScroll
+          dataLength={words.data.length}
+          next={handleNext}
+          hasMore={words.hasMore}
+          loader={<WordsPlaceholder />}
+          className="flex flex-col space-y-6"
+        >
+          {words.data.map((word, idx) => (
+            <WordsCard key={idx} idx={idx} word={word} />
+          ))}
+        </InfiniteScroll>
+      )}
+    </>
   );
 };
 

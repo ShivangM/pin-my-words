@@ -21,9 +21,9 @@ const Boards = () => {
   ]);
 
   useEffect(() => {
-    if (userData && boards.length !== userData.totalBoards) {
+    if (userData && boards.data.length === 0 && boards.hasMore) {
       try {
-        fetchBoards(userData.uid!, 10);
+        fetchBoards(userData.uid!);
       } catch (error: any) {
         toast.error(error.message);
       }
@@ -31,26 +31,16 @@ const Boards = () => {
   }, [userData, fetchBoards, boards]);
 
   const handleNext = async () => {
-    const lastBoardId = boards[boards.length - 1]._id;
-
     if (userData) {
-      await fetchBoards(userData?.uid!, 10, lastBoardId);
+      await fetchBoards(userData?.uid!);
     }
   };
 
-  const [hasMore, setHasMore] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (userData) {
-      setHasMore(boards.length < userData.totalBoards);
-    }
-  }, [boards, userData]);
-
   return (
     <InfiniteScroll
-      dataLength={boards.length}
+      dataLength={boards.data.length}
       next={handleNext}
-      hasMore={hasMore}
+      hasMore={boards.hasMore}
       loader={<BoardsPlaceholder />}
       className="gap-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
     >
@@ -74,7 +64,7 @@ const Boards = () => {
       </button>
 
       {/* Boards */}
-      {boards.map((board) => (
+      {boards.data.map((board) => (
         <BoardCard key={board._id} board={board} />
       ))}
     </InfiniteScroll>

@@ -26,8 +26,6 @@ export interface Board {
 
   totalWords: number;
   totalRootWords: number;
-  totalNotifications: number;
-  totalUsers: number;
 
   createdAt: Timestamp;
   updatedAt: Timestamp;

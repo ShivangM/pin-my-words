@@ -16,3 +16,9 @@ export interface CommonLink {
   href: string;
   Icon?: IconType;
 }
+
+export interface PaginatedResponse<T> {
+  data: T;
+  hasMore: boolean;
+  nextQuery?: Query<DocumentData, DocumentData>;
+}

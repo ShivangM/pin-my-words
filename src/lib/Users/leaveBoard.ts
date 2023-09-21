@@ -1,11 +1,5 @@
 import db from '@/utils/firebase';
-import {
-  deleteDoc,
-  doc,
-  getDoc,
-  increment,
-  updateDoc,
-} from 'firebase/firestore';
+import { deleteDoc, doc, getDoc } from 'firebase/firestore';
 
 const leaveBoard = async (boardId: string, userId: string): Promise<void> => {
   try {
@@ -33,14 +27,6 @@ const leaveBoard = async (boardId: string, userId: string): Promise<void> => {
 
     const docRef = doc(db, 'users-boards', `${userId}_${boardId}`);
     await deleteDoc(docRef);
-
-    await updateDoc(boardRef, {
-      totalUsers: increment(-1),
-    });
-
-    await updateDoc(userRef, {
-      totalBoards: increment(-1),
-    });
   } catch (error) {
     throw error;
   }

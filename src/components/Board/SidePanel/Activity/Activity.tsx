@@ -18,12 +18,12 @@ const Activity = (props: Props) => {
   useEffect(() => {
     if (
       board &&
-      notifications.length === 0 &&
       userData &&
-      board?.totalNotifications > 0
+      notifications.data.length === 0 &&
+      notifications.hasMore
     ) {
       try {
-        fetchNotifications(userData?.uid!, 10);
+        fetchNotifications(userData?.uid!);
       } catch (error) {
         console.log(error);
       }
@@ -31,32 +31,21 @@ const Activity = (props: Props) => {
   }, [notifications, userData, fetchNotifications, board]);
 
   const handleNext = async () => {
-    const lastNotificationId = notifications[notifications.length - 1]._id;
-    console.log(lastNotificationId);
-
     if (board && userData) {
-      fetchNotifications(userData?.uid!, 10, lastNotificationId);
+      fetchNotifications(userData?.uid!);
     }
   };
 
-  const [hasMore, setHasMore] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (board) {
-      setHasMore(notifications.length < board.totalNotifications);
-    }
-  }, [board, notifications]);
-
   return (
     <InfiniteScroll
-      dataLength={notifications.length}
+      dataLength={notifications.data.length}
       next={handleNext}
-      hasMore={hasMore}
+      hasMore={notifications.hasMore}
       loader={<NotificationsPlaceholder />}
       className="w-full space-y-1"
       scrollableTarget="side-panel"
     >
-      {notifications.map((notification, idx) => (
+      {notifications.data.map((notification, idx) => (
         <NotificationCard key={idx} notification={notification} />
       ))}
     </InfiniteScroll>

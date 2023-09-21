@@ -2,22 +2,24 @@ import db from '@/utils/firebase';
 import {
   collection,
   doc,
+  DocumentData,
   getDoc,
   getDocs,
   limit,
   orderBy,
+  Query,
   query,
   startAfter,
 } from 'firebase/firestore';
 import fetchUserAccess from '../Users/fetchUserAccess';
 import { Notification } from '@/interfaces/Notification';
+import { PaginatedResponse } from '@/interfaces/Typings';
 
 const fetchNotificationsFromBoard = async (
   boardId: string,
   userId: string,
-  lim: number,
-  lastVisibleDocId?: string
-): Promise<Notification[]> => {
+  nextQuery?: Query<DocumentData, DocumentData>
+): Promise<PaginatedResponse<Notification[]>> => {
   try {
     const boardRef = doc(db, 'boards', boardId);
     const boardDoc = await getDoc(boardRef);
@@ -32,31 +34,34 @@ const fetchNotificationsFromBoard = async (
       throw new Error('User does not have access to this board');
     }
 
-    const lastDoc = lastVisibleDocId
-      ? doc(db, 'boards', boardId, 'notifications', lastVisibleDocId)
-      : null;
-    const lastDocSnapshot = lastDoc ? await getDoc(lastDoc) : null;
-
     const notificationsCollection = collection(
       db,
       boardRef.path,
       'notifications'
     );
 
-    const notificationsQuery = lastDocSnapshot
-      ? query(
-          notificationsCollection,
-          orderBy('createdAt', 'desc'),
-          startAfter(lastDocSnapshot),
-          limit(lim)
-        )
-      : query(
-          notificationsCollection,
-          orderBy('createdAt', 'desc'),
-          limit(lim)
-        );
+    const notificationsQuery =
+      nextQuery ||
+      query(notificationsCollection, orderBy('createdAt', 'desc'), limit(10));
 
     const notificationsSnapshot = await getDocs(notificationsQuery);
+
+    // Has more
+    let hasMore = notificationsSnapshot.size === 10;
+
+    // Next query
+    let nextQueryData: Query<DocumentData, DocumentData> | undefined;
+
+    if (hasMore) {
+      const lastVisible =
+        notificationsSnapshot.docs[notificationsSnapshot.docs.length - 1];
+      nextQueryData = query(
+        notificationsCollection,
+        orderBy('createdAt', 'desc'),
+        startAfter(lastVisible),
+        limit(10)
+      );
+    }
 
     const notifications: Notification[] = [];
 
@@ -68,7 +73,11 @@ const fetchNotificationsFromBoard = async (
       });
     });
 
-    return notifications;
+    return {
+      data: notifications,
+      hasMore,
+      nextQuery: nextQueryData,
+    };
   } catch (error) {
     throw error;
   }

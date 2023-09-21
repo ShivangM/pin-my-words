@@ -42,14 +42,12 @@ const fetchBoard = async (boardId: string, userId: string): Promise<Board> => {
 
     const totalWords = totalWordsSnapshot.data().count;
     const totalRootWords = totalRootWordsSnapshot.data().count;
-    const totalNotifications = totalNotificationsSnapshot.data().count;
 
     const board = {
       ...boardDoc.data(),
       _id: boardDoc.id,
       totalWords,
       totalRootWords,
-      totalNotifications,
     } as Board;
     return board;
   } catch (error) {
