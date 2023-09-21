@@ -1,6 +1,6 @@
 [
     {
-        "name": "Boards",
-        "url": "/boards"
+        "label": "Boards",
+        "href": "/boards"
     }
 ]

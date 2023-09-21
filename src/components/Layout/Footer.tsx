@@ -2,22 +2,14 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import footerLinks from '../../constants/footer-links.json';
+import { CommonLink } from '@/interfaces/Typings.d';
 
-type FooterLink = {
-  name: string;
-  url: string;
-};
-
-type FooterLinkProps = {
-  link: FooterLink;
-};
-
-const FooterLink = ({ link }: FooterLinkProps) => {
-  const { name, url } = link;
+const FooterLink = ({ link }: { link: CommonLink }) => {
+  const { label, href } = link;
   return (
     <li>
-      <Link href={url} className="mr-4 hover:underline md:mr-6 ">
-        {name}
+      <Link href={href} className="mr-4 hover:underline md:mr-6 ">
+        {label}
       </Link>
     </li>
   );
@@ -38,8 +30,8 @@ const Footer = () => {
             />
           </Link>
           <ul className="flex flex-wrap items-center mb-6 text-sm font-medium text-gray-500 sm:mb-0">
-            {footerLinks.map((link) => (
-              <FooterLink key={link.name} link={link} />
+            {footerLinks.map((link, idx) => (
+              <FooterLink key={idx} link={link} />
             ))}
           </ul>
         </div>

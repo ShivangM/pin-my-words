@@ -1,4 +1,5 @@
 import { DocumentReference, Timestamp } from 'firebase/firestore';
+import { Option } from './Typings.d';
 
 export enum AddWordSteps {
   ENTER_DETAILS,
@@ -11,9 +12,10 @@ export interface Word {
   word: string;
   meaning: string;
   partOfSpeech: string[];
-  roots?: { label: string; value: string }[];
+  roots?: Option[];
   examples?: string[];
   image?: string;
+
   createdAt: Timestamp;
   updatedAt: Timestamp;
   createdBy: string;
@@ -25,6 +27,7 @@ export interface RootWord {
   root: string;
   type: string;
   meaning: string;
+
   createdAt: Timestamp;
   updatedAt: Timestamp;
   createdBy: string;

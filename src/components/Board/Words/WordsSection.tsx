@@ -7,15 +7,15 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import WordsCard from './WordCard';
 
 const WordsSection = () => {
-  const [words, filteredWords, fetchWords, board, selectedDate, filterByDate] =
-    useBoardStore((state) => [
+  const [words, filteredWords, fetchWords, board, selectedDate] = useBoardStore(
+    (state) => [
       state.words,
       state.filteredWords,
       state.fetchWords,
       state.board,
       state.selectedDate,
-      state.filterByDate,
-    ]);
+    ]
+  );
 
   const [userData] = useUserStore((state) => [state.userData]);
 
@@ -26,17 +26,12 @@ const WordsSection = () => {
   }, [board, userData, fetchWords, words]);
 
   const handleNext = async () => {
-    const lastWordId =
-      filteredWords.length > 0
-        ? filteredWords[filteredWords.length - 1]._id
-        : words[words.length - 1]._id;
+    const lastWordId = selectedDate
+      ? filteredWords[filteredWords.length - 1]._id
+      : words[words.length - 1]._id;
 
     if (board && userData) {
-      if (selectedDate) {
-        return await filterByDate(selectedDate, userData.uid, 10, lastWordId);
-      } else {
-        return await fetchWords(board._id, userData.uid, 10, lastWordId);
-      }
+      return await fetchWords(board._id, userData.uid, 10, lastWordId);
     }
   };
 

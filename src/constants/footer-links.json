@@ -1,14 +1,14 @@
 [
     {
-        "name": "Home",
-        "url": "/"
+        "label": "Home",
+        "href": "/"
     },
     {
-        "name": "About",
-        "url": "/about"
+        "label": "About",
+        "href": "/about"
     },
     {
-        "name": "Contact",
-        "url": "/contact"
+        "label": "Contact",
+        "href": "/contact"
     }
 ]

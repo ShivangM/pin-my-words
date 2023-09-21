@@ -20,13 +20,15 @@ export enum BoardModes {
 export interface Board {
   _id: string;
   name: string;
+  description?: string;
+  image?: string;
   owner: string;
+
   totalWords: number;
   totalRootWords: number;
   totalNotifications: number;
   totalUsers: number;
+
   createdAt: Timestamp;
   updatedAt: Timestamp;
-  description?: string;
-  image?: string;
 }

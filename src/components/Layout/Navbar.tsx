@@ -1,29 +1,20 @@
-import React from 'react';
+import { CommonLink } from '@/interfaces/Typings.d';
 import Image from 'next/image';
 import Link from 'next/link';
 import navbarLinks from '../../constants/navbar-links.json';
 import HamburgerIcon from './HamburgerIcon';
 import User from './User';
 
-type NavbarLink = {
-  name: string;
-  url: string;
-};
-
-type NavbarLinkProps = {
-  link: NavbarLink;
-};
-
-const NavbarLink = ({ link }: NavbarLinkProps) => {
-  const { name, url } = link;
+const NavbarLink = ({ link }: { link: CommonLink }) => {
+  const { label, href } = link;
   return (
     <li>
       <Link
-        href={url}
+        href={href}
         className="block py-2 pl-3 pr-4 hover:underline text-white bg-gray-800 rounded md:bg-transparent md:text-gray-800 md:p-0"
         aria-current="page"
       >
-        {name}
+        {label}
       </Link>
     </li>
   );
@@ -48,13 +39,10 @@ const Navbar = () => {
           <HamburgerIcon />
         </div>
 
-        <div
-          className="items-center justify-between hidden w-full md:flex md:w-auto md:order-1"
-          id="navbar-user"
-        >
+        <div className="items-center justify-between hidden w-full md:flex md:w-auto md:order-1">
           <ul className="flex flex-col font-medium p-4 md:p-0 mt-4 border border-gray-100 rounded-lg md:flex-row md:space-x-8 md:mt-0 md:border-0">
-            {navbarLinks.map((link) => (
-              <NavbarLink key={link.name} link={link} />
+            {navbarLinks.map((link, idx) => (
+              <NavbarLink key={idx} link={link} />
             ))}
           </ul>
         </div>

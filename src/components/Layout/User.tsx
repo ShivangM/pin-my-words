@@ -9,8 +9,7 @@ const User = () => {
   const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {
-    if (userData) setShowDropdown(true);
-    else setShowDropdown(false);
+    setShowDropdown(userData !== null);
   }, [userData]);
 
   return <div>{showDropdown ? <UserDropdown /> : <LoginButton />}</div>;

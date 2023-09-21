@@ -1,8 +1,6 @@
 'use client';
 
-type Props = {};
-
-const HamburgerIcon = (props: Props) => {
+const HamburgerIcon = () => {
   return (
     <button
       type="button"

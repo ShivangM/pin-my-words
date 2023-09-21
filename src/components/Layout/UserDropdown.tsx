@@ -5,26 +5,18 @@ import Image from 'next/image';
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import useUserStore from '@/store/userStore';
+import { CommonLink } from '@/interfaces/Typings.d';
 
-type UserDropdownLink = {
-  name: string;
-  url: string;
-};
-
-type UserDropdownLinkProps = {
-  link: UserDropdownLink;
-};
-
-const UserDropdownLink = ({ link }: UserDropdownLinkProps) => {
-  const { name, url } = link;
+const UserDropdownLink = ({ link }: { link: CommonLink }) => {
+  const { label, href } = link;
   return (
     <Menu.Item>
       {({ active }) => (
         <Link
-          href={url}
+          href={href}
           className="block px-4 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100"
         >
-          {name}
+          {label}
         </Link>
       )}
     </Menu.Item>
@@ -72,8 +64,8 @@ const UserDropdown = () => {
               className="py-2 px-1 space-y-2"
               aria-labelledby="user-menu-button"
             >
-              {userDropdownLinks.map((link) => (
-                <UserDropdownLink key={link.name} link={link} />
+              {userDropdownLinks.map((link, idx) => (
+                <UserDropdownLink key={idx} link={link} />
               ))}
 
               <button
