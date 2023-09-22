@@ -1,6 +1,6 @@
 import { User } from '@/interfaces/User';
 import db, { auth } from '@/utils/firebase';
-import { getAuth, signOut } from 'firebase/auth';
+import { signOut } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { create } from 'zustand';
 import { devtools, persist, createJSONStorage } from 'zustand/middleware';
@@ -46,7 +46,6 @@ const useUserStore = create<UserState>()(
                   email: user.email!,
                   name: user.displayName!,
                   image: user.photoURL || undefined,
-                  totalBoards: 0,
                 } as User;
 
                 setDoc(doc(db, 'users', user.uid!), userData)
