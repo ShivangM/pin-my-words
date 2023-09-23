@@ -35,34 +35,31 @@ const useUserStore = create<UserState>()(
           const user = authResult.user;
           const userRef = doc(db, 'users', user.uid);
 
-          getDoc(userRef)
-            .then((userDoc) => {
-              if (userDoc.exists()) {
-                set({
-                  userData: { ...userDoc.data(), uid: userDoc.id } as User,
-                });
-              } else {
-                const userData = {
-                  email: user.email!,
-                  name: user.displayName!,
-                  image: user.photoURL || undefined,
-                } as User;
+          getDoc(userRef).then((userDoc) => {
+            if (userDoc.exists()) {
+              set({
+                userData: { ...userDoc.data(), uid: userDoc.id } as User,
+              });
+            } else {
+              const userData = {
+                email: user.email!,
+                name: user.displayName!,
+                image: user.photoURL || undefined,
+              } as User;
 
-                setDoc(doc(db, 'users', user.uid!), userData)
-                  .then(() => {
-                    set({
-                      userData: { ...userDoc.data(), uid: user.uid } as User,
-                    });
-                  })
-                  .catch((error) => {
-                    throw error;
+              setDoc(doc(db, 'users', user.uid!), userData)
+                .then(() => {
+                  set({
+                    userData: { ...userDoc.data(), uid: user.uid } as User,
                   });
-              }
-            })
-            .then(() => true)
-            .catch(() => false);
+                })
+                .catch((error) => {
+                  throw error;
+                });
+            }
+          });
 
-          return true;
+          return false;
         },
       }),
       {
