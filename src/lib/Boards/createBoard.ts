@@ -31,7 +31,7 @@ const createBoard = async (
       access: BoardAccess.OWNER,
     });
 
-    updateDoc(doc(db, 'users', board.owner), {
+    await updateDoc(doc(db, 'users', board.owner), {
       totalBoards: increment(1),
     });
 
@@ -39,7 +39,7 @@ const createBoard = async (
     if (users) {
       let addUserPromises: Promise<void>[] = [];
 
-      users.forEach((user) => {
+      users.forEach(async (user) => {
         const addUserPromise = setDoc(
           doc(db, 'users-boards', user.uid! + '_' + boardRef.id),
           {
@@ -51,7 +51,7 @@ const createBoard = async (
           }
         );
 
-        updateDoc(doc(db, 'users', user.uid), {
+        await updateDoc(doc(db, 'users', user.uid), {
           totalBoards: increment(1),
         });
 
@@ -68,7 +68,7 @@ const createBoard = async (
       const imageRef = ref(storage, 'boards/' + boardRef.id + '/' + 'cover');
       await uploadBytes(imageRef, image);
       imageUrl = await getDownloadURL(imageRef);
-      updateDoc(boardRef, { image: imageUrl });
+      await updateDoc(doc(db, 'boards', boardRef.id), { image: imageUrl });
     }
 
     const createdBoard = {
