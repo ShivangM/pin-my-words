@@ -39,7 +39,7 @@ const Footer = () => {
         <span className="block text-sm text-gray-500 sm:text-center">
           © {new Date().getFullYear()}{' '}
           <a href="/" className="hover:underline">
-            Pin-My-Words™
+            Vocab-Hub™
           </a>
           . All Rights Reserved.
         </span>
