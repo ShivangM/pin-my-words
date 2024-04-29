@@ -21,7 +21,7 @@ export interface Notification {
   type: NotificationType;
   actionFrom: DocumentReference<DocumentData, DocumentData>;
   actionTo?: DocumentReference<DocumentData, DocumentData> | string;
-
+  message: string;
   createdBy: string;
   createdAt: Timestamp;
 }
