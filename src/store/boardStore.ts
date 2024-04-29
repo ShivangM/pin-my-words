@@ -96,11 +96,6 @@ interface BoardState {
   notifications: PaginatedResponse<Notification[]>;
   fetchNotifications: (userId: string) => Promise<void>;
 
-  addNotification: (
-    notification: Notification,
-    userId: string
-  ) => Promise<void>;
-
   //Pagination operations
   currentPage: number;
   setCurrentPage: (page: number) => void;
@@ -241,16 +236,20 @@ const useBoardStore = create<BoardState>()(
       if (!boardId || !userId) return;
 
       try {
-        const updatedBoard = await updateBoard(userId, boardId, board, image);
+        const { data, notification } = await updateBoard(
+          userId,
+          boardId,
+          board,
+          image
+        );
 
-        set({ board: updatedBoard });
-
-        const notification = {
-          type: NotificationType.BOARD_UPDATED,
-          message: `Board settings updated by ${user.name}`,
-        } as Notification;
-
-        get().addNotification(notification, userId);
+        set({
+          board: data,
+          notifications: {
+            ...get().notifications,
+            data: [notification, ...get().notifications.data],
+          },
+        });
       } catch (error) {
         throw error;
       }
@@ -297,20 +296,21 @@ const useBoardStore = create<BoardState>()(
       if (!boardId || !admin) return;
 
       try {
-        const userAdded = await addUserToBoard(boardId, admin.uid, user);
+        const { data, notification } = await addUserToBoard(
+          boardId,
+          admin.uid,
+          user
+        );
         set({
           users: {
             ...get().users,
-            data: [...get().users.data, userAdded],
+            data: [...get().users.data, data],
+          },
+          notifications: {
+            ...get().notifications,
+            data: [notification, ...get().notifications.data],
           },
         });
-
-        const notification = {
-          type: NotificationType.USER_ADDED,
-          message: `${user.name} added by ${admin.name}`,
-        } as Notification;
-
-        get().addNotification(notification, admin.uid);
       } catch (error) {
         throw error;
       }
@@ -324,13 +324,6 @@ const useBoardStore = create<BoardState>()(
 
       try {
         await leaveBoardHelper(boardId, userId);
-
-        const notification = {
-          type: NotificationType.USER_LEFT,
-          message: `${user.name} left the board`,
-        } as Notification;
-
-        get().addNotification(notification, userId);
       } catch (error) {
         throw error;
       }
@@ -341,20 +334,22 @@ const useBoardStore = create<BoardState>()(
       if (!boardId) return;
 
       try {
-        await removeUserFromBoard(user, admin.uid, boardId);
+        const notification = await removeUserFromBoard(
+          user,
+          admin.uid,
+          boardId
+        );
+
         set({
           users: {
             ...get().users,
             data: get().users.data.filter((u) => u.uid !== user.uid),
           },
+          notifications: {
+            ...get().notifications,
+            data: [notification, ...get().notifications.data],
+          },
         });
-
-        const notification = {
-          type: NotificationType.USER_REMOVED,
-          message: `${user.name} removed by ${admin.name}`,
-        } as Notification;
-
-        get().addNotification(notification, admin.uid);
       } catch (error) {
         throw error;
       }
@@ -365,7 +360,12 @@ const useBoardStore = create<BoardState>()(
       if (!boardId) return;
 
       try {
-        await updateUserAccess(user, admin.uid, boardId, access);
+        const notification = await updateUserAccess(
+          user,
+          admin.uid,
+          boardId,
+          access
+        );
         set({
           users: {
             ...get().users,
@@ -373,14 +373,12 @@ const useBoardStore = create<BoardState>()(
               u.uid === user.uid ? { ...u, access } : u
             ),
           },
+
+          notifications: {
+            ...get().notifications,
+            data: [notification, ...get().notifications.data],
+          },
         });
-
-        const notification = {
-          type: NotificationType.USER_UPDATED,
-          message: `${user.name} access updated to ${access} by ${admin.name}`,
-        } as Notification;
-
-        get().addNotification(notification, admin.uid);
       } catch (error) {
         throw error;
       }
@@ -430,21 +428,23 @@ const useBoardStore = create<BoardState>()(
       if (!boardId || !userId) return;
 
       try {
-        const wordAdded = await addWordToBoard(boardId, word, userId, image);
+        const { data, notification } = await addWordToBoard(
+          boardId,
+          word,
+          userId,
+          image
+        );
         set({
           words: {
             ...get().words,
-            data: [wordAdded, ...get().words!.data],
+            data: [data, ...get().words!.data],
           },
           board: { ...get().board!, totalWords: get().board?.totalWords! + 1 },
+          notifications: {
+            ...get().notifications,
+            data: [notification, ...get().notifications.data],
+          },
         });
-
-        const notification = {
-          type: NotificationType.WORD_ADDED,
-          message: `Word ${word.word} added by ${user.name}`,
-        } as Notification;
-
-        get().addNotification(notification, userId);
       } catch (error) {
         throw error;
       }
@@ -458,21 +458,18 @@ const useBoardStore = create<BoardState>()(
       if (!boardId || !userId || !wordId) return;
 
       try {
-        await deleteWordFromBoard(boardId, wordId, userId);
+        const notification = await deleteWordFromBoard(boardId, wordId, userId);
         set({
           words: {
             ...get().words,
             data: get().words?.data.filter((w) => w._id !== wordId),
           },
           board: { ...get().board!, totalWords: get().board?.totalWords! - 1 },
+          notifications: {
+            ...get().notifications,
+            data: [notification, ...get().notifications.data],
+          },
         });
-
-        const notification = {
-          type: NotificationType.WORD_DELETED,
-          message: `Word ${word.word} deleted by ${user.name}`,
-        } as Notification;
-
-        get().addNotification(notification, userId);
       } catch (error) {
         throw error;
       }
@@ -487,12 +484,13 @@ const useBoardStore = create<BoardState>()(
       }
 
       try {
-        const editedWord = await editWordFromBoard(
+        const { data: editedWord, notification } = await editWordFromBoard(
           word,
           boardId,
           userId,
           image
         );
+
         set({
           words: {
             ...get().words,
@@ -503,14 +501,12 @@ const useBoardStore = create<BoardState>()(
               return w;
             }),
           },
+
+          notifications: {
+            ...get().notifications,
+            data: [notification, ...get().notifications.data],
+          },
         });
-
-        const notification = {
-          type: NotificationType.WORD_UPDATED,
-          message: `Word ${word.word} updated by ${user.name}`,
-        } as Notification;
-
-        get().addNotification(notification, userId);
       } catch (error) {
         throw error;
       }
@@ -546,7 +542,7 @@ const useBoardStore = create<BoardState>()(
       const userId = user.uid;
 
       try {
-        const rootWordAdded = await addRootWordToBoard(
+        const { data: rootWordAdded, notification } = await addRootWordToBoard(
           boardId,
           rootWord,
           userId
@@ -560,14 +556,11 @@ const useBoardStore = create<BoardState>()(
             ...get().board!,
             totalRootWords: get().board?.totalRootWords! + 1,
           },
+          notifications: {
+            ...get().notifications,
+            data: [notification, ...get().notifications.data],
+          },
         });
-
-        const notification = {
-          type: NotificationType.ROOT_WORD_ADDED,
-          message: `Root word ${rootWordAdded.root} added by ${user.name}`,
-        } as Notification;
-
-        get().addNotification(notification, userId);
       } catch (error) {
         throw error;
       }
@@ -581,7 +574,11 @@ const useBoardStore = create<BoardState>()(
       if (!boardId || !rootWordId || !userId) return;
 
       try {
-        await deleteRootWordFromBoard(boardId, rootWordId, userId);
+        const notification = await deleteRootWordFromBoard(
+          boardId,
+          rootWordId,
+          userId
+        );
         set({
           rootWords: {
             ...get().rootWords,
@@ -591,14 +588,12 @@ const useBoardStore = create<BoardState>()(
             ...get().board!,
             totalRootWords: get().board?.totalRootWords! - 1,
           },
+
+          notifications: {
+            ...get().notifications,
+            data: [notification, ...get().notifications.data],
+          },
         });
-
-        const notification = {
-          type: NotificationType.ROOT_WORD_DELETED,
-          message: `Root Word ${rootWord.root} deleted by ${user.name}`,
-        } as Notification;
-
-        get().addNotification(notification, userId);
       } catch (error) {
         throw error;
       }
@@ -611,11 +606,8 @@ const useBoardStore = create<BoardState>()(
       if (!boardId || !userId || !rootWord) return;
 
       try {
-        const updatedRootWord = await editRootWordFromBoard(
-          rootWord,
-          boardId,
-          userId
-        );
+        const { data: updatedRootWord, notification } =
+          await editRootWordFromBoard(rootWord, boardId, userId);
 
         set({
           rootWords: {
@@ -627,14 +619,12 @@ const useBoardStore = create<BoardState>()(
               return rw;
             }),
           },
+
+          notifications: {
+            ...get().notifications,
+            data: [notification, ...get().notifications.data],
+          },
         });
-
-        const notification = {
-          type: NotificationType.ROOT_WORD_UPDATED,
-          message: `Root Word ${rootWord.root} updated by ${user.name}`,
-        } as Notification;
-
-        get().addNotification(notification, userId);
       } catch (error) {
         throw error;
       }
@@ -710,29 +700,6 @@ const useBoardStore = create<BoardState>()(
         });
       } catch (error) {
         throw error;
-      }
-    },
-
-    addNotification: async (notification, userId) => {
-      const boardId = get().board?._id;
-      if (!boardId) return;
-
-      try {
-        const notificationAdded = await addNotificationToBoard(
-          boardId,
-          userId,
-          notification
-        );
-        if (notificationAdded.type !== NotificationType.USER_LEFT) {
-          set({
-            notifications: {
-              ...get().notifications,
-              data: [notificationAdded, ...get().notifications!.data],
-            },
-          });
-        }
-      } catch (error) {
-        get().fetchNotifications(userId);
       }
     },
 

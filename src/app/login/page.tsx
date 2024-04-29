@@ -36,7 +36,7 @@ const SignIn = () => {
 
       tosUrl: 'tos',
       privacyPolicyUrl: 'privacy-policy',
-      siteName: 'Pin My Words',
+      siteName: 'Vocab Hub',
       callbacks: {
         signInSuccessWithAuthResult: loginUser,
         signInFailure(error) {

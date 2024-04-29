@@ -12,7 +12,7 @@ import {
   startAfter,
 } from 'firebase/firestore';
 import fetchUserAccess from '../Users/fetchUserAccess';
-import { Notification } from '@/interfaces/Notification';
+import { Notification } from '@/interfaces/Notification.d';
 import { PaginatedResponse } from '@/interfaces/Typings';
 
 const fetchNotificationsFromBoard = async (

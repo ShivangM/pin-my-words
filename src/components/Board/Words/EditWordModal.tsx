@@ -24,6 +24,7 @@ const EditWordModal = () => {
     state.rootWords,
     state.board,
   ]);
+
   const [editWordModalOpen, toggleEditWordModal, focusedWord] = useUIStore(
     (state) => [
       state.editWordModalOpen,

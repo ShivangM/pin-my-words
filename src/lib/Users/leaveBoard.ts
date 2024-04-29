@@ -1,5 +1,7 @@
+import { Notification, NotificationType } from '@/interfaces/Notification.d';
 import db from '@/utils/firebase';
 import { deleteDoc, doc, getDoc } from 'firebase/firestore';
+import addNotificationToBoard from '../Notifications/addNotifictionToBoard';
 
 const leaveBoard = async (boardId: string, userId: string): Promise<void> => {
   try {
@@ -26,6 +28,16 @@ const leaveBoard = async (boardId: string, userId: string): Promise<void> => {
     }
 
     const docRef = doc(db, 'users-boards', `${userId}_${boardId}`);
+
+    const actionFromRef = doc(db, 'users', userId);
+
+    const notification = {
+      type: NotificationType.USER_LEFT,
+      actionFrom: actionFromRef,
+    } as Notification;
+
+    addNotificationToBoard(boardId, userId, notification);
+
     await deleteDoc(docRef);
   } catch (error) {
     throw error;

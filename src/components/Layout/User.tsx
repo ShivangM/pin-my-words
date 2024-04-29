@@ -2,6 +2,7 @@
 import useUserStore from '@/store/userStore';
 import { useEffect, useState } from 'react';
 import LoginButton from './LoginButton';
+import NotificationsDropdown from './NotificationsDropdown';
 import UserDropdown from './UserDropdown';
 
 const User = () => {
@@ -12,7 +13,18 @@ const User = () => {
     setShowDropdown(userData !== null);
   }, [userData]);
 
-  return <div>{showDropdown ? <UserDropdown /> : <LoginButton />}</div>;
+  return (
+    <div>
+      {showDropdown ? (
+        <div className="flex items-center space-x-4">
+          <NotificationsDropdown />
+          <UserDropdown />
+        </div>
+      ) : (
+        <LoginButton />
+      )}
+    </div>
+  );
 };
 
 export default User;

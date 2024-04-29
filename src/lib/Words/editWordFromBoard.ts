@@ -15,13 +15,16 @@ import {
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import fetchUserAccess from '../Users/fetchUserAccess';
 import { BoardAccess } from '@/interfaces/Board.d';
+import { ResponseWithNotification } from '@/interfaces/Typings';
+import { Notification, NotificationType } from '@/interfaces/Notification.d';
+import addNotificationToBoard from '../Notifications/addNotifictionToBoard';
 
 const editWordFromBoard = async (
   word: Word,
   boardId: string,
   userId: string,
   image?: File
-): Promise<Word> => {
+): Promise<ResponseWithNotification<Word>> => {
   try {
     const userAccess = await fetchUserAccess(boardId, userId);
 
@@ -85,7 +88,25 @@ const editWordFromBoard = async (
       updatedAt: Timestamp.now(),
     };
 
-    return wordUpdated;
+    const actionFrom = doc(db, 'users', userId);
+    const actionTo = doc(db, boardRef.path, 'words', word._id);
+
+    const notification = {
+      type: NotificationType.WORD_UPDATED,
+      actionFrom: actionFrom,
+      actionTo: actionTo,
+    } as Notification;
+
+    const notificationAdded = await addNotificationToBoard(
+      boardId,
+      userId,
+      notification
+    );
+
+    return {
+      data: wordUpdated,
+      notification: notificationAdded,
+    };
   } catch (error) {
     throw error;
   }

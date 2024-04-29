@@ -1,4 +1,5 @@
 import { IconType } from 'react-icons/lib';
+import { Notification } from './Notification.d';
 
 export interface Feature {
   name: string;
@@ -21,4 +22,9 @@ export interface PaginatedResponse<T> {
   data: T;
   hasMore: boolean;
   nextQuery?: Query<DocumentData, DocumentData>;
+}
+
+export interface ResponseWithNotification<T> {
+  data: T;
+  notification: Notification;
 }

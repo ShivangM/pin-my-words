@@ -2,12 +2,14 @@ import db from '@/utils/firebase';
 import { deleteDoc, doc, getDoc } from 'firebase/firestore';
 import fetchUserAccess from './fetchUserAccess';
 import { BoardAccess, BoardUser } from '@/interfaces/Board.d';
+import { Notification, NotificationType } from '@/interfaces/Notification.d';
+import addNotificationToBoard from '../Notifications/addNotifictionToBoard';
 
 const removeUserFromBoard = async (
   user: BoardUser,
   userId: string,
   boardId: string
-): Promise<void> => {
+): Promise<Notification> => {
   try {
     const boardRef = doc(db, 'boards', boardId);
     const boardDoc = await getDoc(boardRef);
@@ -36,7 +38,23 @@ const removeUserFromBoard = async (
       throw new Error('Admin cannot be removed by another admin');
     }
 
+    const actionFromRef = doc(db, 'users', userId);
+    const actionToRef = doc(db, 'users', user.uid!);
+
+    const notification = {
+      type: NotificationType.USER_REMOVED,
+      actionFrom: actionFromRef,
+      actionTo: actionToRef,
+    } as Notification;
+
+    const addedNotification = addNotificationToBoard(
+      boardId,
+      userId,
+      notification
+    );
+
     await deleteDoc(doc(db, 'users-boards', user.uid! + '_' + boardRef.id));
+    return addedNotification;
   } catch (error) {
     throw error;
   }

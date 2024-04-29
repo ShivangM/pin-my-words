@@ -1,4 +1,6 @@
-import { Timestamp } from 'firebase/firestore';
+import { DocumentData, DocumentReference, Timestamp } from 'firebase/firestore';
+import { User } from './User.d';
+import { Option } from './Typings.d';
 
 export enum NotificationType {
   WORD_ADDED = 'WORD_ADDED',
@@ -17,7 +19,8 @@ export enum NotificationType {
 export interface Notification {
   _id: string;
   type: NotificationType;
-  message: string;
+  actionFrom: DocumentReference<DocumentData, DocumentData>;
+  actionTo?: DocumentReference<DocumentData, DocumentData> | string;
 
   createdBy: string;
   createdAt: Timestamp;
